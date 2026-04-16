@@ -1,0 +1,285 @@
+@using CodeWave.Application.DTOs
+@model List<QuizDto>
+@{
+    Layout = null;
+    var attempts = ViewBag.QuizAttempts as List<QuizAttemptDto> ?? new List<QuizAttemptDto>();
+    var completedLessonIds = ViewBag.CompletedLessonIds as List<Guid> ?? new List<Guid>();
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    @await Html.PartialAsync("_ThemeScript")
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Quizzes - CodeWave</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#b887e3",
+                        "primary-light": "#d4b5f0",
+                        "primary-dark": "#9d6fd9",
+                        "background-light": "#fafafa",
+                        "background-dark": "#0f0f1a"
+                    },
+                    fontFamily: {
+                        display: ["Space Grotesk", "Inter", "sans-serif"],
+                        sans: ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {
+                        DEFAULT: "0.75rem",
+                        lg: "1rem",
+                        xl: "1.25rem"
+                    }
+                }
+            }
+        };
+    </script>
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+        }
+        .dark .glass-card {
+            background: rgba(30, 30, 40, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .quiz-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .quiz-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(184, 135, 227, 0.15);
+        }
+        .stat-card {
+            transition: all 0.3s ease;
+        }
+        .stat-card:hover {
+            transform: translateY(-2px);
+        }
+        @@keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-sans text-gray-900 dark:text-gray-100 min-h-screen">
+    <div class="flex min-h-screen">
+        <!-- Sidebar -->
+        @await Html.PartialAsync("_UserSidebar")
+
+        <!-- Main Content -->
+        <main class="flex-1 overflow-y-auto">
+            <div class="max-w-7xl mx-auto px-6 py-8 lg:px-8">
+                <!-- Header -->
+                <div class="mb-10 fade-in">
+                    <div class="flex items-center justify-between mb-6">
+                        <div>
+                            <h1 class="text-4xl lg:text-5xl font-display font-bold text-gray-900 dark:text-white mb-2 tracking-tight">
+                                Quiz Challenge
+                            </h1>
+                            <p class="text-lg text-gray-600 dark:text-gray-400">
+                                Test your knowledge and track your progress
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Stats Overview -->
+                    @{
+                        var totalAttempts = attempts.Count;
+                        var passedAttempts = attempts.Count(a => a.IsPassed == true);
+                        var avgScore = attempts.Where(a => a.Score.HasValue).Any() 
+                            ? attempts.Where(a => a.Score.HasValue).Average(a => a.Score.Value) 
+                            : 0;
+                        var bestScore = attempts.Where(a => a.Score.HasValue).Any()
+                            ? attempts.Where(a => a.Score.HasValue).Max(a => a.Score.Value)
+                            : 0;
+                    }
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                        <div class="stat-card glass-card rounded-xl p-6 fade-in">
+                            <div class="flex items-center gap-4">
+                                <div class="p-3 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10">
+                                    <span class="material-symbols-outlined text-primary text-2xl">quiz</span>
+                                </div>
+                                <div>
+                                    <div class="text-3xl font-bold text-gray-900 dark:text-white">@Model.Count</div>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400 font-medium mt-1">Available</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="stat-card glass-card rounded-xl p-6 fade-in" style="animation-delay: 0.1s">
+                            <div class="flex items-center gap-4">
+                                <div class="p-3 rounded-xl bg-gradient-to-br from-green-100 to-green-50 dark:from-green-900/30 dark:to-green-800/20">
+                                    <span class="material-symbols-outlined text-green-600 dark:text-green-400 text-2xl">check_circle</span>
+                                </div>
+                                <div>
+                                    <div class="text-3xl font-bold text-gray-900 dark:text-white">@passedAttempts</div>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400 font-medium mt-1">Passed</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="stat-card glass-card rounded-xl p-6 fade-in" style="animation-delay: 0.2s">
+                            <div class="flex items-center gap-4">
+                                <div class="p-3 rounded-xl bg-gradient-to-br from-blue-100 to-blue-50 dark:from-blue-900/30 dark:to-blue-800/20">
+                                    <span class="material-symbols-outlined text-blue-600 dark:text-blue-400 text-2xl">trending_up</span>
+                                </div>
+                                <div>
+                                    <div class="text-3xl font-bold text-gray-900 dark:text-white">@Math.Round(avgScore, 0)%</div>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400 font-medium mt-1">Average</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="stat-card glass-card rounded-xl p-6 fade-in" style="animation-delay: 0.3s">
+                            <div class="flex items-center gap-4">
+                                <div class="p-3 rounded-xl bg-gradient-to-br from-yellow-100 to-yellow-50 dark:from-yellow-900/30 dark:to-yellow-800/20">
+                                    <span class="material-symbols-outlined text-yellow-600 dark:text-yellow-400 text-2xl">star</span>
+                                </div>
+                                <div>
+                                    <div class="text-3xl font-bold text-gray-900 dark:text-white">@Math.Round(bestScore, 0)%</div>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400 font-medium mt-1">Best Score</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quiz Cards -->
+                @if (Model.Any())
+                {
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        @foreach (var quiz in Model)
+                        {
+                            var quizAttempts = attempts.Where(a => a.QuizId == quiz.Id).ToList();
+                            var bestAttempt = quizAttempts.Where(a => a.Score.HasValue).OrderByDescending(a => a.Score).FirstOrDefault();
+                            var isPassed = bestAttempt?.IsPassed == true;
+                            
+                            <div class="quiz-card glass-card rounded-xl p-6 fade-in group">
+                                <!-- Header -->
+                                <div class="flex items-start justify-between mb-4">
+                                    <div class="flex items-center gap-3">
+                                        <div class="p-2.5 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 group-hover:from-primary/30 group-hover:to-primary/20 transition-colors">
+                                            <span class="material-symbols-outlined text-primary text-xl">quiz</span>
+                                        </div>
+                                        @if (isPassed)
+                                        {
+                                            <span class="px-2.5 py-1 rounded-lg bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-xs font-semibold uppercase tracking-wide">
+                                                Passed
+                                            </span>
+                                        }
+                                    </div>
+                                </div>
+
+                                <!-- Title & Description -->
+                                <h3 class="text-xl font-display font-bold text-gray-900 dark:text-white mb-2 group-hover:text-primary transition-colors">
+                                    @quiz.Title
+                                </h3>
+                                <p class="text-sm text-gray-600 dark:text-gray-400 mb-5 line-clamp-2 leading-relaxed">
+                                    @quiz.Description
+                                </p>
+
+                                <!-- Quiz Info Tags -->
+                                <div class="flex flex-wrap gap-2 mb-5">
+                                    <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-gray-800/50 text-xs font-medium text-gray-700 dark:text-gray-300">
+                                        <span class="material-symbols-outlined text-sm">help</span>
+                                        @quiz.QuestionCount Questions
+                                    </div>
+                                    <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-gray-800/50 text-xs font-medium text-gray-700 dark:text-gray-300">
+                                        <span class="material-symbols-outlined text-sm">timer</span>
+                                        @quiz.TimeLimitMinutes min
+                                    </div>
+                                    <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-gray-800/50 text-xs font-medium text-gray-700 dark:text-gray-300">
+                                        <span class="material-symbols-outlined text-sm">target</span>
+                                        @quiz.PassingScore% to pass
+                                    </div>
+                                </div>
+
+                                <!-- Progress Bar (if attempted) -->
+                                @if (bestAttempt != null)
+                                {
+                                    <div class="mb-5 p-4 rounded-xl bg-gray-50 dark:bg-gray-800/30">
+                                        <div class="flex justify-between items-center mb-2">
+                                            <span class="text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wide">Best Score</span>
+                                            <span class="text-sm font-bold @(bestAttempt.IsPassed == true ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400")">
+                                                @Math.Round(bestAttempt.Score ?? 0, 0)%
+                                            </span>
+                                        </div>
+                                        <div class="h-2 w-full bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                                            <div class="h-full @(bestAttempt.IsPassed == true ? "bg-gradient-to-r from-green-500 to-green-400" : "bg-gradient-to-r from-red-500 to-red-400") rounded-full transition-all duration-700 ease-out" 
+                                                 style="width: @(bestAttempt.Score ?? 0)%"></div>
+                                        </div>
+                                    </div>
+                                }
+
+                                <!-- Action Button -->
+                                <a href="@Url.Action("Take", "Quiz", new { quizId = quiz.Id })" 
+                                   class="block w-full text-center bg-gradient-to-r from-primary to-primary-dark hover:from-primary-dark hover:to-primary text-white px-6 py-3 rounded-xl text-sm font-semibold shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98]">
+                                    @if (bestAttempt == null)
+                                    {
+                                        <span class="flex items-center justify-center gap-2">
+                                            <span class="material-symbols-outlined text-lg">play_arrow</span>
+                                            Start Quiz
+                                        </span>
+                                    }
+                                    else if (isPassed)
+                                    {
+                                        <span class="flex items-center justify-center gap-2">
+                                            <span class="material-symbols-outlined text-lg">refresh</span>
+                                            Retake Quiz
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="flex items-center justify-center gap-2">
+                                            <span class="material-symbols-outlined text-lg">redo</span>
+                                            Try Again
+                                        </span>
+                                    }
+                                </a>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="glass-card rounded-xl p-12 text-center fade-in">
+                        <div class="p-4 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/10 w-24 h-24 mx-auto mb-6 flex items-center justify-center">
+                            <span class="material-symbols-outlined text-primary text-5xl">quiz</span>
+                        </div>
+                        <h3 class="text-2xl font-display font-bold text-gray-900 dark:text-white mb-3">No Quizzes Available</h3>
+                        <p class="text-gray-600 dark:text-gray-400 mb-8 max-w-md mx-auto">
+                            Complete more lessons to unlock quizzes and test your knowledge!
+                        </p>
+                        <a href="/Home" class="inline-flex items-center gap-2 bg-gradient-to-r from-primary to-primary-dark hover:from-primary-dark hover:to-primary text-white px-6 py-3 rounded-xl text-sm font-semibold shadow-lg shadow-primary/25 hover:shadow-xl transition-all duration-300">
+                            <span class="material-symbols-outlined text-lg">arrow_back</span>
+                            Back to Dashboard
+                        </a>
+                    </div>
+                }
+            </div>
+        </main>
+    </div>
+</body>
+</html>

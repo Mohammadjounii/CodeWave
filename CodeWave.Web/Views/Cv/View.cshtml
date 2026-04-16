@@ -1,0 +1,525 @@
+@{
+    Layout = null;
+    var userLevelRaw = ViewBag.UserLevelRaw as string;
+    var isBeginner = !string.IsNullOrEmpty(userLevelRaw) && string.Equals(userLevelRaw, "Beginner", StringComparison.OrdinalIgnoreCase);
+    var cv = ViewBag.CV as CodeWave.Domain.Entities.CV;
+    var userEmail = ViewBag.UserEmail as string;
+    var completedCourses = ViewBag.CompletedCourses as List<CodeWave.Domain.Entities.Course> ?? new List<CodeWave.Domain.Entities.Course>();
+    var userProjects = ViewBag.UserProjects as List<CodeWave.Domain.Entities.Project> ?? new List<CodeWave.Domain.Entities.Project>();
+    
+    // Parse skills from CV
+    var skillsList = new List<string>();
+    if (!string.IsNullOrEmpty(cv?.ProgrammingLanguages))
+    {
+        skillsList.AddRange(cv.ProgrammingLanguages.Split(new[] { ',', '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries)
+            .Select(s => s.Trim())
+            .Where(s => !string.IsNullOrEmpty(s)));
+    }
+    
+    // Parse projects from CV (JSON or plain text) or use database projects
+    var projectsList = new List<(string Name, string Description, List<string> Technologies, string Link, string Date)>();
+    if (!string.IsNullOrEmpty(cv?.Projects))
+    {
+        try
+        {
+            // Try to parse as JSON
+            var projJson = System.Text.Json.JsonSerializer.Deserialize<List<Dictionary<string, object>>>(cv.Projects);
+            if (projJson != null)
+            {
+                foreach (var proj in projJson)
+                {
+                    var name = proj.ContainsKey("name") ? proj["name"]?.ToString() ?? "" : "";
+                    var description = proj.ContainsKey("description") ? proj["description"]?.ToString() ?? "" : "";
+                    var link = proj.ContainsKey("link") ? proj["link"]?.ToString() ?? "" : "";
+                    var date = proj.ContainsKey("date") ? proj["date"]?.ToString() ?? "" : "";
+                    var technologies = new List<string>();
+                    if (proj.ContainsKey("technologies") && proj["technologies"] is System.Text.Json.JsonElement techElement)
+                    {
+                        if (techElement.ValueKind == System.Text.Json.JsonValueKind.Array)
+                        {
+                            foreach (var tech in techElement.EnumerateArray())
+                            {
+                                if (tech.ValueKind == System.Text.Json.JsonValueKind.String)
+                                {
+                                    technologies.Add(tech.GetString());
+                                }
+                            }
+                        }
+                        else if (techElement.ValueKind == System.Text.Json.JsonValueKind.String)
+                        {
+                            technologies.AddRange(techElement.GetString().Split(',').Select(t => t.Trim()).Where(t => !string.IsNullOrEmpty(t)));
+                        }
+                    }
+                    projectsList.Add((name, description, technologies, link, date));
+                }
+            }
+        }
+        catch
+        {
+            // Fallback to plain text parsing
+            var projectSections = cv.Projects.Split(new[] { "\n\n", "\r\n\r\n" }, StringSplitOptions.RemoveEmptyEntries);
+            foreach (var section in projectSections)
+            {
+                var lines = section.Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
+                if (lines.Length > 0)
+                {
+                    var name = lines[0].Trim();
+                    var description = lines.Length > 1 ? lines[1].Replace("Description:", "").Trim() : "";
+                    var techs = new List<string>();
+                    var link = "";
+                    foreach (var line in lines.Skip(2))
+                    {
+                        if (line.Contains("Technologies:") || line.Contains("Tech:"))
+                        {
+                            var techLine = line.Replace("Technologies:", "").Replace("Tech:", "").Trim();
+                            techs.AddRange(techLine.Split(new[] { ',', '|' }, StringSplitOptions.RemoveEmptyEntries)
+                                .Select(t => t.Trim())
+                                .Where(t => !string.IsNullOrEmpty(t)));
+                        }
+                        else if (line.Contains("Link:") || line.StartsWith("http"))
+                        {
+                            link = line.Replace("Link:", "").Trim();
+                        }
+                    }
+                    projectsList.Add((name, description, techs, link, ""));
+                }
+            }
+        }
+    }
+    
+    // If no projects from CV, use database projects
+    if (projectsList.Count == 0 && userProjects.Any())
+    {
+        foreach (var project in userProjects)
+        {
+            var techs = new List<string>();
+            if (!string.IsNullOrEmpty(project.Result))
+            {
+                techs.AddRange(project.Result.Split(new[] { ',', '|' }, StringSplitOptions.RemoveEmptyEntries)
+                    .Select(t => t.Trim())
+                    .Where(t => !string.IsNullOrEmpty(t)));
+            }
+            var date = project.CompletionDate != default(DateTime) ? project.CompletionDate.ToString("yyyy-MM") : "";
+            projectsList.Add((Name: project.Title ?? "Project", Description: project.Description ?? "", Technologies: techs, Link: "", Date: date));
+        }
+    }
+    
+    // Parse certifications from CV (JSON or plain text)
+    var certificationsList = new List<(string Name, string Institution, string Date, string Expiry, List<string> Skills, string Link)>();
+    if (!string.IsNullOrEmpty(cv?.Certifications))
+    {
+        try
+        {
+            // Try to parse as JSON
+            var certsJson = System.Text.Json.JsonSerializer.Deserialize<List<Dictionary<string, object>>>(cv.Certifications);
+            if (certsJson != null)
+            {
+                foreach (var cert in certsJson)
+                {
+                    var name = cert.ContainsKey("name") ? cert["name"]?.ToString() ?? "" : "";
+                    var institution = cert.ContainsKey("institution") ? cert["institution"]?.ToString() ?? "" : "";
+                    var date = cert.ContainsKey("date") ? cert["date"]?.ToString() ?? "" : "";
+                    var expiry = cert.ContainsKey("expiry") ? cert["expiry"]?.ToString() ?? "" : "";
+                    var link = cert.ContainsKey("link") ? cert["link"]?.ToString() ?? "" : "";
+                    var skills = new List<string>();
+                    if (cert.ContainsKey("skills") && cert["skills"] is System.Text.Json.JsonElement skillsElement)
+                    {
+                        if (skillsElement.ValueKind == System.Text.Json.JsonValueKind.Array)
+                        {
+                            foreach (var skill in skillsElement.EnumerateArray())
+                            {
+                                if (skill.ValueKind == System.Text.Json.JsonValueKind.String)
+                                {
+                                    skills.Add(skill.GetString());
+                                }
+                            }
+                        }
+                    }
+                    certificationsList.Add((name, institution, date, expiry, skills, link));
+                }
+            }
+        }
+        catch
+        {
+            // Fallback to plain text parsing
+            var certLines = cv.Certifications.Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
+            foreach (var line in certLines)
+            {
+                var parts = line.Split(new[] { " - " }, StringSplitOptions.RemoveEmptyEntries);
+                if (parts.Length >= 2)
+                {
+                    var name = parts[0].Trim();
+                    var institution = parts.Length > 1 ? parts[1].Trim() : "";
+                    var date = parts.Length > 2 ? parts[2].Trim() : "";
+                    certificationsList.Add((name, institution, date, "", new List<string>(), ""));
+                }
+                else
+                {
+                    certificationsList.Add((line.Trim(), "", "", "", new List<string>(), ""));
+                }
+            }
+        }
+    }
+    
+    // Format phone number
+    var phoneDisplay = cv?.Phone ?? "";
+    if (!string.IsNullOrEmpty(phoneDisplay) && !phoneDisplay.Contains("("))
+    {
+        // Try to format phone number
+        phoneDisplay = phoneDisplay.Replace(" ", "").Replace("-", "");
+    }
+    
+    // Format LinkedIn and GitHub URLs
+    var linkedInDisplay = cv?.LinkedInUrl ?? "";
+    if (!string.IsNullOrEmpty(linkedInDisplay) && !linkedInDisplay.StartsWith("http"))
+    {
+        linkedInDisplay = linkedInDisplay.StartsWith("linkedin.com") ? "https://" + linkedInDisplay : linkedInDisplay;
+    }
+    
+    var githubDisplay = cv?.GitHubUrl ?? "";
+    if (!string.IsNullOrEmpty(githubDisplay) && !githubDisplay.StartsWith("http"))
+    {
+        githubDisplay = githubDisplay.StartsWith("github.com") ? "https://" + githubDisplay : githubDisplay;
+    }
+    
+    // Get profile picture
+    var profilePictureUrl = cv?.CVPictureUrl ?? ViewBag.ProfilePictureUrl as string;
+    var defaultPictureUrl = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='128' height='128'%3E%3Ccircle cx='64' cy='64' r='64' fill='%234a5568'/%3E%3Cpath d='M64 32c-8.84 0-16 7.16-16 16s7.16 16 16 16 16-7.16 16-16-7.16-16-16-16zm0 40c-13.25 0-24 5.38-24 12v4h48v-4c0-6.62-10.75-12-24-12z' fill='white'/%3E%3C/svg%3E";
+    var displayPictureUrl = !string.IsNullOrEmpty(profilePictureUrl) ? profilePictureUrl : defaultPictureUrl;
+    
+    // Get last updated date
+    var lastUpdated = cv?.LastUpdated ?? DateTime.UtcNow;
+    var lastUpdatedText = lastUpdated.Date == DateTime.UtcNow.Date ? "Today" : lastUpdated.ToString("MMMM dd, yyyy");
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script>
+    // Initialize theme immediately to prevent flash
+    (function() {
+        try {
+            const html = document.documentElement;
+            const savedTheme = localStorage.getItem('theme');
+            const theme = savedTheme || 'dark';
+            if (theme === 'dark') {
+                html.classList.add('dark');
+            } else {
+                html.classList.remove('dark');
+            }
+        } catch(e) {
+            document.documentElement.classList.add('dark');
+        }
+    })();
+</script>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>CV Builder</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<style type="text/tailwindcss">
+        @@layer base {
+          :root, html.dark {
+            --primary: 19 93% 51%;
+            --background-dark: 220 22% 8%;
+            --background-light: 220 14% 97%;
+          }
+          html {
+             --background-dark: 220 14% 97%;
+             --background-light: 220 22% 8%;
+          }
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            font-size: 24px;
+        }
+    </style>
+<script>tailwind.config = {darkMode: "class", theme: {extend: {colors: {primary: "#b887e3", "background-light": "#f7f6f8", "background-dark": "#19131f"}, fontFamily: {display: "Space Grotesk"}, borderRadius: {DEFAULT: "0.25rem", lg: "0.5rem", xl: "0.75rem", full: "9999px"}}}};</script>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display">
+<div class="flex min-h-screen">
+    <!-- Sidebar -->
+    @await Html.PartialAsync("_UserSidebar")
+<!-- Main Content -->
+<main class="flex-1 overflow-y-auto">
+<div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 py-8">
+<!-- PageHeading -->
+<div class="flex flex-wrap justify-between gap-3 items-start mb-4">
+<div class="flex flex-col gap-1">
+<h1 class="text-slate-900 dark:text-white text-4xl font-black leading-tight tracking-[-0.033em]">My Curriculum Vitae</h1>
+<p class="text-gray-700 dark:text-slate-400 text-base font-normal leading-normal">Last updated: @lastUpdatedText</p>
+</div>
+</div>
+<!-- ToolBar -->
+<div class="flex justify-between items-center gap-2 px-4 py-3 bg-white dark:bg-[#1C202A] rounded-xl border border-slate-200 dark:border-slate-800 mb-8 sticky top-4 z-10">
+<div class="flex gap-2">
+<a href="@Url.Action("DownloadPDF", "Cv")" class="p-2 text-gray-700 dark:text-slate-400 hover:text-primary dark:hover:text-primary transition-colors" title="Download PDF">
+<span class="material-symbols-outlined">download</span>
+</a>
+<button class="p-2 text-gray-700 dark:text-slate-400 hover:text-primary dark:hover:text-primary transition-colors" title="Share" onclick="navigator.share ? navigator.share({title: 'My CV', text: 'Check out my CV', url: window.location.href}) : alert('Share functionality not available')">
+<span class="material-symbols-outlined">share</span>
+</button>
+<a href="@Url.Action("Index", "Cv")" class="p-2 text-gray-700 dark:text-slate-400 hover:text-primary dark:hover:text-primary transition-colors" title="Edit CV">
+<span class="material-symbols-outlined">edit</span>
+</a>
+</div>
+<div>
+<form asp-action="AutoFillCV" method="post" class="inline">
+@Html.AntiForgeryToken()
+<button type="submit" class="flex items-center gap-2 min-w-[84px] cursor-pointer justify-center overflow-hidden rounded-lg h-10 px-4 bg-primary text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-primary/90 transition-colors">
+<span class="material-symbols-outlined text-base">sync</span>
+<span class="truncate">Update from Profile</span>
+</button>
+</form>
+</div>
+</div>
+<!-- CV Content -->
+<div class="bg-white dark:bg-[#1C202A] rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm p-8 md:p-12 space-y-12">
+<!-- ProfileHeader -->
+<div class="flex p-4 @@container border-b border-slate-200 dark:border-slate-800 pb-12">
+<div class="flex w-full flex-col gap-6 @@[520px]:flex-row @@[520px]:justify-between @@[520px]:items-center">
+<div class="flex items-center gap-6">
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full h-32 w-32 flex-shrink-0" data-alt="Professional headshot" style='background-image: url("@displayPictureUrl");'></div>
+<div class="flex flex-col justify-center gap-1">
+<p class="text-slate-900 dark:text-white text-[28px] font-bold leading-tight tracking-[-0.015em]">@(cv?.FullName ?? ViewBag.UserName ?? "Your Name")</p>
+<p class="text-primary text-lg font-medium leading-normal">@(ViewBag.UserLevel ?? "Developer")</p>
+<p class="text-gray-700 dark:text-slate-400 text-sm font-normal leading-normal mt-2">@(cv?.Email ?? userEmail ?? "")@(!string.IsNullOrEmpty(cv?.Phone) ? $" | {cv.Phone}" : "")</p>
+@if (!string.IsNullOrEmpty(linkedInDisplay) || !string.IsNullOrEmpty(githubDisplay))
+{
+<p class="text-gray-700 dark:text-slate-400 text-sm font-normal leading-normal">
+@if (!string.IsNullOrEmpty(linkedInDisplay))
+{
+<span>@linkedInDisplay</span>
+}
+@if (!string.IsNullOrEmpty(linkedInDisplay) && !string.IsNullOrEmpty(githubDisplay))
+{
+<span> | </span>
+}
+@if (!string.IsNullOrEmpty(githubDisplay))
+{
+<span>@githubDisplay</span>
+}
+</p>
+}
+</div>
+</div>
+</div>
+</div>
+<!-- Professional Summary Section -->
+@if (!string.IsNullOrEmpty(cv?.Summary))
+{
+<div>
+<h2 class="text-slate-900 dark:text-white text-[22px] font-bold leading-tight tracking-[-0.015em] pb-4">Professional Summary</h2>
+<p class="text-gray-800 dark:text-slate-300 text-base font-normal leading-relaxed">@cv.Summary</p>
+</div>
+}
+<!-- Skills Section -->
+@if (skillsList.Any())
+{
+<div>
+<h2 class="text-slate-900 dark:text-white text-[22px] font-bold leading-tight tracking-[-0.015em] pb-4">Skills</h2>
+<div class="flex flex-wrap gap-2">
+@foreach (var skill in skillsList)
+{
+<span class="rounded-lg bg-primary/10 px-3 py-1 text-sm font-medium text-primary dark:bg-primary/20 dark:text-primary-300">@skill</span>
+}
+</div>
+</div>
+}
+<!-- Projects Section -->
+@if (projectsList.Any())
+{
+<div>
+<h2 class="text-slate-900 dark:text-white text-[22px] font-bold leading-tight tracking-[-0.015em] pb-4">Projects</h2>
+<div class="space-y-6">
+@foreach (var project in projectsList)
+{
+<div class="flex flex-col border-b border-slate-200 dark:border-slate-800 pb-6 last:border-0 last:pb-0">
+<div class="flex justify-between items-start mb-2">
+<div>
+@if (!string.IsNullOrEmpty(project.Link))
+{
+<h3 class="text-slate-800 dark:text-slate-100 text-lg font-semibold"><a href="@project.Link" target="_blank" class="hover:text-primary transition-colors">@project.Name</a></h3>
+}
+else
+{
+<h3 class="text-slate-800 dark:text-slate-100 text-lg font-semibold">@project.Name</h3>
+}
+</div>
+@if (!string.IsNullOrEmpty(project.Date))
+{
+var projDate = DateTime.TryParse(project.Date + "-01", out var date) ? date.ToString("MMMM yyyy") : project.Date;
+<p class="text-gray-700 dark:text-slate-400 text-sm">@projDate</p>
+}
+</div>
+@if (!string.IsNullOrEmpty(project.Description))
+{
+<p class="text-gray-800 dark:text-slate-300 mt-2 mb-3 text-base leading-relaxed">@project.Description</p>
+}
+@if (project.Technologies.Any())
+{
+<div class="flex flex-wrap gap-2">
+@foreach (var tech in project.Technologies)
+{
+<span class="rounded bg-slate-100 dark:bg-slate-800 px-2.5 py-0.5 text-xs font-medium text-gray-800 dark:text-slate-400">@tech</span>
+}
+</div>
+}
+</div>
+}
+</div>
+</div>
+}
+<!-- Courses & Certifications Section -->
+@if (certificationsList.Any() || completedCourses.Any())
+{
+<div>
+<h2 class="text-slate-900 dark:text-white text-[22px] font-bold leading-tight tracking-[-0.015em] pb-4">Courses &amp; Certifications</h2>
+<ul class="space-y-4 list-disc list-inside text-gray-800 dark:text-slate-300">
+@foreach (var cert in certificationsList)
+{
+<li>
+@if (!string.IsNullOrEmpty(cert.Link))
+{
+<a href="@cert.Link" target="_blank" class="font-semibold text-slate-700 dark:text-slate-200 hover:text-primary transition-colors">@cert.Name</a>
+}
+else
+{
+<span class="font-semibold text-slate-700 dark:text-slate-200">@cert.Name</span>
+}
+@(!string.IsNullOrEmpty(cert.Institution) ? $" - {cert.Institution}" : "")
+@if (!string.IsNullOrEmpty(cert.Date))
+{
+var certDate = DateTime.TryParse(cert.Date + "-01", out var date) ? date.ToString("MMMM yyyy") : cert.Date;
+<span> - @certDate</span>
+}
+@if (!string.IsNullOrEmpty(cert.Expiry))
+{
+var expiryDate = DateTime.TryParse(cert.Expiry + "-01", out var expiry) ? expiry.ToString("MMMM yyyy") : cert.Expiry;
+<span> (Expires: @expiryDate)</span>
+}
+@if (cert.Skills.Any())
+{
+<span class="text-gray-700 dark:text-slate-400"> - @string.Join(", ", cert.Skills)</span>
+}
+</li>
+}
+@foreach (var course in completedCourses)
+{
+<li><span class="font-semibold text-slate-700 dark:text-slate-200">@course.Title</span> - Completed, @(course.CreatedAt.ToString("MMMM yyyy"))</li>
+}
+</ul>
+</div>
+}
+<!-- Experience Section -->
+<div>
+<h2 class="text-slate-900 dark:text-white text-[22px] font-bold leading-tight tracking-[-0.015em] pb-4">Experience</h2>
+@{
+    var experiencesList = new List<(string Title, string Company, string StartDate, string EndDate, string Description, List<string> Skills)>();
+    if (!string.IsNullOrEmpty(cv?.Experience))
+    {
+        try
+        {
+            // Try to parse as JSON
+            var expJson = System.Text.Json.JsonSerializer.Deserialize<List<Dictionary<string, object>>>(cv.Experience);
+            if (expJson != null)
+            {
+                foreach (var exp in expJson)
+                {
+                    var title = exp.ContainsKey("title") ? exp["title"]?.ToString() ?? "" : "";
+                    var company = exp.ContainsKey("company") ? exp["company"]?.ToString() ?? "" : "";
+                    var startDate = exp.ContainsKey("startDate") ? exp["startDate"]?.ToString() ?? "" : "";
+                    var endDate = exp.ContainsKey("endDate") ? exp["endDate"]?.ToString() ?? "" : "";
+                    var description = exp.ContainsKey("description") ? exp["description"]?.ToString() ?? "" : "";
+                    var skills = new List<string>();
+                    if (exp.ContainsKey("skills") && exp["skills"] is System.Text.Json.JsonElement skillsElement)
+                    {
+                        if (skillsElement.ValueKind == System.Text.Json.JsonValueKind.Array)
+                        {
+                            foreach (var skill in skillsElement.EnumerateArray())
+                            {
+                                if (skill.ValueKind == System.Text.Json.JsonValueKind.String)
+                                {
+                                    skills.Add(skill.GetString());
+                                }
+                            }
+                        }
+                    }
+                    experiencesList.Add((title, company, startDate, endDate, description, skills));
+                }
+            }
+        }
+        catch
+        {
+            // Fallback to plain text - show as is
+        }
+    }
+}
+@if (experiencesList.Any())
+{
+<div class="space-y-6">
+@foreach (var exp in experiencesList)
+{
+<div class="flex flex-col border-b border-slate-200 dark:border-slate-800 pb-6 last:border-0 last:pb-0">
+<div class="flex justify-between items-start mb-2">
+<div>
+<h3 class="text-slate-800 dark:text-slate-100 text-lg font-semibold">@exp.Title</h3>
+<p class="text-gray-800 dark:text-slate-300 text-base">@exp.Company</p>
+</div>
+@if (!string.IsNullOrEmpty(exp.StartDate) || !string.IsNullOrEmpty(exp.EndDate))
+{
+<p class="text-gray-700 dark:text-slate-400 text-sm">
+@if (!string.IsNullOrEmpty(exp.StartDate))
+{
+var startDate = DateTime.TryParse(exp.StartDate + "-01", out var start) ? start.ToString("MMM yyyy") : exp.StartDate;
+<span>@startDate</span>
+}
+@if (string.IsNullOrEmpty(exp.EndDate))
+{
+<span> - Present</span>
+}
+else
+{
+var endDate = DateTime.TryParse(exp.EndDate + "-01", out var end) ? end.ToString("MMM yyyy") : exp.EndDate;
+<span> - @endDate</span>
+}
+</p>
+}
+</div>
+@if (!string.IsNullOrEmpty(exp.Description))
+{
+<p class="text-gray-800 dark:text-slate-300 mt-2 mb-3 text-base leading-relaxed">@exp.Description</p>
+}
+@if (exp.Skills.Any())
+{
+<div class="flex flex-wrap gap-2">
+@foreach (var skill in exp.Skills)
+{
+<span class="rounded bg-slate-100 dark:bg-slate-800 px-2.5 py-0.5 text-xs font-medium text-gray-800 dark:text-slate-400">@skill</span>
+}
+</div>
+}
+</div>
+}
+</div>
+}
+else if (!string.IsNullOrEmpty(cv?.Experience))
+{
+<div class="text-gray-800 dark:text-slate-300 whitespace-pre-line">@cv.Experience</div>
+}
+else
+{
+<div class="text-center py-8 px-4 border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-lg">
+<p class="text-gray-700 dark:text-slate-400">You haven't added any external work experience yet.</p>
+<a href="@Url.Action("Index", "Cv")" class="mt-4 flex mx-auto min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-primary/10 text-primary dark:bg-primary/20 text-sm font-bold leading-normal tracking-[0.015em]">
+<span class="truncate">Add Experience</span>
+</a>
+</div>
+}
+</div>
+</div>
+</main>
+
+</div>
+</body></html>
+

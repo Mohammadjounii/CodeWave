@@ -1,0 +1,130 @@
+﻿
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+
+<html class="" lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Onboarding - Motivation</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&amp;display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#135bec",
+                        "background-light": "#f6f6f8",
+                        "background-dark": "#101622",
+                    },
+                    fontFamily: {
+                        "display": ["Space Grotesk", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem",
+                        "lg": "1rem",
+                        "xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+    <style>
+        .glass-card {
+            background: rgba(255, 255, 255, 0.05);
+            -webkit-backdrop-filter: blur(20px);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .light .glass-card {
+            background: rgba(255, 255, 255, 0.4);
+            -webkit-backdrop-filter: blur(20px);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .form-textarea-custom {
+            background-color: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+            .form-textarea-custom:focus {
+                border-color: #135bec;
+                box-shadow: 0 0 0 2px rgba(19, 91, 236, 0.4);
+                background-color: rgba(255, 255, 255, 0.1);
+            }
+
+        .light .form-textarea-custom {
+            background-color: rgba(255, 255, 255, 0.5);
+            border-color: rgba(0, 0, 0, 0.1);
+        }
+
+            .light .form-textarea-custom:focus {
+                background-color: rgba(255, 255, 255, 0.7);
+            }
+    </style>
+</head>
+<body class="font-display">
+    <div class="relative flex min-h-screen w-full flex-col items-center justify-center bg-background-light dark:bg-background-dark group/design-root overflow-hidden p-4">
+        <div class="absolute inset-0 z-0">
+            <div class="absolute -top-1/4 left-0 h-1/2 w-1/2 rounded-full bg-primary/20 blur-3xl"></div>
+            <div class="absolute -bottom-1/4 right-0 h-1/2 w-1/2 rounded-full bg-[#9333ea]/20 blur-3xl"></div>
+        </div>
+        <div class="relative z-10 flex w-full max-w-2xl flex-col items-center">
+            <div class="glass-card flex w-full flex-col gap-8 rounded-xl p-6 md:p-10 shadow-2xl shadow-black/10">
+                <!-- ProgressBar -->
+                <div class="flex flex-col gap-3 w-full">
+                    <div class="flex gap-6 justify-between"><p class="text-slate-600 dark:text-slate-400 text-sm font-medium leading-normal">Step 2 of 4</p></div>
+                    <div class="rounded-full bg-slate-200/50 dark:bg-slate-700/50"><div class="h-2 rounded-full bg-primary" style="width: 50%;"></div></div>
+                </div>
+                <!-- PageHeading -->
+                <div class="flex flex-col gap-2">
+                    <p class="text-slate-800 dark:text-white text-3xl md:text-4xl font-bold leading-tight tracking-tight">Why do you want to learn to code?</p>
+                    <p class="text-slate-600 dark:text-slate-400 text-base font-normal leading-normal">Knowing your 'why' helps us tailor your learning journey.</p>
+                </div>
+                <!-- TextField -->
+                <div class="flex flex-col">
+                    <label class="flex w-full flex-col">
+<textarea class="form-textarea-custom flex w-full min-w-0 flex-1 resize-y overflow-hidden rounded-lg text-slate-800 dark:text-white focus:outline-none focus:ring-0 min-h-40 placeholder:text-slate-500 dark:placeholder:text-slate-500 p-4 text-base font-normal leading-normal" placeholder="I want to build my own startup, switch careers, or just build cool things..."></textarea>
+                    </label>
+                    <p class="text-right text-sm text-slate-500 dark:text-slate-500 mt-2">0/500</p>
+                </div>
+                <!-- ButtonGroup -->
+                <form method="post" asp-controller="Welcome" asp-action="UserMotivation">
+                    <input type="hidden" name="motivation" id="userMotivation" value="" />
+                    <div class="flex flex-col-reverse sm:flex-row flex-1 gap-3 justify-between">
+                        <a asp-controller="Welcome" asp-action="UserSkill" class="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-5 bg-slate-200/80 dark:bg-slate-700/80 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-white text-base font-bold leading-normal tracking-wide transition-colors">
+                            <span class="truncate">Back</span>
+                        </a>
+                        <button type="submit" class="flex flex-1 sm:flex-none min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-5 bg-primary hover:bg-primary/90 text-white text-base font-bold leading-normal tracking-wide transition-colors">
+                            <span class="truncate">Next</span>
+                        </button>
+                    </div>
+                </form>
+                <script>
+                    document.querySelector('textarea').addEventListener('input', function() {
+                        document.getElementById('userMotivation').value = this.value;
+                        const charCount = this.value.length;
+                        document.querySelector('p.text-right').textContent = charCount + '/500';
+                    });
+                </script>
+            </div>
+            <!-- SingleButton (Skip) -->
+            <div class="flex px-4 py-3 justify-center mt-4">
+                <button class="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-transparent text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white text-sm font-bold leading-normal tracking-wide transition-colors">
+                    <span class="truncate">Skip</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

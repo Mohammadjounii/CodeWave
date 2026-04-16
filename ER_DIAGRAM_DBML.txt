@@ -1,0 +1,232 @@
+// CodeWave Database Schema - DBML Format
+// Can be used with dbdiagram.io
+
+Table ApplicationUser {
+  Id guid [pk]
+  UserName string
+  Email string
+  FirstName string
+  LastName string
+  Description string
+  Level string
+  LearningPath string
+  Interests string
+  Goal string
+  SkillLevel string
+  Motivation string
+  WeeklyHours int
+  PreferredLanguage string
+  ProfilePictureUrl string
+  IsAdmin boolean
+}
+
+Table Assessment {
+  Id guid [pk]
+  Title string
+  CreatedAt datetime
+  isDeleted boolean
+}
+
+Table Question {
+  Id guid [pk]
+  AssessmentId guid [ref: > Assessment.Id]
+  Text string
+  Difficulty string
+  CreatedAt datetime
+  isDeleted boolean
+}
+
+Table AnswerOption {
+  Id guid [pk]
+  QuestionId guid [ref: > Question.Id]
+  Text string
+  IsCorrect boolean
+  CreatedAt datetime
+  isDeleted boolean
+}
+
+Table UserAssesment {
+  Id guid [pk]
+  UserId guid [ref: > ApplicationUser.Id]
+  AssessmentId guid [ref: > Assessment.Id]
+  Score double
+  ResultLevel string
+  AssignedLearningPath string
+  DateTaken datetime
+  CreatedAt datetime
+  isDeleted boolean
+}
+
+Table UserAnswer {
+  Id guid [pk]
+  UserAssessmentId guid [ref: > UserAssesment.Id]
+  QuestionId guid [ref: > Question.Id]
+  AnswerOptionId guid [ref: > AnswerOption.Id]
+  IsCorrect boolean
+}
+
+Table Course {
+  Id guid [pk]
+  Title string
+  Description string
+  DifficultyLevel string
+  LearningPath string
+  ProgrammingLanguage int
+  CreatedAt datetime
+  IsDeleted boolean
+}
+
+Table Lesson {
+  Id guid [pk]
+  CourseId guid [ref: > Course.Id]
+  Title string
+  Content string
+  VideoUrl string
+  ImageUrl string
+  OrderNumber int
+  CreatedAt datetime
+  isDeleted boolean
+}
+
+Table CodingExercise {
+  Id guid [pk]
+  LessonId guid [ref: > Lesson.Id]
+  Title string
+  Description string
+  StarterCode string
+  ExpectedOutput string
+  CreatedAt datetime
+  isDeleted boolean
+}
+
+Table ExerciseTestCase {
+  Id guid [pk]
+  ExerciseId guid [ref: > CodingExercise.Id]
+  Input string
+  ExpectedOutput string
+  Description string
+  OrderNumber int
+  CreatedAt datetime
+  IsDeleted boolean
+}
+
+Table ExerciseSubmission {
+  Id guid [pk]
+  UserId guid [ref: > ApplicationUser.Id]
+  ExerciseId guid [ref: > CodingExercise.Id]
+  SubmittedCode string
+  Output string
+  IsCorrect boolean
+  SubmissionDate datetime
+  CreatedAt datetime
+  isDeleted boolean
+}
+
+Table LessonCompletion {
+  Id guid [pk]
+  UserId guid [ref: > ApplicationUser.Id]
+  LessonId guid [ref: > Lesson.Id]
+  IsCompleted boolean
+  CompletionDate datetime
+  TimeSpentMinutes int
+  CreatedAt datetime
+  isDeleted boolean
+}
+
+Table UserCourse {
+  Id guid [pk]
+  UserId guid [ref: > ApplicationUser.Id]
+  CourseId guid [ref: > Course.Id]
+  ProgressPercent int
+  CompletionDate datetime
+  CreatedAt datetime
+  isDeleted boolean
+}
+
+Table Quiz {
+  Id guid [pk]
+  CourseId guid [ref: > Course.Id]
+  Title string
+  Description string
+  TimeLimitMinutes int
+  PassingScore int
+  CreatedAt datetime
+  IsDeleted boolean
+}
+
+Table QuizQuestion {
+  Id guid [pk]
+  QuizId guid [ref: > Quiz.Id]
+  Text string
+  Difficulty string
+  OrderNumber int
+  CreatedAt datetime
+  IsDeleted boolean
+}
+
+Table QuizAnswerOption {
+  Id guid [pk]
+  QuizQuestionId guid [ref: > QuizQuestion.Id]
+  Text string
+  IsCorrect boolean
+  CreatedAt datetime
+  IsDeleted boolean
+}
+
+Table UserQuizAttempt {
+  Id guid [pk]
+  UserId guid [ref: > ApplicationUser.Id]
+  QuizId guid [ref: > Quiz.Id]
+  Score double
+  IsPassed boolean
+  StartedAt datetime
+  CompletedAt datetime
+  TimeSpentMinutes int
+  CreatedAt datetime
+  IsDeleted boolean
+}
+
+Table UserQuizAnswer {
+  Id guid [pk]
+  UserQuizAttemptId guid [ref: > UserQuizAttempt.Id]
+  QuizQuestionId guid [ref: > QuizQuestion.Id]
+  SelectedAnswerOptionId guid [ref: > QuizAnswerOption.Id]
+  IsCorrect boolean
+  CreatedAt datetime
+  IsDeleted boolean
+}
+
+Table JobOffer {
+  Id guid [pk]
+  JobTitle string
+  Company string
+  Description string
+  RequiredSkills string
+  PostedDate datetime
+  Deadline datetime
+  CreatedAt datetime
+  isDeleted boolean
+}
+
+Table Project {
+  Id guid [pk]
+  UserId guid [ref: > ApplicationUser.Id]
+  Title string
+  Description string
+  CompletionDate datetime
+  Result string
+  CreatedAt datetime
+  isDeleted boolean
+}
+
+Table CV {
+  Id guid [pk]
+  UserId guid [ref: > ApplicationUser.Id, unique]
+  Summary string
+  Skills string
+  Education string
+  Experience string
+  Certifications string
+  LastUpdated datetime
+}
+

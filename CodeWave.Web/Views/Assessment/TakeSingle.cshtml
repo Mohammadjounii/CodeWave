@@ -1,0 +1,182 @@
+﻿@model CodeWave.Application.Assessments.DTOs.QuestionDto
+
+
+@{
+    Layout = null;
+    var index = (int)ViewBag.Index;
+    var total = (int)ViewBag.Total;
+    var progress = (double)ViewBag.Progress;
+}
+
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CodeWave | Skills Assessment</title>
+
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        :root {
+            --radio-dot-svg: url('data:image/svg+xml,%3csvg viewBox=%270 0 16 16%27 fill=%27rgb(255,255,255)%27 xmlns=%27http://www.w3.org/2000/svg%27%3e%3ccircle cx=%278%27 cy=%278%27 r=%273%27/%3e%3c/svg%3e');
+        }
+    </style>
+
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#b887e3",
+                        "background-light": "#f7f6f8",
+                        "background-dark": "#19131f"
+                    },
+                    fontFamily: { display: "Space Grotesk" }
+                }
+            }
+        };
+    </script>
+</head>
+
+<body class="bg-background-light dark:bg-background-dark font-display text-[#212529] dark:text-white">
+
+<div class="relative flex min-h-screen w-full flex-col">
+
+    <div class="flex h-full grow flex-col">
+        <div class="px-4 py-5 sm:px-8 md:px-16 lg:px-24 xl:px-40 flex flex-1 justify-center">
+            <div class="flex flex-col w-full max-w-[960px] flex-1">
+
+                <!-- TOP NAV -->
+                <header class="flex items-center justify-between border-b border-gray-200 dark:border-[#282e39] py-3">
+                    <div class="flex items-center gap-4 text-gray-800 dark:text-white">
+                        <div class="size-6 text-primary">
+                            <svg fill="none" viewBox="0 0 48 48">
+                                <path d="M4 42.4379C4 42.4379 14.0962 36.0744 24 41.1692C35.0664 46.8624 44 42.2078 44 42.2078L44 7.01134C44 7.01134 35.068 11.6577 24.0031 5.96913C14.0971 0.876274 4 7.27094 4 7.27094L4 42.4379Z" fill="currentColor"></path>
+                            </svg>
+                        </div>
+                        <h2 class="text-lg font-bold">CodeWave Assessment</h2>
+                    </div>
+                </header>
+
+                <main class="flex flex-col flex-1 py-10">
+
+                    <!-- PROGRESS -->
+                    <div class="flex flex-col gap-3 p-4">
+                        <div class="flex justify-between items-center">
+                            <p class="text-base font-medium">Question @index of @total</p>
+
+                            <div class="flex items-center gap-2 text-gray-500 dark:text-[#9da6b9]">
+                                <span class="material-symbols-outlined text-xl">timer</span>
+                                <span id="assessment-timer" class="font-mono text-sm">00:00</span>
+                            </div>
+                        </div>
+
+                        <div class="rounded-full bg-gray-200 dark:bg-[#3b4354]">
+                            <div class="h-2 rounded-full bg-primary" style="width:@progress%;"></div>
+                        </div>
+                    </div>
+
+                    <!-- QUESTION -->
+                    <div class="p-4 mt-6">
+                        <p class="text-gray-500 dark:text-[#9da6b9] text-sm">Fundamentals</p>
+                        <p class="text-gray-900 dark:text-white text-2xl font-bold">@Model.Text</p>
+                    </div>
+
+                    <!-- FORM -->
+                    <form method="post" asp-action="Next">
+                        <input type="hidden" name="questionId" value="@Model.QuestionId" />
+
+                        <!-- OPTIONS -->
+                        <div class="flex flex-col gap-4 p-4">
+                            @foreach (var opt in Model.Options)
+                            {
+                                <label class="flex cursor-pointer items-center gap-4 rounded-lg border border-gray-300 dark:border-[#3b4354] p-4 
+                                            hover:bg-gray-100 dark:hover:bg-[#282e39]
+                                            has-[:checked]:border-primary has-[:checked]:bg-primary/10">
+
+                                    <input type="radio"
+                                           name="selectedOptionId"
+                                           value="@opt.AnswerOptionId"
+                                           class="h-5 w-5 appearance-none rounded-full border-2 border-gray-400 dark:border-[#3b4354]
+                                                  checked:border-primary checked:bg-primary checked:bg-[image:--radio-dot-svg]"
+                                           required />
+
+                                    <p class="text-base font-medium text-gray-800 dark:text-white">@opt.Text</p>
+                                </label>
+                            }
+                        </div>
+
+                        <!-- BUTTONS -->
+                        <footer class="mt-auto border-t border-gray-200 dark:border-[#282e39]">
+                            <div class="flex gap-3 px-4 py-4 justify-between">
+                                <div>
+                                    @if (ViewBag.HasPrevious == true)
+                                    {
+                                        <a href="@Url.Action("Previous", "Assessment")"
+                                           class="h-12 px-5 flex items-center justify-center rounded-lg
+                                                  text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-[#282e39]">
+                                            Previous
+                                        </a>
+                                    }
+                                </div>
+                                <div class="flex gap-3">
+                                    <a href="@Url.Action("Next", "Assessment", new { questionId = Model.QuestionId })"
+                                       class="h-12 px-5 flex items-center justify-center rounded-lg
+                                              text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-[#282e39]">
+                                        Skip
+                                    </a>
+
+                                    <button type="submit"
+                                            class="h-12 px-5 flex items-center justify-center rounded-lg bg-primary text-white font-bold">
+                                        Next
+                                    </button>
+                                </div>
+                            </div>
+                        </footer>
+
+                    </form>
+
+                </main>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+
+<script>
+    (function () {
+        var STORAGE_KEY = 'cw_assessment_start';
+        var timerEl = document.getElementById('assessment-timer');
+
+        if (!sessionStorage.getItem(STORAGE_KEY)) {
+            sessionStorage.setItem(STORAGE_KEY, Date.now().toString());
+        }
+
+        function tick() {
+            var elapsed = Math.floor((Date.now() - parseInt(sessionStorage.getItem(STORAGE_KEY))) / 1000);
+            var mins = Math.floor(elapsed / 60).toString().padStart(2, '0');
+            var secs = (elapsed % 60).toString().padStart(2, '0');
+            timerEl.textContent = `${mins}:${secs}`;
+        }
+
+        tick();
+        var intervalId = setInterval(tick, 1000);
+        window.addEventListener('pagehide', function () { clearInterval(intervalId); });
+    })();
+</script>
+
+</body>
+</html>
+

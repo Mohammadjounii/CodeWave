@@ -1,0 +1,32 @@
+@model CodeWave.Domain.Entities.Lesson
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>@Model.Title - CodeWave</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 min-h-screen p-8">
+    <div class="max-w-3xl mx-auto bg-white rounded-xl shadow p-8">
+        <h1 class="text-3xl font-bold text-purple-600 mb-4">@Model.Title</h1>
+        @if (!string.IsNullOrEmpty(Model.VideoUrl))
+        {
+            <div class="mb-6">
+                <video controls class="w-full rounded-lg">
+                    <source src="@Model.VideoUrl" />
+                </video>
+            </div>
+        }
+        <div class="prose max-w-none text-gray-700 mb-8">
+            @Html.Raw(Model.Content)
+        </div>
+        <a href="javascript:history.back()" class="px-5 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition">
+            Back
+        </a>
+    </div>
+</body>
+</html>

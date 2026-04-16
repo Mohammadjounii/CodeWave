@@ -1,0 +1,289 @@
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Analytics & Reports";
+    ViewData["Subtitle"] = "Real-time insights on student progress, engagement, and platform health.";
+}
+
+<div class="flex flex-col gap-6 max-w-[1400px] mx-auto">
+<!-- Page Heading & Actions -->
+<div class="flex flex-wrap items-end justify-between gap-4">
+<div>
+<h1 class="text-3xl font-bold text-slate-900 dark:text-white tracking-tight">Platform Analytics</h1>
+<p class="text-slate-500 dark:text-slate-400 mt-1">Real-time insights on student progress, engagement, and platform health.</p>
+</div>
+<div class="flex gap-3">
+<button class="flex items-center gap-2 px-4 py-2 bg-surface-light dark:bg-surface-dark border border-slate-200 dark:border-slate-800 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors shadow-sm">
+<span class="material-symbols-outlined text-lg">calendar_today</span>
+Select Dates
+</button>
+<button class="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg text-sm font-bold shadow-md hover:bg-primary-dark transition-colors">
+<span class="material-symbols-outlined text-lg">download</span>
+Export Report
+</button>
+</div>
+</div>
+
+<!-- KPI Stats Grid -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+<!-- Stat Card 1 -->
+<div class="flex flex-col p-5 rounded-xl border border-slate-200 dark:border-slate-800 bg-surface-light dark:bg-surface-dark shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
+<div class="flex justify-between items-start mb-4 z-10">
+<p class="text-slate-500 dark:text-slate-400 text-sm font-medium">Active Learners</p>
+<span class="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-xs px-2 py-0.5 rounded-full font-bold flex items-center gap-1">
+<span class="material-symbols-outlined text-xs">trending_up</span> +5%
+</span>
+</div>
+<div class="z-10">
+<h3 class="text-3xl font-bold text-slate-900 dark:text-white">@ViewBag.ActiveUsers</h3>
+<p class="text-slate-500 dark:text-slate-400 text-xs mt-1">out of @ViewBag.TotalUsers total users</p>
+</div>
+<div class="absolute -right-4 -bottom-4 bg-primary/5 rounded-full size-24 group-hover:scale-110 transition-transform duration-500"></div>
+</div>
+<!-- Stat Card 2 -->
+<div class="flex flex-col p-5 rounded-xl border border-slate-200 dark:border-slate-800 bg-surface-light dark:bg-surface-dark shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
+<div class="flex justify-between items-start mb-4 z-10">
+<p class="text-slate-500 dark:text-slate-400 text-sm font-medium">Total Courses</p>
+<span class="bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 text-xs px-2 py-0.5 rounded-full font-bold flex items-center gap-1">
+<span class="material-symbols-outlined text-xs">trending_up</span> +2%
+</span>
+</div>
+<div class="z-10">
+<h3 class="text-3xl font-bold text-slate-900 dark:text-white">@ViewBag.TotalCourses</h3>
+<p class="text-slate-500 dark:text-slate-400 text-xs mt-1">@ViewBag.TotalLessons lessons available</p>
+</div>
+<div class="absolute -right-4 -bottom-4 bg-blue-500/5 rounded-full size-24 group-hover:scale-110 transition-transform duration-500"></div>
+</div>
+<!-- Stat Card 3 -->
+<div class="flex flex-col p-5 rounded-xl border border-slate-200 dark:border-slate-800 bg-surface-light dark:bg-surface-dark shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
+<div class="flex justify-between items-start mb-4 z-10">
+<p class="text-slate-500 dark:text-slate-400 text-sm font-medium">Coding Exercises</p>
+<span class="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-xs px-2 py-0.5 rounded-full font-bold flex items-center gap-1">
+<span class="material-symbols-outlined text-xs">trending_up</span> +12%
+</span>
+</div>
+<div class="z-10">
+<h3 class="text-3xl font-bold text-slate-900 dark:text-white">@ViewBag.TotalExercises</h3>
+<p class="text-slate-500 dark:text-slate-400 text-xs mt-1">Available exercises</p>
+</div>
+<div class="absolute -right-4 -bottom-4 bg-orange-500/5 rounded-full size-24 group-hover:scale-110 transition-transform duration-500"></div>
+</div>
+<!-- Stat Card 4 -->
+<div class="flex flex-col p-5 rounded-xl border border-slate-200 dark:border-slate-800 bg-surface-light dark:bg-surface-dark shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
+<div class="flex justify-between items-start mb-4 z-10">
+<p class="text-slate-500 dark:text-slate-400 text-sm font-medium">Job Offers</p>
+<span class="bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 text-xs px-2 py-0.5 rounded-full font-bold flex items-center gap-1">
+<span class="material-symbols-outlined text-xs">remove</span> 0%
+</span>
+</div>
+<div class="z-10">
+<h3 class="text-3xl font-bold text-slate-900 dark:text-white">@ViewBag.TotalJobOffers</h3>
+<p class="text-slate-500 dark:text-slate-400 text-xs mt-1">Active listings</p>
+</div>
+<div class="absolute -right-4 -bottom-4 bg-teal-500/5 rounded-full size-24 group-hover:scale-110 transition-transform duration-500"></div>
+</div>
+</div>
+
+<!-- Main Charts Section -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+<!-- User Progress Chart -->
+<div class="lg:col-span-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-surface-light dark:bg-surface-dark p-6 shadow-sm">
+<div class="flex items-center justify-between mb-6">
+<div>
+<h3 class="text-lg font-bold text-slate-900 dark:text-white">User Progress Overview</h3>
+<p class="text-sm text-slate-500 dark:text-slate-400">Completed lessons and exercises</p>
+</div>
+<button class="p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800">
+<span class="material-symbols-outlined text-slate-500 dark:text-slate-400">more_vert</span>
+</button>
+</div>
+@{
+    var usersWithProgress = ViewBag.UsersWithProgress as List<dynamic>;
+    var totalCompletedLessons = usersWithProgress?.Sum(u => (int)(u.CompletedLessons ?? 0)) ?? 0;
+    var totalCompletedExercises = usersWithProgress?.Sum(u => (int)(u.CompletedExercises ?? 0)) ?? 0;
+    var totalQuizAttempts = usersWithProgress?.Sum(u => (int)(u.QuizAttempts ?? 0)) ?? 0;
+    var totalPassedQuizzes = usersWithProgress?.Sum(u => (int)(u.PassedQuizzes ?? 0)) ?? 0;
+}
+<div class="h-[300px] w-full relative">
+<!-- Simulated Chart -->
+<svg class="w-full h-full overflow-visible" preserveaspectratio="none" viewbox="0 0 100 100">
+<defs>
+<lineargradient id="gradient-progress" x1="0%" x2="0%" y1="0%" y2="100%">
+<stop offset="0%" style="stop-color:#9e47eb; stop-opacity:0.2"></stop>
+<stop offset="100%" style="stop-color:#9e47eb; stop-opacity:0"></stop>
+</lineargradient>
+</defs>
+<!-- Grid lines -->
+<line stroke="#eee7f3" dark:stroke="#3d2a4a" stroke-width="0.5" vector-effect="non-scaling-stroke" x1="0" x2="100" y1="0" y2="0"></line>
+<line stroke="#eee7f3" dark:stroke="#3d2a4a" stroke-width="0.5" vector-effect="non-scaling-stroke" x1="0" x2="100" y1="25" y2="25"></line>
+<line stroke="#eee7f3" dark:stroke="#3d2a4a" stroke-width="0.5" vector-effect="non-scaling-stroke" x1="0" x2="100" y1="50" y2="50"></line>
+<line stroke="#eee7f3" dark:stroke="#3d2a4a" stroke-width="0.5" vector-effect="non-scaling-stroke" x1="0" x2="100" y1="75" y2="75"></line>
+<line stroke="#eee7f3" dark:stroke="#3d2a4a" stroke-width="0.5" vector-effect="non-scaling-stroke" x1="0" x2="100" y1="100" y2="100"></line>
+<!-- Data line -->
+<path d="M0,80 C10,70 15,90 25,60 C35,30 40,40 50,30 C60,20 65,35 75,25 C85,15 90,30 100,10" fill="none" stroke="#9e47eb" stroke-linecap="round" stroke-width="2.5" vector-effect="non-scaling-stroke"></path>
+<path d="M0,80 C10,70 15,90 25,60 C35,30 40,40 50,30 C60,20 65,35 75,25 C85,15 90,30 100,10 V100 H0 Z" fill="url(#gradient-progress)" stroke="none"></path>
+</svg>
+</div>
+<div class="mt-6 grid grid-cols-3 gap-4">
+<div class="text-center">
+<p class="text-2xl font-bold text-slate-900 dark:text-white">@totalCompletedLessons</p>
+<p class="text-xs text-slate-500 dark:text-slate-400">Lessons Completed</p>
+</div>
+<div class="text-center">
+<p class="text-2xl font-bold text-slate-900 dark:text-white">@totalCompletedExercises</p>
+<p class="text-xs text-slate-500 dark:text-slate-400">Exercises Solved</p>
+</div>
+<div class="text-center">
+<p class="text-2xl font-bold text-slate-900 dark:text-white">@totalPassedQuizzes</p>
+<p class="text-xs text-slate-500 dark:text-slate-400">Quizzes Passed</p>
+</div>
+</div>
+</div>
+
+<!-- Course Distribution -->
+<div class="lg:col-span-1 rounded-xl border border-slate-200 dark:border-slate-800 bg-surface-light dark:bg-surface-dark p-6 shadow-sm flex flex-col">
+<h3 class="text-lg font-bold text-slate-900 dark:text-white mb-1">Course Distribution</h3>
+<p class="text-sm text-slate-500 dark:text-slate-400 mb-6">Enrollment by course</p>
+@{
+    var courseEnrollments = ViewBag.CourseEnrollments as List<dynamic>;
+    var totalEnrollments = courseEnrollments?.Sum(c => (int)(c.EnrollmentCount ?? 0)) ?? 0;
+}
+@if (courseEnrollments != null && courseEnrollments.Any())
+{
+    <div class="flex-1 flex flex-col justify-center gap-4">
+    @foreach (var enrollment in courseEnrollments.Take(4))
+    {
+        var percentage = totalEnrollments > 0 ? (int)(((int)(enrollment.EnrollmentCount ?? 0) * 100.0) / totalEnrollments) : 0;
+        <div>
+        <div class="flex justify-between mb-2">
+        <span class="text-sm font-medium text-slate-900 dark:text-white">Course @enrollment.CourseId.ToString().Substring(0, 8)</span>
+        <span class="text-sm text-slate-500 dark:text-slate-400">@enrollment.EnrollmentCount</span>
+        </div>
+        <div class="w-full h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+        <div class="h-full bg-primary rounded-full transition-all" style="width: @percentage%"></div>
+        </div>
+        </div>
+    }
+    </div>
+}
+else
+{
+    <div class="flex-1 flex items-center justify-center">
+    <p class="text-slate-500 dark:text-slate-400 text-sm">No enrollment data available</p>
+    </div>
+}
+</div>
+</div>
+
+<!-- Second Row: Detailed Stats -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+<!-- Top Performing Users -->
+<div class="bg-surface-light dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+<div class="p-6 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center">
+<div>
+<h3 class="text-lg font-bold text-slate-900 dark:text-white">Top Performing Users</h3>
+<p class="text-sm text-slate-500 dark:text-slate-400">Based on completed lessons and exercises</p>
+</div>
+<a asp-controller="Admin" asp-action="UserManagment" class="text-sm text-primary font-semibold hover:underline">View All</a>
+</div>
+<div class="p-0">
+@if (usersWithProgress != null && usersWithProgress.Any())
+{
+    <div class="divide-y divide-slate-200 dark:divide-slate-800">
+    @foreach (var user in usersWithProgress.OrderByDescending(u => (int)(u.CompletedLessons ?? 0) + (int)(u.CompletedExercises ?? 0)).Take(5))
+    {
+        var totalProgress = (int)(user.CompletedLessons ?? 0) + (int)(user.CompletedExercises ?? 0);
+        <div class="px-6 py-4 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+        <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+        <span class="material-symbols-outlined text-primary">person</span>
+        </div>
+        <div>
+        <p class="font-medium text-slate-900 dark:text-white">User @user.UserId.ToString().Substring(0, 8)</p>
+        <p class="text-xs text-slate-500 dark:text-slate-400">@user.CompletedLessons lessons • @user.CompletedExercises exercises</p>
+        </div>
+        </div>
+        <div class="text-right">
+        <p class="text-sm font-bold text-slate-900 dark:text-white">@totalProgress</p>
+        <p class="text-xs text-slate-500 dark:text-slate-400">Total</p>
+        </div>
+        </div>
+        </div>
+    }
+    </div>
+}
+else
+{
+    <div class="px-6 py-12 text-center">
+    <span class="material-symbols-outlined text-slate-400 text-4xl mb-2">bar_chart</span>
+    <p class="text-slate-500 dark:text-slate-400">No user progress data available</p>
+    </div>
+}
+</div>
+</div>
+
+<!-- Platform Statistics -->
+<div class="bg-surface-light dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm p-6">
+<div class="flex justify-between items-center mb-6">
+<div>
+<h3 class="text-lg font-bold text-slate-900 dark:text-white">Platform Statistics</h3>
+<p class="text-sm text-slate-500 dark:text-slate-400">Key metrics overview</p>
+</div>
+</div>
+<div class="flex flex-col gap-5">
+<!-- Stat Item 1 -->
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-lg bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined">school</span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between mb-1">
+<h4 class="text-sm font-semibold text-slate-900 dark:text-white">Total Lessons</h4>
+<span class="text-sm font-bold text-slate-900 dark:text-white">@ViewBag.TotalLessons</span>
+</div>
+<p class="text-xs text-slate-500 dark:text-slate-400">Available across all courses</p>
+</div>
+</div>
+<!-- Stat Item 2 -->
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-lg bg-purple-50 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined">code</span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between mb-1">
+<h4 class="text-sm font-semibold text-slate-900 dark:text-white">Coding Exercises</h4>
+<span class="text-sm font-bold text-slate-900 dark:text-white">@ViewBag.TotalExercises</span>
+</div>
+<p class="text-xs text-slate-500 dark:text-slate-400">Hands-on practice opportunities</p>
+</div>
+</div>
+<!-- Stat Item 3 -->
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-lg bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400 flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined">quiz</span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between mb-1">
+<h4 class="text-sm font-semibold text-slate-900 dark:text-white">Quiz Attempts</h4>
+<span class="text-sm font-bold text-slate-900 dark:text-white">@totalQuizAttempts</span>
+</div>
+<p class="text-xs text-slate-500 dark:text-slate-400">@totalPassedQuizzes passed successfully</p>
+</div>
+</div>
+<!-- Stat Item 4 -->
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-lg bg-orange-50 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined">work</span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between mb-1">
+<h4 class="text-sm font-semibold text-slate-900 dark:text-white">Job Offers</h4>
+<span class="text-sm font-bold text-slate-900 dark:text-white">@ViewBag.TotalJobOffers</span>
+</div>
+<p class="text-xs text-slate-500 dark:text-slate-400">Active job listings</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>

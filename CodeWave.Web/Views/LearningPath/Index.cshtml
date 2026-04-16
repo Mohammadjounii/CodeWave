@@ -1,0 +1,351 @@
+﻿@using CodeWave.Application.ViewModels
+@model JavaLearningPathViewModel
+
+@{
+    Layout = null; // or your main layout if you want
+}
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>@Model.Course.Title - Learning Path</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet" />
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#b887e3",
+                        "background-light": "#f7f6f8",
+                        "background-dark": "#19131f"
+                    },
+                    fontFamily: { display: "Inter" },
+                    borderRadius: { DEFAULT: "1rem", lg: "2rem", xl: "3rem", full: "9999px" }
+                }
+            }
+        };
+    </script>
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24
+        }
+    </style>
+</head>
+<body class="font-display bg-background-light dark:bg-background-dark">
+    <div class="flex h-screen w-full">
+        <!-- SideNavBar -->
+        <aside class="flex w-64 flex-col border-r border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-[#111722]">
+            <div class="flex items-center gap-3 px-3 py-2">
+                <img src="/codewaveblacklogo.png" alt="CodeWave Logo" class="h-10 w-10 object-contain dark:hidden block" />
+                <img src="/CodeWavelogo.PNG" alt="CodeWave Logo" class="h-10 w-10 object-contain dark:block hidden" />
+                <h2 class="text-slate-900 dark:text-white text-lg font-bold leading-tight tracking-[-0.015em]">CodeWave</h2>
+            </div>
+
+            <div class="flex flex-1 flex-col justify-between pt-4">
+                <div class="flex flex-col gap-2">
+                    <a href="/Home" class="flex items-center gap-3 px-3 py-2 rounded-lg cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800">
+                        <span class="material-symbols-outlined text-slate-500 dark:text-[#92a4c9]">dashboard</span>
+                        <p class="text-slate-700 dark:text-white text-sm font-medium leading-normal">Dashboard</p>
+                    </a>
+                    <div class="flex items-center gap-3 px-3 py-2 rounded-lg bg-primary/10 dark:bg-[#232f48]">
+                        <span class="material-symbols-outlined text-primary dark:text-white" style="font-variation-settings: 'FILL' 1;">explore</span>
+                        <p class="text-primary dark:text-white text-sm font-medium leading-normal">Learning Paths</p>
+                    </div>
+                    <div class="flex items-center gap-3 px-3 py-2 rounded-lg cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800">
+                        <span class="material-symbols-outlined text-slate-500 dark:text-[#92a4c9]">folder</span>
+                        <p class="text-slate-700 dark:text-white text-sm font-medium leading-normal">Projects</p>
+                    </div>
+                    <div class="flex items-center gap-3 px-3 py-2 rounded-lg cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800">
+                        <span class="material-symbols-outlined text-slate-500 dark:text-[#92a4c9]">person</span>
+                        <p class="text-slate-700 dark:text-white text-sm font-medium leading-normal">Profile/CV</p>
+                    </div>
+                    <div class="flex items-center gap-3 px-3 py-2 rounded-lg cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800">
+                        <span class="material-symbols-outlined text-slate-500 dark:text-[#92a4c9]">work</span>
+                        <p class="text-slate-700 dark:text-white text-sm font-medium leading-normal">Job Board</p>
+                    </div>
+                </div>
+
+                <div class="flex flex-col gap-2">
+                    <!-- Dummy user info -->
+                    <div class="flex gap-3 items-center border-t border-slate-200 dark:border-slate-800 pt-4">
+                        <div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBrs1PVn_r4HlZaQ-LGB4E2GFeSZhTmm4Aa2_RuytDoGKq1i4PvqunNoo2e-w6TPdQjRpoJHr6OV0xsfeRIb1Rph7AvjvlGhBTcT9B33vqUmWGjldamnJrga18fIOqVw9Mo_O0-q9q4HyJF6H5_nzcUbXHTH9DwahZ9BZwzCbZHEKxJiAN7BL4QSWPHSNyJ-5fDxtdbFcFetQ8Vy-3REKNEoVf5rMOtZG1ub5bDsawXzXGANEsy-V2qZ89MT4zr9ZAboGMD3D234SI");'></div>
+                        <div class="flex flex-col">
+                            <h1 class="text-slate-900 dark:text-white text-sm font-medium leading-normal">Alex Doe</h1>
+                            <p class="text-slate-500 dark:text-[#92a4c9] text-xs font-normal leading-normal">alex.doe@email.com</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3 px-3 py-2 rounded-lg cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800">
+                        <span class="material-symbols-outlined text-slate-500 dark:text-[#92a4c9]">settings</span>
+                        <p class="text-slate-700 dark:text-white text-sm font-medium leading-normal">Settings</p>
+                    </div>
+                    <div class="flex items-center gap-3 px-3 py-2 rounded-lg cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800">
+                        <span class="material-symbols-outlined text-slate-500 dark:text-[#92a4c9]">logout</span>
+                        <p class="text-slate-700 dark:text-white text-sm font-medium leading-normal">Log out</p>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex flex-1 flex-col overflow-hidden">
+            <!-- TopNavBar -->
+            <header class="flex shrink-0 items-center justify-between whitespace-nowrap border-b border-slate-200 bg-white px-8 py-3 dark:border-slate-800 dark:bg-[#111722]">
+                <div class="flex items-center gap-4 text-slate-900 dark:text-white">
+                    <div class="flex flex-wrap items-center gap-2">
+                        <span class="text-slate-500 dark:text-[#92a4c9] text-sm font-medium leading-normal">Learning Paths</span>
+                        <span class="text-slate-400 dark:text-slate-600 text-sm font-medium leading-normal">/</span>
+                        <span class="text-slate-500 dark:text-[#92a4c9] text-sm font-medium leading-normal">@Model.Course.Title</span>
+                    </div>
+                </div>
+                <div class="flex flex-1 justify-end gap-4">
+                    <label class="flex flex-col min-w-40 !h-10 max-w-64">
+                        <div class="flex w-full flex-1 items-stretch rounded-lg h-full">
+                            <div class="text-slate-500 dark:text-[#92a4c9] flex border border-slate-300 dark:border-slate-700 bg-white dark:bg-[#232f48] items-center justify-center pl-3 rounded-l-lg border-r-0">
+                                <span class="material-symbols-outlined text-lg">search</span>
+                            </div>
+                            <input class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-slate-900 dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-slate-300 dark:border-slate-700 bg-white dark:bg-[#232f48] h-full placeholder:text-slate-500 dark:placeholder:text-[#92a4c9] px-4 rounded-l-none border-l-0 pl-2 text-sm font-normal leading-normal" placeholder="Search topics..." />
+                        </div>
+                    </label>
+                    <button class="flex max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 w-10 border border-slate-300 bg-white dark:border-slate-700 dark:bg-[#232f48] text-slate-500 dark:text-white gap-2 text-sm font-bold leading-normal tracking-[0.015em] min-w-0">
+                        <span class="material-symbols-outlined text-xl">notifications</span>
+                    </button>
+                </div>
+            </header>
+
+            <div class="flex flex-1 overflow-y-auto">
+                <!-- Center: Learning Path Visualization -->
+                <div class="flex-1 overflow-y-auto p-8">
+                    <div class="flex flex-col gap-6">
+                        <!-- Page Heading -->
+                        <div class="flex flex-wrap justify-between gap-3">
+                            <div class="flex min-w-72 flex-col gap-2">
+                                <p class="text-slate-900 dark:text-white text-3xl font-bold leading-tight tracking-[-0.033em]">@Model.Course.Title</p>
+                                <p class="text-slate-500 dark:text-[#92a4c9] text-base font-normal leading-normal">
+                                    @Model.Course.Description
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Progress Bar -->
+                        <div class="flex flex-col gap-2 rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-[#111722]">
+                            <div class="flex gap-6 justify-between items-center">
+                                <p class="text-slate-800 dark:text-white text-base font-medium leading-normal">Overall Path Completion</p>
+                                <p class="text-slate-900 dark:text-white text-sm font-semibold leading-normal" id="overallPercent">@Model.CompletionPercent %</p>
+                            </div>
+                            <div class="rounded-full bg-slate-200 dark:bg-slate-700 h-2">
+                                <div id="overallBar" class="h-2 rounded-full bg-primary" style="width:@Model.CompletionPercent%;"></div>
+                            </div>
+                        </div>
+
+                        <!-- Learning Path Modules (one per Lesson) -->
+                        <div class="flex flex-col gap-4">
+                            @for (int i = 0; i < Model.Lessons.Count; i++)
+                            {
+                                var lesson = Model.Lessons[i];
+                                var isCompleted = Model.CompletedLessonIds.Contains(lesson.Id);
+                                var isCurrent = Model.CurrentLessonId.HasValue && Model.CurrentLessonId.Value == lesson.Id;
+                                var isLocked = !isCompleted && !isCurrent && i > 0 && !Model.CompletedLessonIds.Contains(Model.Lessons[i - 1].Id);
+                                <div class="flex items-start gap-4 @(isLocked ? "opacity-60" : "")">
+                                    <div class="flex flex-col items-center">
+                                        <div class="flex size-8 items-center justify-center rounded-full
+                                        @(isCompleted ? "bg-green-500 text-white" :
+                                                                                   isCurrent ? "border-2 border-primary bg-primary/10 text-primary" :
+                                                                                   "bg-slate-300 dark:bg-slate-700 text-slate-500")">
+                                            <span class="material-symbols-outlined text-lg">
+                                                @(isCompleted ? "check" : isCurrent ? "play_arrow" : "lock")
+                                            </span>
+                                        </div>
+                                        @if (i < Model.Lessons.Count - 1)
+                                        {
+                                            <div class="w-px flex-1 bg-slate-300 dark:bg-slate-700 my-2"></div>
+                                        }
+                                    </div>
+                                    <div class="flex-1 pb-8">
+                                        <div class="rounded-xl border @(isCurrent ? "border-primary/50 bg-white dark:bg-slate-800/60" : "border-slate-200 bg-white dark:bg-[#111722]") p-4">
+                                            <p class="font-semibold text-slate-800 dark:text-white cursor-pointer"
+                                               onclick="loadLesson('@lesson.Id')">
+                                                @lesson.Title
+                                            </p>
+                                            <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">
+                                                Lesson @lesson.OrderNumber
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right: Dynamic Lesson Panel -->
+                <aside class="w-[450px] shrink-0 border-l border-slate-200 bg-white dark:border-slate-800 dark:bg-[#111722] overflow-y-auto p-6 flex flex-col gap-6">
+                    <div class="flex flex-col gap-1">
+                        <p class="text-xs text-primary font-semibold uppercase">CURRENT LESSON</p>
+                        <h3 id="lessonTitle" class="text-2xl font-bold text-slate-900 dark:text-white">
+                            Select a lesson
+                        </h3>
+                        <p id="lessonShortDescription" class="text-sm text-slate-500 dark:text-slate-400">
+                            Click a lesson from the left to start learning.
+                        </p>
+                    </div>
+
+                    <div class="border-b border-slate-200 dark:border-slate-700">
+                        <nav aria-label="Tabs" class="flex -mb-px gap-6">
+                            <button id="tabLesson" class="shrink-0 border-b-2 border-primary px-1 pb-2 text-sm font-semibold text-primary" type="button">
+                                Lesson
+                            </button>
+                            <button id="tabCode" class="shrink-0 border-b-2 border-transparent px-1 pb-2 text-sm font-medium text-slate-500 hover:border-primary hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300" type="button">
+                                Code Editor
+                            </button>
+                        </nav>
+                    </div>
+
+                    <div id="lessonContent" class="flex-1 prose prose-sm dark:prose-invert max-w-none text-slate-600 dark:text-slate-300">
+                        <!-- Lesson HTML goes here -->
+                    </div>
+
+                    <iframe id="lessonVideo" class="w-full aspect-video rounded-lg hidden" allowfullscreen></iframe>
+
+                    <textarea id="codeEditor" class="hidden w-full h-48 rounded-lg border border-slate-700 p-3 bg-slate-900 text-white text-sm"></textarea>
+
+                    <pre id="terminalOutput" class="hidden w-full h-32 bg-black text-green-400 p-3 rounded-lg overflow-auto text-sm"></pre>
+
+                    <div class="flex flex-col gap-4 sticky bottom-0 bg-white dark:bg-[#111722] py-4 border-t border-slate-200 dark:border-slate-800">
+                        <button id="runCodeBtn" type="button"
+                                class="hidden flex w-full items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700">
+                            <span class="material-symbols-outlined text-base">code</span>
+                            <span>Run Code</span>
+                        </button>
+                        <button id="markCompleteBtn" type="button"
+                                class="hidden flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white hover:bg-primary/90">
+                            <span>Mark as Complete</span>
+                            <span class="material-symbols-outlined text-base">arrow_forward</span>
+                        </button>
+                    </div>
+                </aside>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        let currentLessonId = '@Model.CurrentLessonId';
+        let currentExerciseId = null;
+
+        // Tabs
+        const tabLesson = document.getElementById("tabLesson");
+        const tabCode = document.getElementById("tabCode");
+        const lessonContent = document.getElementById("lessonContent");
+        const codeEditor = document.getElementById("codeEditor");
+        const terminalOutput = document.getElementById("terminalOutput");
+
+        tabLesson.addEventListener("click", () => {
+            tabLesson.classList.add("border-primary", "text-primary");
+            tabCode.classList.remove("border-primary", "text-primary");
+
+            lessonContent.classList.remove("hidden");
+            codeEditor.classList.add("hidden");
+            terminalOutput.classList.add("hidden");
+        });
+
+        tabCode.addEventListener("click", () => {
+            tabCode.classList.add("border-primary", "text-primary");
+            tabLesson.classList.remove("border-primary", "text-primary");
+
+            lessonContent.classList.add("hidden");
+            codeEditor.classList.remove("hidden");
+            // terminal stays hidden until we run code
+        });
+
+        async function loadLesson(lessonId) {
+            currentLessonId = lessonId;
+
+            const res = await fetch(`/LearningPath/Lesson/${lessonId}`);
+            if (!res.ok) {
+                alert("Failed to load lesson");
+                return;
+            }
+            const lesson = await res.json();
+
+            document.getElementById("lessonTitle").innerText = lesson.title;
+
+            const plain = lesson.content.replace(/<[^>]+>/g, '');
+            document.getElementById("lessonShortDescription").innerText =
+                plain.length > 150 ? plain.substring(0, 150) + "..." : plain;
+
+            lessonContent.innerHTML = lesson.content || "";
+
+            const video = document.getElementById("lessonVideo");
+            if (lesson.videoUrl) {
+                video.src = lesson.videoUrl;
+                video.classList.remove("hidden");
+            } else {
+                video.src = "";
+                video.classList.add("hidden");
+            }
+
+            if (lesson.exercises && lesson.exercises.length > 0) {
+                const ex = lesson.exercises[0];
+                currentExerciseId = ex.id;
+                codeEditor.value = ex.starterCode || "";
+                codeEditor.classList.remove("hidden");
+                document.getElementById("runCodeBtn").classList.remove("hidden");
+                document.getElementById("markCompleteBtn").classList.remove("hidden");
+            } else {
+                currentExerciseId = null;
+                codeEditor.value = "";
+                codeEditor.classList.add("hidden");
+                document.getElementById("runCodeBtn").classList.add("hidden");
+                document.getElementById("markCompleteBtn").classList.remove("hidden"); // still can complete
+            }
+
+            terminalOutput.textContent = "";
+            terminalOutput.classList.add("hidden");
+
+            // Switch back to Lesson tab when changing lesson
+            tabLesson.click();
+        }
+
+        document.getElementById("runCodeBtn").addEventListener("click", async () => {
+            const code = codeEditor.value;
+            const res = await fetch('/api/code/run', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ code })
+            });
+
+            const data = await res.json();
+            terminalOutput.classList.remove("hidden");
+            terminalOutput.textContent = data.output || "";
+            tabCode.click(); // show code tab
+        });
+
+        document.getElementById("markCompleteBtn").addEventListener("click", async () => {
+            if (!currentLessonId) {
+                alert("No lesson selected.");
+                return;
+            }
+
+            const res = await fetch(`/LearningPath/CompleteLesson?lessonId=${currentLessonId}`, {
+                method: 'POST'
+            });
+
+            if (res.ok) {
+                alert("Lesson marked as complete.");
+                // For now: just reloading the page to refresh progress & states
+                location.reload();
+            } else {
+                alert("Failed to mark lesson as complete.");
+            }
+        });
+
+        // Load initial lesson if exists
+        if (currentLessonId && currentLessonId !== "00000000-0000-0000-0000-000000000000") {
+            loadLesson(currentLessonId);
+        }
+    </script>
+</body>
+</html>

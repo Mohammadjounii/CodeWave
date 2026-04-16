@@ -1,0 +1,1615 @@
+﻿@model CodeWave.Application.ViewModels.FocusModeViewModel
+@inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Antiforgery
+@{
+    Layout = null;
+    var lesson = Model.Lesson;
+    var exercises = Model.Exercises ?? new List<CodeWave.Domain.Entities.CodingExercise>();
+    var exercise = exercises.FirstOrDefault();
+    var course = Model.Course;
+    var solvedLookup = Model.SolvedLookup ?? new Dictionary<Guid, bool>();
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <meta name="csrf-token" content="@Antiforgery.GetAndStoreTokens(Context).RequestToken" />
+    <title>@lesson.Title - Focus Mode</title>
+
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <!-- Monaco Editor -->
+    <script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs/loader.js"></script>
+
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#b887e3",
+                        "background-light": "#f7f6f8",
+                        "background-dark": "#19131f",
+                        "content-dark": "#1E2028"
+                    },
+                    fontFamily: {
+                        display: "Space Grotesk"
+                    }
+                }
+            }
+        };
+    </script>
+
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+
+        /* Chatbot Popup Animations */
+        #chatbotPopup {
+            animation: chatbotFadeIn 0.3s ease-out;
+        }
+        
+        #chatbotPopupContent {
+            animation: chatbotSlideUp 0.3s ease-out;
+        }
+        
+        @@keyframes chatbotFadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @@keyframes chatbotSlideUp {
+            from { 
+                opacity: 0;
+                transform: translateY(20px) scale(0.95);
+            }
+            to { 
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+        
+        #chatbotFloatingBtn {
+            animation: pulse 2s infinite;
+        }
+        
+        @@keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        /* Custom scrollbar for chat messages */
+        #aiChatMessagesPopup::-webkit-scrollbar,
+        #aiChatMessages::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        #aiChatMessagesPopup::-webkit-scrollbar-track,
+        #aiChatMessages::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 3px;
+        }
+        
+        #aiChatMessagesPopup::-webkit-scrollbar-thumb,
+        #aiChatMessages::-webkit-scrollbar-thumb {
+            background: rgba(184, 135, 227, 0.5);
+            border-radius: 3px;
+        }
+        
+        #aiChatMessagesPopup::-webkit-scrollbar-thumb:hover,
+        #aiChatMessages::-webkit-scrollbar-thumb:hover {
+            background: rgba(184, 135, 227, 0.7);
+        }
+
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .fade-in-start {
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeSlideIn 0.6s ease-out forwards;
+        }
+
+        @@keyframes fadeSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .popup {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            padding: 14px 20px;
+            border-radius: 12px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            opacity: 0;
+            animation: fadeIn 0.3s ease forwards;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.25);
+        }
+
+        @@keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        #testCaseResultsList {
+            overflow-y: scroll !important;
+            overflow-x: hidden !important;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
+            height: 120px !important;
+            max-height: 120px !important;
+        }
+
+        #testCaseResultsList::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        #testCaseResultsList::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 4px;
+        }
+
+        #testCaseResultsList::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.4);
+            border-radius: 4px;
+        }
+
+        #testCaseResultsList::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.6);
+        }
+    </style>
+</head>
+
+<body class="bg-background-dark font-display text-white overflow-auto">
+    <div id="focusRoot" class="relative flex min-h-screen w-full flex-col fade-in-start">
+
+        <!-- HEADER -->
+        <header class="flex items-center justify-between px-6 py-4 bg-content-dark border-b border-white/10">
+            <div class="flex items-center gap-3">
+                <a asp-controller="Home" asp-action="Index" class="flex items-center gap-2 hover:opacity-80 transition-opacity">
+                    <img src="/codewaveblacklogo.png" alt="CodeWave Logo" class="h-10 w-10 object-contain dark:hidden" />
+                    <img src="/CodeWavelogo.PNG" alt="CodeWave Logo" class="h-10 w-10 object-contain hidden dark:block" />
+                <h2 class="text-gray-900 dark:text-white text-lg font-bold">CodeWave</h2>
+                </a>
+                <span class="material-symbols-outlined text-gray-400 text-sm">chevron_right</span>
+                <span class="text-sm font-medium text-gray-300">@lesson.Title</span>
+            </div>
+
+            <div class="flex items-center gap-4">
+                <!-- Previous/Next Lesson Navigation -->
+                <div class="flex items-center gap-2">
+                    @if (Model.PreviousLessonId.HasValue)
+                    {
+                        <a asp-controller="LearningPath" asp-action="FocusMode" asp-route-lessonId="@Model.PreviousLessonId.Value"
+                           class="flex items-center justify-center gap-2 h-10 px-4 rounded-lg
+                                  bg-white/10 hover:bg-white/20 text-white font-semibold transition-all">
+                            <span class="material-symbols-outlined text-sm">arrow_back</span>
+                            <span class="hidden sm:inline">Previous</span>
+                        </a>
+                    }
+                    else
+                    {
+                        <button disabled
+                                class="flex items-center justify-center gap-2 h-10 px-4 rounded-lg
+                                       bg-white/5 text-gray-500 cursor-not-allowed">
+                            <span class="material-symbols-outlined text-sm">arrow_back</span>
+                            <span class="hidden sm:inline">Previous</span>
+                        </button>
+                    }
+                    
+                    @if (Model.NextLessonId.HasValue)
+                    {
+                        <a asp-controller="LearningPath" asp-action="FocusMode" asp-route-lessonId="@Model.NextLessonId.Value"
+                           class="flex items-center justify-center gap-2 h-10 px-4 rounded-lg
+                                  bg-primary/20 hover:bg-primary/30 text-primary font-semibold transition-all">
+                            <span class="hidden sm:inline">Next</span>
+                            <span class="material-symbols-outlined text-sm">arrow_forward</span>
+                        </a>
+                    }
+                    else
+                    {
+                        <button disabled
+                                class="flex items-center justify-center gap-2 h-10 px-4 rounded-lg
+                                       bg-primary/10 text-gray-500 cursor-not-allowed">
+                            <span class="hidden sm:inline">Next</span>
+                            <span class="material-symbols-outlined text-sm">arrow_forward</span>
+                        </button>
+                    }
+                </div>
+                
+                <!-- Navigation Links -->
+                <div class="hidden md:flex items-center gap-6 mr-4">
+                    <a asp-controller="Home" asp-action="Index" class="text-sm text-gray-300 hover:text-white transition-colors">Dashboard</a>
+                    <a asp-controller="Home" asp-action="LearningPaths" class="text-sm text-gray-300 hover:text-white transition-colors">Learning Paths</a>
+                    <a asp-controller="JobOffer" asp-action="Index" class="text-sm text-gray-300 hover:text-white transition-colors">Jobs</a>
+                </div>
+                <button onclick="saveAndExit()"
+                        class="flex items-center justify-center gap-2 h-10 px-4 rounded-lg
+                               bg-white/10 hover:bg-white/20 text-white font-semibold transition-all">
+                    <span class="material-symbols-outlined text-sm">save</span>
+                    Save & Exit
+                </button>
+                <button onclick="exitFocusMode()"
+                        class="flex items-center justify-center gap-2 h-10 px-4 rounded-lg
+                               bg-primary/20 hover:bg-primary/30 text-primary font-semibold transition-all">
+                    <span class="material-symbols-outlined text-sm">close</span>
+                    Exit
+                </button>
+            </div>
+        </header>
+
+        <!-- MAIN -->
+        <main class="grid flex-1 grid-cols-1 md:grid-cols-[35fr_45fr_20fr] min-h-0 overflow-auto">
+
+            <!-- LEFT COLUMN: Lesson Content -->
+            <div class="hidden md:flex flex-col bg-content-dark overflow-y-auto border-r border-white/10">
+                <div class="p-6 space-y-6">
+                    <div>
+                        <h1 class="text-2xl font-bold mb-2">@lesson.Title</h1>
+                        <p class="text-sm text-gray-400">Lesson @lesson.OrderNumber</p>
+                    </div>
+
+                    @if (!string.IsNullOrWhiteSpace(lesson.VideoUrl))
+                    {
+                        <div class="relative aspect-video rounded-xl overflow-hidden bg-black border border-white/10">
+                            <iframe src="@lesson.VideoUrl" class="w-full h-full" allowfullscreen></iframe>
+                        </div>
+                    }
+
+                    <div class="prose prose-invert max-w-none text-gray-300">
+                        @Html.Raw(lesson.Content)
+                    </div>
+
+                    @if (exercises.Any())
+                    {
+                        <div class="mt-6 space-y-3">
+                            <h3 class="text-lg font-bold text-white mb-3">Exercises (@exercises.Count)</h3>
+
+                            <!-- Dynamic panel: description of the currently selected exercise -->
+                            <div id="currentExercisePanel" class="p-4 rounded-xl bg-white/5 border border-primary/40">
+                                <div class="flex items-center justify-between mb-2">
+                                    <span id="currentExerciseLabel" class="text-xs font-semibold text-primary uppercase tracking-wide">Exercise 1 of @exercises.Count</span>
+                                    <span id="currentExerciseSolvedBadge" class="@(solvedLookup.ContainsKey(exercises.First().Id) && solvedLookup[exercises.First().Id] ? "" : "hidden") text-xs text-green-400 flex items-center gap-1">
+                                        <span class="material-symbols-outlined text-xs">check_circle</span> Solved
+                                    </span>
+                                </div>
+                                <h4 id="currentExerciseTitle" class="text-sm font-bold text-white mb-1">@exercises.First().Title</h4>
+                                <p id="currentExerciseDesc" class="text-sm text-gray-300 leading-relaxed">@exercises.First().Description</p>
+                            </div>
+
+                            @{int exerciseIndex = 0;}
+                            @foreach (var ex in exercises)
+                            {
+                                var isSolved = solvedLookup.ContainsKey(ex.Id) && solvedLookup[ex.Id];
+                                var currentIdx = exerciseIndex;
+                                <div class="exercise-card p-4 rounded-xl @(isSolved ? "bg-green-900/20 border-green-700" : "bg-primary/10 border-primary/30") border cursor-pointer hover:bg-primary/20 transition-all @(exerciseIndex == 0 ? "ring-2 ring-primary" : "")" 
+                                     data-exercise-id="@ex.Id.ToString()" 
+                                     data-exercise-index="@currentIdx"
+                                     onclick="selectExercise(@currentIdx)">
+                                    <div class="flex items-start justify-between gap-2">
+                                        <div class="flex-1">
+                                            <h4 class="text-base font-bold text-white flex items-center gap-2">
+                                                @ex.Title
+                                                @if (isSolved)
+                                                {
+                                                    <span class="material-symbols-outlined text-green-400 text-sm">check_circle</span>
+                                                }
+                                            </h4>
+                                        </div>
+                                    </div>
+                                </div>
+                                exerciseIndex++;
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- CENTER COLUMN: Code Editor -->
+            <div class="flex flex-col bg-[#1e1e1e] border-r border-white/10">
+                <!-- Editor Header -->
+                <div class="flex items-center justify-between px-4 py-3 bg-[#252526] border-b border-white/5">
+                    <div class="flex items-center gap-3">
+                        <span class="material-symbols-outlined text-sm text-primary">code_blocks</span>
+                        <span id="exerciseTitleDisplay" class="text-sm font-semibold text-white">@(exercise?.Title ?? "Code Editor - Experiment Mode")</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button onclick="toggleSnippets()" class="text-xs text-gray-400 hover:text-white px-2 py-1 rounded transition-colors" title="Toggle Code Snippets">
+                            <span class="material-symbols-outlined text-sm">snippet_folder</span>
+                        </button>
+                        <span id="autoSaveIndicator" class="text-xs text-green-400 hidden flex items-center gap-1">
+                            <span class="material-symbols-outlined text-xs">check_circle</span> Saved
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Code Editor with Snippets -->
+                <div class="flex flex-1 gap-3 p-3 overflow-hidden">
+                    <!-- Editor -->
+                    <div class="flex-1 flex flex-col border border-white/10 rounded-xl overflow-hidden bg-[#1e1e1e]">
+                        <div id="codeEditor" class="w-full flex-1" style="min-height: 400px;"></div>
+                </div>
+
+                    <!-- Snippets Panel -->
+                    <div id="snippetsPanel" class="w-80 border border-white/10 rounded-xl bg-content-dark overflow-hidden flex flex-col hidden">
+                        <div class="px-4 py-3 bg-[#252526] border-b border-white/5 flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <span class="material-symbols-outlined text-sm text-primary">lightbulb</span>
+                                <span class="text-sm font-semibold text-white">Code Snippets</span>
+                            </div>
+                            <button onclick="toggleSnippets()" class="text-gray-400 hover:text-white">
+                                <span class="material-symbols-outlined text-sm">close</span>
+                            </button>
+                        </div>
+                        <div class="flex-1 overflow-y-auto p-4 space-y-3">
+                            <div id="snippetsList" class="space-y-2">
+                                <!-- Snippets populated by JS -->
+                            </div>
+                        </div>
+                    </div>
+                    </div>
+
+                <!-- Console -->
+                <div class="h-64 flex flex-col border-t border-white/10 bg-[#1e1e1e] overflow-hidden">
+                    <div class="flex items-center justify-between px-4 py-2 bg-[#252526] border-b border-white/5 flex-shrink-0">
+                        <div class="flex items-center gap-2">
+                            <span class="material-symbols-outlined text-sm text-green-400">terminal</span>
+                            <span class="text-sm font-semibold text-white">Console</span>
+                        </div>
+                        <button onclick="clearConsole()" class="text-xs text-gray-400 hover:text-white transition-colors">
+                            Clear
+                        </button>
+                    </div>
+                    <div class="flex-1 min-h-0 flex flex-col overflow-hidden">
+                        <pre id="terminalOutput" class="p-4 bg-[#1e1e1e] text-green-400 text-sm font-mono overflow-auto whitespace-pre-wrap break-words" style="flex: 1 1 auto; min-height: 0;">
+                            <span class="text-gray-500">&gt; Output will appear here...</span>
+                        </pre>
+                        
+                        <!-- Test Case Results -->
+                        <div id="testCaseResults" class="hidden flex flex-col border-t border-white/10 bg-[#1e1e1e] flex-shrink-0" style="height: 160px; max-height: 160px; flex: 0 0 160px;">
+                            <h4 class="text-sm font-semibold text-white mb-2 px-4 pt-3 flex-shrink-0">Test Results:</h4>
+                            <div id="testCaseResultsList" class="px-4 pb-3 space-y-2" style="height: 120px; max-height: 120px; overflow-y: scroll; overflow-x: hidden; display: block;">
+                                <!-- Test case results will be displayed here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex items-center justify-between px-4 py-3 bg-[#252526] border-t border-white/5 gap-3">
+                    <div class="flex items-center gap-2">
+                        @if (exercises.Count > 1)
+                        {
+                            <button id="prevExerciseBtn"
+                                    class="flex items-center justify-center gap-1 h-10 px-3 rounded-lg bg-white/10 hover:bg-white/20 text-white font-medium transition-all">
+                                <span class="material-symbols-outlined text-sm">chevron_left</span>
+                                Prev
+                            </button>
+                            <span id="exerciseCounter" class="text-xs text-gray-400">Exercise 1 of @exercises.Count</span>
+                            <button id="nextExerciseBtn"
+                                    class="flex items-center justify-center gap-1 h-10 px-3 rounded-lg bg-white/10 hover:bg-white/20 text-white font-medium transition-all">
+                                Next
+                                <span class="material-symbols-outlined text-sm">chevron_right</span>
+                            </button>
+                        }
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button id="runCodeBtn"
+                                class="flex items-center justify-center gap-2 h-10 px-6 rounded-lg bg-green-600 hover:bg-green-700 text-white font-semibold transition-all">
+                            <span class="material-symbols-outlined text-sm">play_arrow</span>
+                            Run Code
+                        </button>
+                        <button id="submitBtn"
+                                class="flex items-center justify-center gap-2 h-10 px-6 rounded-lg bg-primary hover:bg-primary/90 text-white font-semibold transition-all opacity-50 cursor-not-allowed"
+                                disabled>
+                            <span class="material-symbols-outlined text-sm">check_circle</span>
+                            Submit & Complete
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RIGHT COLUMN: AI Helper / Hints (Collapsed Sidebar) -->
+            <div id="aiHelperSidebar" class="hidden md:flex flex-col bg-content-dark overflow-hidden">
+                <div class="px-4 py-3 border-b border-white/10 flex items-center justify-between">
+                    <h3 class="font-bold text-sm text-white flex items-center gap-2">
+                        <span class="material-symbols-outlined text-primary text-lg">smart_toy</span>
+                        AI Helper
+                    </h3>
+                    <button onclick="expandChatbot()" 
+                            class="p-1.5 rounded-lg hover:bg-white/10 transition-all text-gray-400 hover:text-white"
+                            title="Expand chatbot">
+                        <span class="material-symbols-outlined text-sm">open_in_full</span>
+                    </button>
+                </div>
+
+                <!-- Quick Action Buttons -->
+                <div class="px-4 py-3 border-b border-white/10">
+                    <div class="grid grid-cols-3 gap-2">
+                        <button onclick="askAIHelper('explain')" 
+                                class="text-xs text-center p-2 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary font-medium transition-all border border-primary/20">
+                            Explain
+                        </button>
+                        <button onclick="askAIHelper('hint')" 
+                                class="text-xs text-center p-2 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary font-medium transition-all border border-primary/20">
+                            Hint
+                        </button>
+                        <button onclick="askAIHelper('solution')" 
+                                class="text-xs text-center p-2 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary font-medium transition-all border border-primary/20">
+                            Solution
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Chat Messages -->
+                <div id="aiChatMessages" class="flex-1 p-4 overflow-y-auto space-y-4" style="max-height: calc(100vh - 300px);">
+                    <div class="flex gap-3">
+                        <div class="size-8 rounded-full bg-primary/20 flex items-center justify-center text-primary shrink-0">
+                            <span class="material-symbols-outlined text-sm">smart_toy</span>
+                        </div>
+                        <div class="p-3 rounded-xl bg-white/5 border border-white/10">
+                            <p class="text-sm text-gray-300">Hi! I'm your AI coding assistant. Ask me anything about this lesson, get hints, or request explanations!</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Input Area -->
+                <div class="p-4 border-t border-white/10">
+                    <div class="relative">
+                        <input id="aiHelperInput" 
+                               type="text"
+                               class="w-full h-10 pl-4 pr-10 rounded-lg bg-white/5 border border-white/10 text-sm text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/50"
+                               placeholder="Ask AI Helper..."
+                               onkeypress="if(event.key === 'Enter') askAIHelper()" />
+                        <button onclick="askAIHelper()"
+                                id="aiSendBtn"
+                                class="absolute right-2 top-1/2 -translate-y-1/2 size-7 text-white rounded-md bg-primary hover:bg-primary/90 flex items-center justify-center transition-all">
+                            <span class="material-symbols-outlined text-sm">send</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Floating Chatbot Button (Mobile & Desktop) -->
+            <button id="chatbotFloatingBtn" 
+                    onclick="expandChatbot()"
+                    class="fixed bottom-6 right-6 z-50 size-14 rounded-full bg-gradient-to-br from-primary to-purple-600 shadow-lg hover:shadow-xl transition-all flex items-center justify-center text-white group hover:scale-110">
+                <span class="material-symbols-outlined text-2xl">smart_toy</span>
+                <span class="absolute -top-1 -right-1 size-3 bg-green-500 rounded-full border-2 border-content-dark animate-pulse"></span>
+            </button>
+
+            <!-- Expanded Chatbot Popup -->
+            <div id="chatbotPopup" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+                <div id="chatbotPopupContent" class="w-full max-w-4xl h-[85vh] bg-content-dark rounded-2xl shadow-2xl flex flex-col overflow-hidden border border-white/10">
+                    <!-- Header -->
+                    <div id="chatbotPopupHeader" class="px-6 py-4 border-b border-white/10 flex items-center justify-between bg-gradient-to-r from-primary/10 to-purple-600/10">
+                        <div class="flex items-center gap-3">
+                            <div class="size-10 rounded-full bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center">
+                                <span class="material-symbols-outlined text-white text-xl">smart_toy</span>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-lg text-white">AI Coding Assistant</h3>
+                                <p class="text-xs text-gray-400">Always here to help</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button onclick="minimizeChatbot()" 
+                                    class="p-2 rounded-lg hover:bg-white/10 transition-all text-gray-400 hover:text-white"
+                                    title="Minimize">
+                                <span class="material-symbols-outlined text-lg">minimize</span>
+                            </button>
+                            <button onclick="closeChatbot()" 
+                                    class="p-2 rounded-lg hover:bg-red-500/20 transition-all text-gray-400 hover:text-red-400"
+                                    title="Close">
+                                <span class="material-symbols-outlined text-lg">close</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Quick Action Buttons -->
+                    <div class="px-6 py-4 border-b border-white/10 bg-white/5">
+                        <div class="flex flex-wrap gap-2">
+                            <button onclick="askAIHelper('explain')" 
+                                    class="px-4 py-2 rounded-lg bg-primary/20 hover:bg-primary/30 text-primary font-medium transition-all border border-primary/30 flex items-center gap-2">
+                                <span class="material-symbols-outlined text-sm">lightbulb</span>
+                                Explain
+                            </button>
+                            <button onclick="askAIHelper('hint')" 
+                                    class="px-4 py-2 rounded-lg bg-primary/20 hover:bg-primary/30 text-primary font-medium transition-all border border-primary/30 flex items-center gap-2">
+                                <span class="material-symbols-outlined text-sm">tips_and_updates</span>
+                                Hint
+                            </button>
+                            <button onclick="askAIHelper('solution')" 
+                                    class="px-4 py-2 rounded-lg bg-primary/20 hover:bg-primary/30 text-primary font-medium transition-all border border-primary/30 flex items-center gap-2">
+                                <span class="material-symbols-outlined text-sm">code</span>
+                                Solution
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Chat Messages (Popup) -->
+                    <div id="aiChatMessagesPopup" class="flex-1 p-6 overflow-y-auto space-y-4 bg-gradient-to-b from-content-dark to-black/20">
+                        <div class="flex gap-3">
+                            <div class="size-10 rounded-full bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center shrink-0">
+                                <span class="material-symbols-outlined text-white text-lg">smart_toy</span>
+                            </div>
+                            <div class="p-4 rounded-xl bg-white/5 border border-white/10 max-w-[80%]">
+                                <p class="text-sm text-gray-300">Hi! I'm your AI coding assistant. Ask me anything about this lesson, get hints, or request explanations!</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Input Area (Popup) -->
+                    <div class="p-6 border-t border-white/10 bg-content-dark">
+                        <div class="relative">
+                            <input id="aiHelperInputPopup" 
+                                   type="text"
+                                   class="w-full h-12 pl-4 pr-14 rounded-xl bg-white/5 border border-white/10 text-sm text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all"
+                                   placeholder="Ask AI Helper anything..."
+                                   onkeypress="if(event.key === 'Enter') askAIHelper()" />
+                            <button onclick="askAIHelper()"
+                                    id="aiSendBtnPopup"
+                                    class="absolute right-2 top-1/2 -translate-y-1/2 size-9 text-white rounded-lg bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-600/90 flex items-center justify-center transition-all shadow-lg hover:shadow-xl">
+                                <span class="material-symbols-outlined text-lg">send</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <div id="popupContainer"></div>
+
+<script>
+        // Global state
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+        const lessonId = '@lesson.Id';
+        const exercises = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(exercises.Select(e => new {
+            id = e.Id.ToString(),
+            title = e.Title,
+            description = e.Description,
+            starterCode = e.StarterCode,
+            isSolved = solvedLookup.ContainsKey(e.Id) && solvedLookup[e.Id]
+        })));
+        let currentExerciseIndex = 0;
+        let currentExerciseId = exercises.length > 0 ? exercises[0].id : null;
+        @{
+            var focusCourseLang = course?.ProgrammingLanguage?.ToString()?.ToLower();
+            var focusLearningPath = course?.LearningPath?.ToLower() ?? "";
+            var focusDetectedLang = focusCourseLang ?? (focusLearningPath.Contains("python") ? "python" : "java");
+        }
+        const language = "@focusDetectedLang";
+        let lastSavedCode = "";
+        let autoSaveTimer = null;
+        let isExerciseSolved = false;
+
+        // DOM elements
+        const codeEditorElement = document.getElementById("codeEditor");
+        const terminalOutput = document.getElementById("terminalOutput");
+        const runCodeBtn = document.getElementById("runCodeBtn");
+        const submitBtn = document.getElementById("submitBtn");
+        const snippetsPanel = document.getElementById("snippetsPanel");
+        const autoSaveIndicator = document.getElementById("autoSaveIndicator");
+
+        // Monaco Editor instance
+        let monacoEditor = null;
+
+        // Initialize Monaco Editor
+        require.config({ paths: { vs: 'https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs' } });
+        require(['vs/editor/editor.main'], function () {
+            const detectedLang = language === 'python' ? 'python' : 'java';
+
+            // Determine initial code before creating the editor
+            let initialCode;
+            if (exercises.length > 0) {
+                // Temporarily set currentExerciseId so loadCodeFromLocalStorage uses the right key
+                currentExerciseId = exercises[0].id;
+                const savedCode = loadCodeFromLocalStorage();
+                initialCode = savedCode || exercises[0].starterCode || "// Write your code here...";
+            } else {
+                initialCode = language === 'python'
+                    ? "# Experiment with Python code!\nprint('Hello, CodeWave!')\n"
+                    : "// Experiment with Java code!\npublic class Main {\n    public static void main(String[] args) {\n        System.out.println(\"Hello, CodeWave!\");\n    }\n}";
+            }
+
+            // Create the Monaco editor FIRST so loadExercise can call setValue safely
+            monacoEditor = monaco.editor.create(codeEditorElement, {
+                value: initialCode,
+                language: detectedLang,
+                theme: 'vs-dark',
+                fontSize: 14,
+                minimap: { enabled: true },
+                automaticLayout: true,
+                scrollBeyondLastLine: false,
+                wordWrap: 'on',
+                lineNumbers: 'on',
+                roundedSelection: false,
+                cursorStyle: 'line',
+                formatOnPaste: true,
+                formatOnType: true,
+                tabSize: 4,
+                insertSpaces: true,
+                suggestOnTriggerCharacters: true,
+                quickSuggestions: true,
+                quickSuggestionsDelay: 100,
+                parameterHints: { enabled: true },
+                hover: { enabled: true },
+                contextmenu: true,
+                autoIndent: 'full',
+                bracketPairColorization: { enabled: true },
+                colorDecorators: true
+            });
+
+            // Auto-save on content change
+            monacoEditor.onDidChangeModelContent(() => {
+                startAutoSave();
+            });
+
+            // Now load the first exercise (editor is ready)
+            if (exercises.length > 0) {
+                loadExercise(0);
+            } else {
+                currentExerciseId = null;
+                currentExerciseIndex = -1;
+                const exerciseTitleEl = document.getElementById("exerciseTitleDisplay");
+                if (exerciseTitleEl) {
+                    exerciseTitleEl.textContent = "Code Editor - Experiment Mode";
+                }
+            }
+
+            // Initialize snippets and auto-save
+            loadCodeSnippets(language);
+            startAutoSave();
+        });
+        
+        function selectExercise(index) {
+            loadExercise(index);
+            updateExerciseSelection(index);
+        }
+
+        function updateExerciseSelection(selectedIndex, scroll = true) {
+            // Remove ring from all exercise cards
+            const allCards = document.querySelectorAll('.exercise-card');
+            allCards.forEach(card => {
+                card.classList.remove('ring-2', 'ring-primary');
+            });
+
+            // Add ring to selected exercise card
+            const selectedCard = document.querySelector(`[data-exercise-index="${selectedIndex}"]`);
+            if (selectedCard) {
+                selectedCard.classList.add('ring-2', 'ring-primary');
+                // Scroll into view only when explicitly switching exercises
+                if (scroll) {
+                    selectedCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }
+            }
+        }
+
+        function loadExercise(index) {
+            if (index < 0 || index >= exercises.length) return;
+            
+            currentExerciseIndex = index;
+            currentExerciseId = exercises[index].id;
+            const exercise = exercises[index];
+            
+            // Update UI
+            const exerciseTitleEl = document.getElementById("exerciseTitleDisplay");
+            if (exerciseTitleEl) {
+                exerciseTitleEl.textContent = exercise.title;
+            }
+            
+            // Update exercise counter
+            const counterEl = document.getElementById("exerciseCounter");
+            if (counterEl) {
+                counterEl.textContent = `Exercise ${index + 1} of ${exercises.length}`;
+            }
+            
+            // Update navigation buttons
+            const prevBtn = document.getElementById("prevExerciseBtn");
+            const nextBtn = document.getElementById("nextExerciseBtn");
+            if (prevBtn) {
+                prevBtn.disabled = index === 0;
+                prevBtn.classList.toggle("opacity-50", index === 0);
+                prevBtn.classList.toggle("cursor-not-allowed", index === 0);
+            }
+            if (nextBtn) {
+                nextBtn.disabled = index === exercises.length - 1;
+                nextBtn.classList.toggle("opacity-50", index === exercises.length - 1);
+                nextBtn.classList.toggle("cursor-not-allowed", index === exercises.length - 1);
+            }
+            
+            // Update exercise selection visual
+            updateExerciseSelection(index);
+
+            // Sync the "current exercise" description panel in the left column
+            const currentExerciseLabel  = document.getElementById("currentExerciseLabel");
+            const currentExerciseTitle  = document.getElementById("currentExerciseTitle");
+            const currentExerciseDesc   = document.getElementById("currentExerciseDesc");
+            const currentExerciseSolvedBadge = document.getElementById("currentExerciseSolvedBadge");
+            if (currentExerciseLabel) {
+                currentExerciseLabel.textContent = `Exercise ${index + 1} of ${exercises.length}`;
+                currentExerciseTitle.textContent  = exercise.title;
+                currentExerciseDesc.textContent   = exercise.description || "";
+                if (exercise.isSolved) {
+                    currentExerciseSolvedBadge.classList.remove("hidden");
+                } else {
+                    currentExerciseSolvedBadge.classList.add("hidden");
+                }
+            }
+
+            // Load code
+            const savedCode = loadCodeFromLocalStorage();
+            const codeToSet = savedCode || exercise.starterCode || "// Write your code here...";
+            
+            if (monacoEditor) {
+                monacoEditor.setValue(codeToSet);
+                lastSavedCode = codeToSet;
+            }
+            
+            // Update solved status
+            isExerciseSolved = exercise.isSolved || false;
+            updateSubmitButton();
+            
+            // Clear terminal and test results
+            terminalOutput.innerHTML = '<span class="text-gray-500">&gt; Output will appear here...</span>';
+            const testResultsContainer = document.getElementById("testCaseResults");
+            if (testResultsContainer) {
+                testResultsContainer.classList.add("hidden");
+            }
+        }
+        
+        // Add event listeners for navigation buttons
+        document.addEventListener("DOMContentLoaded", () => {
+            const prevBtn = document.getElementById("prevExerciseBtn");
+            const nextBtn = document.getElementById("nextExerciseBtn");
+            
+            if (prevBtn) {
+                prevBtn.addEventListener("click", () => {
+                    if (currentExerciseIndex > 0) {
+                        selectExercise(currentExerciseIndex - 1);
+                    }
+                });
+            }
+            
+            if (nextBtn) {
+                nextBtn.addEventListener("click", () => {
+                    if (currentExerciseIndex < exercises.length - 1) {
+                        selectExercise(currentExerciseIndex + 1);
+                    }
+                });
+            }
+
+            // Initialize exercise selection visual (no scroll on initial load)
+            if (exercises.length > 0) {
+                updateExerciseSelection(0, false);
+            }
+        });
+        
+        function updateSubmitButton() {
+            // Must have exercises AND all of them solved — never allow empty-exercise auto-pass
+            const allSolved = exercises.length > 0 && exercises.every(e => e.isSolved);
+            if (allSolved) {
+                submitBtn.classList.remove("opacity-50", "cursor-not-allowed");
+                submitBtn.disabled = false;
+            } else {
+                submitBtn.classList.add("opacity-50", "cursor-not-allowed");
+                submitBtn.disabled = true;
+            }
+        }
+
+        // -------------------------
+        // CODE SNIPPETS
+        // -------------------------
+        function toggleSnippets() {
+            if (snippetsPanel) {
+                snippetsPanel.classList.toggle("hidden");
+            }
+        }
+
+        function loadCodeSnippets(lang) {
+            const snippetsList = document.getElementById("snippetsList");
+            if (!snippetsList) return;
+
+            const snippets = getSnippetsForLanguage(lang);
+            snippetsList.innerHTML = "";
+
+            snippets.forEach(snippet => {
+                const snippetCard = document.createElement("div");
+                snippetCard.className = "p-3 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 cursor-pointer transition-all";
+                snippetCard.innerHTML = `
+                    <div class="flex items-start justify-between gap-2">
+                        <div class="flex-1">
+                            <p class="text-sm font-semibold text-white mb-1">${snippet.title}</p>
+                            <p class="text-xs text-gray-400 mb-2">${snippet.description}</p>
+                            <pre class="text-xs bg-black/50 p-2 rounded text-gray-300 overflow-x-auto"><code>${snippet.code}</code></pre>
+                        </div>
+                    </div>
+                `;
+                snippetCard.addEventListener("click", () => insertSnippet(snippet.code));
+                snippetsList.appendChild(snippetCard);
+            });
+        }
+
+        function getSnippetsForLanguage(lang) {
+            if (lang === "python") {
+                return [
+                    { title: "For Loop", description: "Iterate over a range", code: "for i in range(10):\n    print(i)" },
+                    { title: "While Loop", description: "Loop while condition is true", code: "i = 0\nwhile i < 10:\n    print(i)\n    i += 1" },
+                    { title: "List Comprehension", description: "Create a list efficiently", code: "[x * 2 for x in range(10)]" },
+                    { title: "Function Definition", description: "Define a function", code: "def my_function(param):\n    return param" },
+                    { title: "If-Else", description: "Conditional statement", code: "if condition:\n    # do something\nelse:\n    # do something else" },
+                    { title: "If-Elif-Else", description: "Multiple conditions", code: "if condition1:\n    # code\nelif condition2:\n    # code\nelse:\n    # code" },
+                    { title: "Try-Except", description: "Error handling", code: "try:\n    # code\nexcept Exception as e:\n    print(e)" },
+                    { title: "List Operations", description: "Common list methods", code: "my_list = [1, 2, 3]\nmy_list.append(4)\nmy_list.remove(2)\nprint(len(my_list))" },
+                    { title: "Dictionary", description: "Key-value pairs", code: "my_dict = {\"key\": \"value\"}\nprint(my_dict[\"key\"])" },
+                    { title: "String Formatting", description: "Format strings", code: "name = \"CodeWave\"\nprint(f\"Hello, {name}!\")" }
+                ];
+            } else if (lang === "java") {
+                return [
+                    { title: "For Loop", description: "Iterate over a range", code: "for (int i = 0; i < 10; i++) {\n    System.out.println(i);\n}" },
+                    { title: "Enhanced For Loop", description: "Iterate over arrays/collections", code: "for (int num : numbers) {\n    System.out.println(num);\n}" },
+                    { title: "While Loop", description: "Loop while condition is true", code: "int i = 0;\nwhile (i < 10) {\n    System.out.println(i);\n    i++;\n}" },
+                    { title: "Method Definition", description: "Define a method", code: "public static void myMethod() {\n    // code\n}" },
+                    { title: "Method with Return", description: "Method that returns a value", code: "public static int calculate(int a, int b) {\n    return a + b;\n}" },
+                    { title: "If-Else", description: "Conditional statement", code: "if (condition) {\n    // code\n} else {\n    // code\n}" },
+                    { title: "If-Else If-Else", description: "Multiple conditions", code: "if (condition1) {\n    // code\n} else if (condition2) {\n    // code\n} else {\n    // code\n}" },
+                    { title: "Class Definition", description: "Define a class", code: "public class MyClass {\n    // fields and methods\n}" },
+                    { title: "Array Declaration", description: "Create an array", code: "int[] numbers = new int[10];\nint[] numbers = {1, 2, 3};" },
+                    { title: "Try-Catch", description: "Error handling", code: "try {\n    // code\n} catch (Exception e) {\n    System.out.println(e.getMessage());\n}" }
+                ];
+            }
+            return [];
+        }
+
+        function insertSnippet(code) {
+            if (!monacoEditor) return;
+            const selection = monacoEditor.getSelection();
+            const op = {
+                range: selection,
+                text: code + "\n",
+                forceMoveMarkers: true
+            };
+            monacoEditor.executeEdits("insert-snippet", [op]);
+            monacoEditor.focus();
+        }
+
+        // -------------------------
+        // AUTO-SAVE
+        // -------------------------
+        function startAutoSave() {
+            if (autoSaveTimer) clearInterval(autoSaveTimer);
+            autoSaveTimer = setInterval(() => {
+                if (monacoEditor) {
+                    const currentCode = monacoEditor.getValue();
+                    if (currentCode !== lastSavedCode) {
+                        saveCodeToLocalStorage();
+                    }
+                }
+            }, 3000);
+        }
+
+        function saveCodeToLocalStorage() {
+            if (!monacoEditor) return;
+            const code = monacoEditor.getValue();
+            
+            // Save to exercise-specific key if exercise selected, otherwise save to general key
+            const key = currentExerciseId 
+                ? `focus_code_${currentExerciseId}` 
+                : `focus_code_experiment_${lessonId}`;
+            
+            localStorage.setItem(key, code);
+            lastSavedCode = code;
+            if (autoSaveIndicator) {
+                autoSaveIndicator.classList.remove("hidden");
+                setTimeout(() => autoSaveIndicator.classList.add("hidden"), 2000);
+            }
+        }
+
+        function loadCodeFromLocalStorage() {
+            if (!monacoEditor) return "";
+            
+            // Load from exercise-specific key if exercise selected, otherwise load from general key
+            const key = currentExerciseId 
+                ? `focus_code_${currentExerciseId}` 
+                : `focus_code_experiment_${lessonId}`;
+            
+            const savedCode = localStorage.getItem(key);
+            if (savedCode) {
+                lastSavedCode = savedCode;
+                return savedCode;
+            }
+            return "";
+        }
+
+        // -------------------------
+        // RUN CODE
+        // -------------------------
+        runCodeBtn.addEventListener("click", async () => {
+            if (!monacoEditor) {
+                showPopup("error", "Code editor not ready. Please wait...");
+                return;
+            }
+
+            const code = monacoEditor.getValue();
+            if (!code.trim()) {
+                showPopup("error", "Please write some code first.");
+                return;
+            }
+
+            runCodeBtn.disabled = true;
+            runCodeBtn.innerHTML = '<span class="material-symbols-outlined text-sm animate-spin">sync</span> Running...';
+
+            try {
+                const res = await fetch("/api/code/run", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        language: language,
+                        code: code,
+                        exerciseId: currentExerciseId || null // Allow null if no exercise selected
+                    })
+                });
+
+                const data = await res.json();
+
+                // Display output in console
+                if (data.output) {
+                    // Format output with proper escaping
+                    const outputText = escapeHtml(data.output);
+                    terminalOutput.innerHTML = `<span class="text-green-400">${outputText}</span>`;
+                } else if (data.message) {
+                    terminalOutput.innerHTML = `<span class="text-yellow-400">${escapeHtml(data.message)}</span>`;
+                } else {
+                    terminalOutput.innerHTML = `<span class="text-gray-400">No output generated.</span>`;
+                }
+
+                // Auto-scroll console to bottom
+                terminalOutput.scrollTop = terminalOutput.scrollHeight;
+
+                // Only process exercise-related logic if an exercise is selected
+                if (currentExerciseId) {
+                    // Display test case results if available
+                    if (data.testCaseResults && data.testCaseResults.length > 0) {
+                        displayTestCaseResults(data.testCaseResults, data.passedTests || 0, data.totalTests || data.testCaseResults.length);
+                    } else {
+                        const container = document.getElementById("testCaseResults");
+                        if (container) {
+                            container.classList.add("hidden");
+                        }
+                    }
+
+                    if (data.isCorrect === true) {
+                        // Update exercise solved status
+                        const exercise = exercises.find(e => e.id === currentExerciseId);
+                        if (exercise) {
+                            exercise.isSolved = true;
+                        }
+                        isExerciseSolved = true;
+
+                        // Update "current exercise" panel solved badge
+                        const currentExerciseSolvedBadge = document.getElementById("currentExerciseSolvedBadge");
+                        if (currentExerciseSolvedBadge) currentExerciseSolvedBadge.classList.remove("hidden");
+
+                        // Update exercise card visual to green in the left panel
+                        const solvedCard = document.querySelector(`[data-exercise-index="${currentExerciseIndex}"]`);
+                        if (solvedCard) {
+                            solvedCard.classList.remove("bg-primary/10", "border-primary/30");
+                            solvedCard.classList.add("bg-green-900/20", "border-green-700");
+                            const titleEl = solvedCard.querySelector("h4");
+                            if (titleEl && !titleEl.querySelector(".runtime-solved-icon")) {
+                                const icon = document.createElement("span");
+                                icon.className = "material-symbols-outlined text-green-400 text-sm runtime-solved-icon";
+                                icon.textContent = "check_circle";
+                                titleEl.appendChild(icon);
+                            }
+                        }
+
+                        const passedTests = data.passedTests || (data.testCaseResults ? data.testCaseResults.length : 1);
+                        const totalTests  = data.totalTests  || (data.testCaseResults ? data.testCaseResults.length : 1);
+                        showPopup("success", `All tests passed! (${passedTests}/${totalTests}) 🎉`);
+                        miniConfetti();
+
+                        // Check if all exercises are solved (enables Submit & Complete)
+                        updateSubmitButton();
+
+                        // Auto-advance to the next unsolved exercise (forward first, then wrap)
+                        let nextUnsolvedIdx = exercises.findIndex(
+                            (e, idx) => idx > currentExerciseIndex && !e.isSolved
+                        );
+                        if (nextUnsolvedIdx === -1) {
+                            nextUnsolvedIdx = exercises.findIndex(
+                                (e, idx) => idx < currentExerciseIndex && !e.isSolved
+                            );
+                        }
+                        if (nextUnsolvedIdx !== -1) {
+                            setTimeout(() => selectExercise(nextUnsolvedIdx), 5000);
+                        }
+                    } else {
+                        // Show error output in console (fix operator precedence: && binds tighter than ||)
+                        if (data.output && (data.output.includes("Error") || data.output.includes("error"))) {
+                            const errorText = escapeHtml(data.output);
+                            terminalOutput.innerHTML = `<span class="text-red-400">${errorText}</span>`;
+                            terminalOutput.scrollTop = terminalOutput.scrollHeight;
+                        }
+
+                        // Don't revert isSolved — a previous correct submission still counts
+                        const exercise = exercises.find(e => e.id === currentExerciseId);
+                        isExerciseSolved = exercise ? exercise.isSolved : false;
+
+                        const message = data.testCaseResults && data.testCaseResults.length > 0
+                            ? `Some tests failed. Passed: ${data.passedTests || 0}/${data.totalTests || data.testCaseResults.length}`
+                            : "Incorrect output. Try again!";
+                        showPopup("error", message);
+                        updateSubmitButton();
+                    }
+                } else {
+                    // No exercise selected — experiment mode only, not a submission
+                    showPopup("info", "Code ran. Check the console for output.");
+                }
+            } catch (error) {
+                // Show error in console
+                const errorMsg = `Error: ${error.message || "Failed to run code. Please try again."}`;
+                terminalOutput.innerHTML = `<span class="text-red-400">${escapeHtml(errorMsg)}</span>`;
+                terminalOutput.scrollTop = terminalOutput.scrollHeight;
+                
+                showPopup("error", "Error running code.");
+                console.error(error);
+            } finally {
+                runCodeBtn.disabled = false;
+                runCodeBtn.innerHTML = '<span class="material-symbols-outlined text-sm">play_arrow</span> Run Code';
+            }
+        });
+        
+        function displayTestCaseResults(testCaseResults, passedTests, totalTests) {
+            const container = document.getElementById("testCaseResults");
+            const list = document.getElementById("testCaseResultsList");
+            
+            if (!container || !list) return;
+            
+            container.classList.remove("hidden");
+            list.innerHTML = "";
+            
+            testCaseResults.forEach((testCase, index) => {
+                const testDiv = document.createElement("div");
+                testDiv.className = `p-3 rounded-lg border-2 ${
+                    testCase.passed 
+                        ? "bg-green-900/20 border-green-700" 
+                        : "bg-red-900/20 border-red-700"
+                }`;
+                
+                testDiv.innerHTML = `
+                    <div class="flex items-start gap-2">
+                        <span class="material-symbols-outlined text-[20px] ${
+                            testCase.passed ? "text-green-400" : "text-red-400"
+                        }">
+                            ${testCase.passed ? "check_circle" : "cancel"}
+                        </span>
+                        <div class="flex-1">
+                            <div class="text-sm font-medium ${
+                                testCase.passed ? "text-green-300" : "text-red-300"
+                            }">
+                                Test ${index + 1}: ${testCase.description || "Test case"}
+                            </div>
+                            ${testCase.input ? `<div class="text-xs text-gray-400 mt-1">Input: <code class="bg-black/50 px-1 rounded">${testCase.input}</code></div>` : ""}
+                            <div class="text-xs text-gray-400 mt-1">
+                                Expected: <code class="bg-black/50 px-1 rounded">${testCase.expectedOutput || "N/A"}</code>
+                            </div>
+                            <div class="text-xs text-gray-400 mt-1">
+                                Got: <code class="bg-black/50 px-1 rounded">${testCase.actualOutput || "N/A"}</code>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                list.appendChild(testDiv);
+            });
+            
+            // Add summary
+            const summaryDiv = document.createElement("div");
+            summaryDiv.className = `mt-3 p-2 rounded-lg text-sm font-semibold ${
+                passedTests === totalTests 
+                    ? "bg-green-900/30 text-green-300" 
+                    : "bg-yellow-900/30 text-yellow-300"
+            }`;
+            summaryDiv.textContent = `Summary: ${passedTests} out of ${totalTests} tests passed`;
+            list.appendChild(summaryDiv);
+        }
+
+        // -------------------------
+        // SUBMIT & COMPLETE
+        // -------------------------
+        submitBtn.addEventListener("click", async () => {
+            // Check if all exercises are solved (exercises.length > 0 guards against vacuous true)
+            const allSolved = exercises.length > 0 && exercises.every(e => e.isSolved);
+            if (!allSolved) {
+                showPopup("error", "Please solve all exercises before completing the lesson.");
+                return;
+            }
+
+            if (!lessonId) {
+                showPopup("error", "Lesson ID not found.");
+                return;
+            }
+
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="material-symbols-outlined text-sm animate-spin">sync</span> Completing...';
+
+            try {
+                // Save code first
+                saveCodeToLocalStorage();
+
+                // Complete lesson
+                const res = await fetch(`/LearningPath/CompleteLesson?lessonId=${lessonId}`, {
+                    method: "POST",
+                    headers: { "RequestVerificationToken": csrfToken }
+                });
+
+                if (!res.ok) {
+                    throw new Error("Failed to complete lesson");
+                }
+
+                const result = await res.json();
+                if (result.success === false) {
+                    showPopup("error", result.message || "Lesson completion failed.");
+                    return;
+                }
+
+                // Success!
+                launchConfetti();
+                showPopup("success", "Lesson completed! 🚀");
+
+                setTimeout(() => {
+                    window.location.href = `/LearningPath/Course?courseId=@course.Id`;
+                }, 1500);
+
+            } catch (error) {
+                showPopup("error", "Error completing lesson.");
+                console.error(error);
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<span class="material-symbols-outlined text-sm">check_circle</span> Submit & Complete';
+            }
+        });
+        
+        // Initialize submit button state
+        updateSubmitButton();
+
+        // -------------------------
+        // UTILITIES
+        // -------------------------
+        function clearConsole() {
+            if (terminalOutput) {
+                terminalOutput.innerHTML = '<span class="text-gray-500">&gt; Output will appear here...</span>';
+                terminalOutput.scrollTop = 0;
+            }
+        }
+
+        function saveAndExit() {
+            saveCodeToLocalStorage();
+            window.location.href = `/LearningPath/Course?courseId=@course.Id`;
+        }
+
+        function exitFocusMode() {
+            if (confirm("Are you sure you want to exit? Your progress will be saved.")) {
+                saveCodeToLocalStorage();
+                window.location.href = `/LearningPath/Course?courseId=@course.Id`;
+            }
+        }
+
+        // AI Helper Chat
+        const aiChatMessages = document.getElementById("aiChatMessages");
+        const aiChatMessagesPopup = document.getElementById("aiChatMessagesPopup");
+        const aiHelperInput = document.getElementById("aiHelperInput");
+        const aiHelperInputPopup = document.getElementById("aiHelperInputPopup");
+        const aiSendBtn = document.getElementById("aiSendBtn");
+        const aiSendBtnPopup = document.getElementById("aiSendBtnPopup");
+        const chatbotPopup = document.getElementById("chatbotPopup");
+        const chatbotFloatingBtn = document.getElementById("chatbotFloatingBtn");
+        const aiHelperSidebar = document.getElementById("aiHelperSidebar");
+        let isChatbotExpanded = false;
+
+        // Chatbot popup functions
+        function expandChatbot() {
+            isChatbotExpanded = true;
+            if (chatbotPopup) chatbotPopup.classList.remove("hidden");
+            if (chatbotFloatingBtn) chatbotFloatingBtn.classList.add("hidden");
+            // Focus input
+            if (aiHelperInputPopup) {
+                setTimeout(() => aiHelperInputPopup.focus(), 100);
+            }
+        }
+
+        function minimizeChatbot() {
+            isChatbotExpanded = false;
+            if (chatbotPopup) chatbotPopup.classList.add("hidden");
+            if (chatbotFloatingBtn) chatbotFloatingBtn.classList.remove("hidden");
+        }
+
+        function closeChatbot() {
+            minimizeChatbot();
+        }
+
+        // Close popup when clicking outside
+        if (chatbotPopup) {
+            chatbotPopup.addEventListener('click', (e) => {
+                if (e.target === chatbotPopup) {
+                    closeChatbot();
+                }
+            });
+        }
+
+        function addMessageToChat(message, isUser = false) {
+            const messageDiv = document.createElement("div");
+            messageDiv.className = `flex gap-3 ${isUser ? 'justify-end' : ''}`;
+            
+            if (isUser) {
+                messageDiv.innerHTML = `
+                    <div class="p-3 rounded-xl bg-primary/20 border border-primary/30 max-w-[80%]">
+                        <p class="text-sm text-white">${escapeHtml(message)}</p>
+                    </div>
+                `;
+            } else {
+                messageDiv.innerHTML = `
+                    <div class="size-8 rounded-full bg-primary/20 flex items-center justify-center text-primary shrink-0">
+                        <span class="material-symbols-outlined text-sm">smart_toy</span>
+                    </div>
+                    <div class="p-3 rounded-xl bg-white/5 border border-white/10 max-w-[80%]">
+                        <div class="text-sm text-gray-300 prose prose-invert prose-sm max-w-none">
+                            ${renderMarkdown(message)}
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // Add to sidebar if it exists
+            if (aiChatMessages) {
+                aiChatMessages.appendChild(messageDiv.cloneNode(true));
+                aiChatMessages.scrollTop = aiChatMessages.scrollHeight;
+            }
+            
+            // Add to popup if it exists
+            if (aiChatMessagesPopup) {
+                // Create popup version with larger avatar
+                const popupMessageDiv = document.createElement("div");
+                popupMessageDiv.className = `flex gap-3 ${isUser ? 'justify-end' : ''}`;
+                
+                if (isUser) {
+                    popupMessageDiv.innerHTML = `
+                        <div class="p-4 rounded-xl bg-primary/20 border border-primary/30 max-w-[80%] shadow-lg">
+                            <p class="text-sm text-white">${escapeHtml(message)}</p>
+                        </div>
+                    `;
+                } else {
+                    popupMessageDiv.innerHTML = `
+                        <div class="size-10 rounded-full bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center shrink-0">
+                            <span class="material-symbols-outlined text-white text-lg">smart_toy</span>
+                        </div>
+                        <div class="p-4 rounded-xl bg-white/5 border border-white/10 max-w-[80%] shadow-lg">
+                            <div class="text-sm text-gray-300 prose prose-invert prose-sm max-w-none">
+                                ${renderMarkdown(message)}
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                aiChatMessagesPopup.appendChild(popupMessageDiv);
+                aiChatMessagesPopup.scrollTop = aiChatMessagesPopup.scrollHeight;
+            }
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Convert markdown to HTML while preserving formatting
+        function renderMarkdown(text) {
+            if (!text) return '';
+            
+            let html = text;
+            
+            // First, handle code blocks (```language\ncode\n```) - do this before escaping
+            html = html.replace(/```(\w+)?\n([\s\S]*?)```/g, (match, lang, code) => {
+                const language = lang || '';
+                // Escape the code content
+                const escapedCode = escapeHtml(code.trim());
+                return `<pre class="bg-gray-800 dark:bg-gray-900 p-3 rounded-lg overflow-x-auto my-2 border border-gray-700"><code class="text-sm text-green-400 font-mono block whitespace-pre">${escapedCode}</code></pre>`;
+            });
+            
+            // Split by code blocks to process text separately
+            const parts = html.split(/(<pre[\s\S]*?<\/pre>)/);
+            let result = '';
+            
+            for (let i = 0; i < parts.length; i++) {
+                if (parts[i].startsWith('<pre')) {
+                    // This is a code block, keep it as is
+                    result += parts[i];
+                } else {
+                    // Process markdown in text parts
+                    let textPart = parts[i];
+                    
+                    // Escape HTML first to prevent XSS
+                    textPart = escapeHtml(textPart);
+                    
+                    // Convert inline code (`code`) - but not inside code blocks
+                    textPart = textPart.replace(/`([^`\n]+)`/g, '<code class="bg-gray-800 dark:bg-gray-900 px-1.5 py-0.5 rounded text-green-400 text-xs font-mono">$1</code>');
+                    
+                    // Convert bold text (**text** or __text__) - do this before italic
+                    textPart = textPart.replace(/\*\*([^*\n]+?)\*\*/g, '<strong class="font-bold text-white dark:text-white">$1</strong>');
+                    textPart = textPart.replace(/__([^_\n]+?)__/g, '<strong class="font-bold text-white dark:text-white">$1</strong>');
+                    
+                    // Convert italic text (*text* or _text_) - but not if it's part of bold
+                    // Use a simpler approach: replace single asterisks/underscores that aren't adjacent to another
+                    textPart = textPart.replace(/(?<!\*)\*([^*\n<]+?)\*(?!\*)/g, '<em class="italic">$1</em>');
+                    textPart = textPart.replace(/(?<!_)_([^_\n<]+?)_(?!_)/g, '<em class="italic">$1</em>');
+                    
+                    // Check if this text part contains lists
+                    const lines = textPart.split('\n');
+                    const hasList = lines.some(line => /^(\d+\.|[-*])\s+/.test(line.trim()));
+                    
+                    if (hasList) {
+                        // Process as list
+                        let listItems = [];
+                        let currentListType = null;
+                        let listContent = '';
+                        
+                        lines.forEach(line => {
+                            const trimmed = line.trim();
+                            if (/^\d+\.\s+/.test(trimmed)) {
+                                if (currentListType !== 'ordered') {
+                                    if (listContent) {
+                                        result += listContent;
+                                        listContent = '';
+                                    }
+                                    if (listItems.length > 0) {
+                                        result += currentListType === 'unordered' 
+                                            ? `<ul class="list-disc list-inside space-y-1 my-2 ml-4">${listItems.join('')}</ul>`
+                                            : `<ol class="list-decimal list-inside space-y-1 my-2 ml-4">${listItems.join('')}</ol>`;
+                                    }
+                                    listItems = [];
+                                    currentListType = 'ordered';
+                                }
+                                listItems.push(`<li>${trimmed.replace(/^\d+\.\s+/, '')}</li>`);
+                            } else if (/^[-*]\s+/.test(trimmed)) {
+                                if (currentListType !== 'unordered') {
+                                    if (listContent) {
+                                        result += listContent;
+                                        listContent = '';
+                                    }
+                                    if (listItems.length > 0) {
+                                        result += currentListType === 'ordered'
+                                            ? `<ol class="list-decimal list-inside space-y-1 my-2 ml-4">${listItems.join('')}</ol>`
+                                            : `<ul class="list-disc list-inside space-y-1 my-2 ml-4">${listItems.join('')}</ul>`;
+                                    }
+                                    listItems = [];
+                                    currentListType = 'unordered';
+                                }
+                                listItems.push(`<li>${trimmed.replace(/^[-*]\s+/, '')}</li>`);
+                            } else if (trimmed) {
+                                if (listItems.length > 0) {
+                                    result += currentListType === 'ordered'
+                                        ? `<ol class="list-decimal list-inside space-y-1 my-2 ml-4">${listItems.join('')}</ol>`
+                                        : `<ul class="list-disc list-inside space-y-1 my-2 ml-4">${listItems.join('')}</ul>`;
+                                    listItems = [];
+                                    currentListType = null;
+                                }
+                                listContent += (listContent ? '<br>' : '') + trimmed;
+                            }
+                        });
+                        
+                        // Close any remaining list
+                        if (listItems.length > 0) {
+                            result += currentListType === 'ordered'
+                                ? `<ol class="list-decimal list-inside space-y-1 my-2 ml-4">${listItems.join('')}</ol>`
+                                : `<ul class="list-disc list-inside space-y-1 my-2 ml-4">${listItems.join('')}</ul>`;
+                        }
+                        if (listContent) {
+                            result += `<p class="my-2">${listContent}</p>`;
+                        }
+                    } else {
+                        // Regular text - convert newlines
+                        textPart = textPart.replace(/\n\n+/g, '</p><p class="my-2">');
+                        textPart = textPart.replace(/\n/g, '<br>');
+                        
+                        if (textPart.trim()) {
+                            result += '<p class="my-2">' + textPart + '</p>';
+                        }
+                    }
+                }
+            }
+            
+            return result || html; // Fallback if processing resulted in empty string
+        }
+
+        async function askAIHelper(quickAction = null) {
+            let question = "";
+            
+            if (quickAction) {
+                const currentExercise = exercises[currentExerciseIndex];
+                switch(quickAction) {
+                    case 'explain':
+                        question = `Can you explain the concept behind this exercise: "${currentExercise?.title || 'current exercise'}"?`;
+                        break;
+                    case 'hint':
+                        question = `Can you give me a hint for solving: "${currentExercise?.title || 'current exercise'}"?`;
+                        break;
+                    case 'solution':
+                        question = `Can you show me the solution for: "${currentExercise?.title || 'current exercise'}"?`;
+                        break;
+                }
+            } else {
+                // Get input from either sidebar or popup
+                question = (isChatbotExpanded && aiHelperInputPopup) 
+                    ? aiHelperInputPopup.value.trim() 
+                    : (aiHelperInput?.value.trim() || "");
+            }
+
+            if (!question) return;
+
+            // Add user message to chat
+            addMessageToChat(question, true);
+            
+            // Clear input
+            if (aiHelperInput) aiHelperInput.value = "";
+            if (aiHelperInputPopup) aiHelperInputPopup.value = "";
+            
+            // Disable send buttons
+            if (aiSendBtn) {
+                aiSendBtn.disabled = true;
+                aiSendBtn.innerHTML = '<span class="material-symbols-outlined text-sm animate-spin">sync</span>';
+            }
+            if (aiSendBtnPopup) {
+                aiSendBtnPopup.disabled = true;
+                aiSendBtnPopup.innerHTML = '<span class="material-symbols-outlined text-lg animate-spin">sync</span>';
+            }
+
+            // Add thinking indicator
+            const thinkingDiv = document.createElement("div");
+            thinkingDiv.className = "flex gap-3";
+            thinkingDiv.id = "thinkingIndicator";
+            thinkingDiv.innerHTML = `
+                <div class="size-8 rounded-full bg-primary/20 flex items-center justify-center text-primary shrink-0">
+                    <span class="material-symbols-outlined text-sm animate-spin">sync</span>
+                </div>
+                <div class="p-3 rounded-xl bg-white/5 border border-white/10">
+                    <p class="text-sm text-gray-400">Thinking...</p>
+                </div>
+            `;
+            
+            const thinkingDivPopup = document.createElement("div");
+            thinkingDivPopup.className = "flex gap-3";
+            thinkingDivPopup.id = "thinkingIndicatorPopup";
+            thinkingDivPopup.innerHTML = `
+                <div class="size-10 rounded-full bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center shrink-0">
+                    <span class="material-symbols-outlined text-white text-lg animate-spin">sync</span>
+                </div>
+                <div class="p-4 rounded-xl bg-white/5 border border-white/10 shadow-lg">
+                    <p class="text-sm text-gray-400">Thinking...</p>
+                </div>
+            `;
+            
+            if (aiChatMessages) {
+                aiChatMessages.appendChild(thinkingDiv);
+                aiChatMessages.scrollTop = aiChatMessages.scrollHeight;
+            }
+            if (aiChatMessagesPopup) {
+                aiChatMessagesPopup.appendChild(thinkingDivPopup);
+                aiChatMessagesPopup.scrollTop = aiChatMessagesPopup.scrollHeight;
+            }
+
+            try {
+                const response = await fetch('/LearningPath/AIHelper', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': csrfToken,
+                    },
+                    body: JSON.stringify({
+                        question: question,
+                        lessonId: lessonId,
+                        exerciseId: currentExerciseId,
+                        language: language,
+                        exerciseTitle: exercises[currentExerciseIndex]?.title || '',
+                        exerciseDescription: exercises[currentExerciseIndex]?.description || ''
+                    })
+                });
+
+                const data = await response.json();
+                
+                // Remove thinking indicator
+                const thinking = document.getElementById("thinkingIndicator");
+                if (thinking) thinking.remove();
+                const thinkingPopup = document.getElementById("thinkingIndicatorPopup");
+                if (thinkingPopup) thinkingPopup.remove();
+
+                if (data.success && data.response) {
+                    addMessageToChat(data.response, false);
+                } else {
+                    addMessageToChat("Sorry, I couldn't process your request. Please try again.", false);
+                }
+            } catch (error) {
+                console.error('AI Helper error:', error);
+                
+                // Remove thinking indicator
+                const thinking = document.getElementById("thinkingIndicator");
+                if (thinking) thinking.remove();
+                const thinkingPopup = document.getElementById("thinkingIndicatorPopup");
+                if (thinkingPopup) thinkingPopup.remove();
+                
+                addMessageToChat("Sorry, there was an error. Please try again later.", false);
+            } finally {
+                // Re-enable send button
+                if (aiSendBtn) {
+                    aiSendBtn.disabled = false;
+                    aiSendBtn.innerHTML = '<span class="material-symbols-outlined text-sm">send</span>';
+                }
+                if (aiSendBtnPopup) {
+                    aiSendBtnPopup.disabled = false;
+                    aiSendBtnPopup.innerHTML = '<span class="material-symbols-outlined text-lg">send</span>';
+                }
+            }
+        }
+
+        function showPopup(type, message) {
+            const container = document.getElementById("popupContainer");
+            const popup = document.createElement("div");
+            popup.className = `popup ${type === "success" ? "bg-green-600 text-white" : type === "error" ? "bg-red-500 text-white" : "bg-blue-500 text-white"}`;
+            popup.innerHTML = `
+                <span class="material-symbols-outlined">${type === "success" ? "check_circle" : type === "error" ? "error" : "info"}</span>
+                ${message}
+            `;
+            container.appendChild(popup);
+            setTimeout(() => {
+                popup.style.opacity = "0";
+                setTimeout(() => popup.remove(), 400);
+            }, 2600);
+        }
+
+        function launchConfetti() {
+            confetti({
+                particleCount: 100,
+                spread: 70,
+                origin: { y: 0.6 },
+                colors: ["#b887e3", "#22c55e", "#ffffff", "#a855f7"]
+            });
+        }
+
+        function miniConfetti() {
+            confetti({
+                particleCount: 25,
+                angle: 90,
+                spread: 55,
+                startVelocity: 30,
+                origin: { y: 0.6 },
+                colors: ["#22c55e", "#ffffff", "#b887e3"]
+            });
+        }
+</script>
+</body>
+</html>

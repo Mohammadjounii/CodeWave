@@ -1,0 +1,329 @@
+@startuml CodeWave_User_Registration_Login
+
+title User Registration and Login Flow
+
+start
+
+if (User Authenticated?) then (No)
+  :Show Login Page;
+  if (Login Method?) then (Email/Password)
+    :Enter Email & Password;
+    if (Validate Credentials?) then (Invalid)
+      :Display Error Message;
+      :Show Login Page;
+    else (Valid)
+      if (Account Exists?) then (No)
+        :Show Registration Page;
+        :Enter Registration Data;
+        if (Validate Registration Data?) then (Invalid)
+          :Display Validation Errors;
+        else (Valid)
+          :Create User Account;
+        endif
+      endif
+      :Create User Session;
+    endif
+  elseif (Google)
+    :Redirect to Google OAuth;
+    :Receive OAuth Token;
+    if (User Exists?) then (No)
+      :Create Account from OAuth;
+    endif
+    :Create User Session;
+  elseif (GitHub)
+    :Redirect to GitHub OAuth;
+    :Receive OAuth Token;
+    if (User Exists?) then (No)
+      :Create Account from OAuth;
+    endif
+    :Create User Session;
+  endif
+else (Yes)
+endif
+
+if (Check User Role?) then (Admin)
+  :Redirect to /Admin Dashboard;
+else (Regular User)
+  :Redirect to /Home Dashboard;
+endif
+
+stop
+
+@enduml
+
+@startuml CodeWave_Assessment_Flow
+
+title Assessment and Learning Path Assignment Flow
+
+start
+
+if (Assessment Completed?) then (No)
+  :Display Assessment Questions;
+  :Load Questions from Database;
+  
+  repeat
+    :Display Current Question;
+    :User Selects Answer;
+  repeat while (More Questions?) is (Yes)
+  
+  :User Submits Assessment;
+  :Calculate Assessment Score;
+  :Determine Skill Level;
+  
+  if (Assign Learning Path?) then (Python Path)
+    :Set LearningPath = Python;
+  else (Java Path)
+    :Set LearningPath = Java;
+  endif
+  
+  :Update User Profile;
+  :Save Assessment Results;
+  :Display Assessment Results;
+else (Yes)
+endif
+
+:Redirect to Dashboard;
+
+stop
+
+@enduml
+
+@startuml CodeWave_Course_Learning_Flow
+
+title Course Learning Flow
+
+start
+
+:View User Dashboard;
+:Browse Available Courses;
+:Select Course;
+
+if (Enrolled in Course?) then (No)
+  :Auto-Enroll User in Course;
+endif
+
+:Load Course Content;
+:Display Lesson List;
+
+repeat
+  :User Selects Lesson;
+  
+  if (Previous Lesson Completed?) then (No)
+    :Show Lesson Locked Message;
+  else (Yes)
+    :Load Lesson Content;
+    :Display Lesson Content;
+    :View Coding Exercises;
+    
+    if (Select Exercise?) then (Yes)
+      :Load Exercise Details;
+      :Write Code in Editor;
+      
+      repeat
+        :Run Code;
+        :Execute Code in Docker;
+        :Display Output;
+        
+        if (Submit Exercise?) then (Yes)
+          :Validate Against Test Cases;
+          
+          if (All Tests Pass?) then (Yes)
+            :Save Exercise Submission;
+            :Unlock Next Lesson;
+            break
+          else (No)
+            :Show Failed Test Cases;
+          endif
+        endif
+      repeat while (Continue Editing?) is (Yes)
+    endif
+    
+    if (Mark Lesson Complete?) then (Yes)
+      :Save Lesson Completion;
+      :Update Course Progress;
+    endif
+  endif
+repeat while (More Lessons?) is (Yes)
+
+:Course Completed;
+
+stop
+
+@enduml
+
+@startuml CodeWave_Code_Execution_Flow
+
+title Code Execution Flow
+
+start
+
+:Receive User Code;
+
+if (Exercise Selected?) then (Yes)
+  :Load Exercise Details;
+  :Get Exercise Test Cases;
+else (No)
+  :Enter Experiment Mode;
+endif
+
+:Detect Programming Language;
+
+if (Need Input Injection?) then (Yes)
+  :Inject Test Input into Code;
+endif
+
+:Send Code to Code Runner;
+
+if (Runner Type?) then (Python)
+  :Execute Python Code;
+else (Java)
+  :Execute Java Code;
+endif
+
+:Capture Output & Errors;
+
+if (Exercise Selected?) then (No)
+  :Display Output to User;
+  stop
+else (Yes)
+  :Validate Output Against Tests;
+  
+  repeat
+    :Compare with Expected Output;
+    
+    if (Test Passed?) then (No)
+      :Log Failed Test;
+    else (Yes)
+      :Log Passed Test;
+    endif
+  repeat while (More Test Cases?) is (Yes)
+  
+  if (All Tests Passed?) then (Yes)
+    :Save Exercise Submission;
+    :Mark Exercise Complete;
+    :Unlock Next Lesson;
+  endif
+  
+  :Show Test Results;
+endif
+
+stop
+
+@enduml
+
+@startuml CodeWave_Quiz_Flow
+
+title Quiz Taking Flow
+
+start
+
+:Check User Eligibility;
+:Get User's Completed Lessons;
+:Filter Available Quizzes;
+:Display Available Quizzes;
+:User Selects Quiz;
+
+:Load Quiz Questions;
+
+if (Has Time Limit?) then (Yes)
+  :Start Quiz Timer;
+endif
+
+:Display Quiz Questions;
+
+repeat
+  :User Answers Question;
+repeat while (More Questions?) is (Yes)
+
+if (Submit Quiz?) then (Yes)
+  if (Has Timer?) then (Yes)
+    :Stop Timer;
+  endif
+  
+  :Calculate Quiz Score;
+  
+  if (Score >= Passing Score?) then (Yes)
+    :Mark as Passed;
+  else (No)
+    :Mark as Failed;
+  endif
+  
+  :Save Quiz Attempt;
+  :Save User Answers;
+  :Generate Results Summary;
+  :Display Quiz Results;
+  :Show Correct/Incorrect Answers;
+  :Show Feedback for Each Question;
+  :Update User Progress;
+endif
+
+stop
+
+@enduml
+
+@startuml CodeWave_Admin_Management_Flow
+
+title Admin User Management Flow
+
+start
+
+:Admin Logs In;
+:Redirect to Admin Dashboard;
+
+if (Select Management?) then (User Management)
+  :Open User Management;
+  :Load User List;
+  :Display Users with Pagination;
+  
+  if (User Action?) then (Search)
+    :Search Users;
+    :Filter User List;
+  elseif (Create)
+    :Open Create User Form;
+    :Enter User Data;
+    
+    if (Validate Data?) then (Invalid)
+      :Show Validation Errors;
+    else (Valid)
+      :Save New User;
+    endif
+  elseif (Edit)
+    :Open Edit User Form;
+    :Load User Data;
+    :Modify User Data;
+    :Validate Data;
+  elseif (Delete)
+    :Confirm Delete User;
+    
+    if (Confirm Delete?) then (Yes)
+      :Soft Delete User;
+    endif
+  elseif (View Details)
+    :Load User Details;
+    :Show User Progress;
+    :Show User Courses;
+    :Show Quiz Attempts;
+  elseif (Toggle Admin)
+    :Update Admin Status;
+    :Refresh User Claims;
+  endif
+elseif (Course Management)
+  :Open Course Management;
+  :Load Course List;
+  :Perform Course CRUD Operations;
+elseif (Job Management)
+  :Open Job Management;
+  :Load Job Offer List;
+  :Perform Job CRUD Operations;
+elseif (Reports)
+  :Open Reports;
+  :Collect Analytics Data;
+  :Calculate Metrics;
+  :Generate Report;
+  :Display Analytics Report;
+endif
+
+stop
+
+@enduml
+

@@ -1,0 +1,243 @@
+@{
+    Layout = null;
+    var applications = ViewBag.Applications as List<CodeWave.Domain.Entities.JobApplication> ?? new List<CodeWave.Domain.Entities.JobApplication>();
+    var learningPath = ViewBag.LearningPath as string ?? "";
+    var recommendedCourse = ViewBag.RecommendedCourse as CodeWave.Domain.Entities.Course;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script>
+        // Initialize theme immediately to prevent flash
+        (function() {
+            try {
+                const html = document.documentElement;
+                const savedTheme = localStorage.getItem('theme');
+                const theme = savedTheme || 'dark';
+                if (theme === 'dark') {
+                    html.classList.add('dark');
+                } else {
+                    html.classList.remove('dark');
+                }
+            } catch(e) {
+                document.documentElement.classList.add('dark');
+            }
+        })();
+    </script>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>My Applications - CodeWave</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
+    
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'FILL' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#b887e3",
+                        "primary-dark": "#9d6fd9",
+                        "background-light": "#f7f6f8",
+                        "background-dark": "#0a0a0f"
+                    },
+                    fontFamily: {
+                        display: "Space Grotesk"
+                    }
+                }
+            }
+        };
+    </script>
+    <style>
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .modern-card {
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(24px) saturate(200%);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+        .modern-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(184, 135, 227, 0.3);
+            box-shadow: 0 24px 48px rgba(0, 0, 0, 0.4);
+        }
+        .status-badge {
+            padding: 0.375rem 0.75rem;
+            border-radius: 0.5rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.375rem;
+        }
+        .status-pending {
+            background: rgba(251, 191, 36, 0.15);
+            color: #fbbf24;
+            border: 1px solid rgba(251, 191, 36, 0.3);
+        }
+        .status-reviewed {
+            background: rgba(59, 130, 246, 0.15);
+            color: #3b82f6;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+        }
+        .status-accepted {
+            background: rgba(34, 197, 94, 0.15);
+            color: #22c55e;
+            border: 1px solid rgba(34, 197, 94, 0.3);
+        }
+        .status-rejected {
+            background: rgba(239, 68, 68, 0.15);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+    </style>
+</head>
+
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-800 dark:text-slate-200 min-h-screen">
+    <div class="flex min-h-screen">
+        <!-- Sidebar -->
+        @await Html.PartialAsync("_UserSidebar")
+
+        <!-- Main Content -->
+        <main class="flex-1 p-6 lg:p-8 bg-background-light dark:bg-gradient-to-br dark:from-[#0a0a0f] dark:via-[#0f0f1a] dark:to-[#0a0a0f]">
+            <div class="max-w-7xl mx-auto">
+                <!-- Header -->
+                <div class="mb-8">
+                    <h1 class="text-gray-900 dark:text-white text-4xl font-black mb-2 bg-gradient-to-r from-gray-900 dark:from-white via-primary to-purple-400 bg-clip-text text-transparent">
+                        My Job Applications
+                    </h1>
+                    <p class="text-gray-600 dark:text-slate-300 text-lg">Track the status of your job applications</p>
+                </div>
+
+                @if (applications.Any())
+                {
+                    <div class="grid gap-4">
+                        @foreach (var application in applications)
+                        {
+                            var job = application.JobOffer;
+                            var statusClass = application.Status?.ToLower() switch
+                            {
+                                "pending" => "status-pending",
+                                "reviewed" => "status-reviewed",
+                                "accepted" => "status-accepted",
+                                "rejected" => "status-rejected",
+                                _ => "status-pending"
+                            };
+                            
+                            <div class="modern-card rounded-2xl p-6">
+                                <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                                    <div class="flex-1">
+                                        <div class="flex items-center gap-4 mb-3">
+                                            <h2 class="text-gray-900 dark:text-white text-xl font-bold">@job.JobTitle</h2>
+                                            <span class="@statusClass status-badge">
+                                                @if (application.Status?.ToLower() == "pending")
+                                                {
+                                                    <span class="material-symbols-outlined text-sm">schedule</span>
+                                                }
+                                                else if (application.Status?.ToLower() == "reviewed")
+                                                {
+                                                    <span class="material-symbols-outlined text-sm">visibility</span>
+                                                }
+                                                else if (application.Status?.ToLower() == "accepted")
+                                                {
+                                                    <span class="material-symbols-outlined text-sm">check_circle</span>
+                                                }
+                                                else if (application.Status?.ToLower() == "rejected")
+                                                {
+                                                    <span class="material-symbols-outlined text-sm">cancel</span>
+                                                }
+                                                @application.Status
+                                            </span>
+                                        </div>
+                                        
+                                        <p class="text-primary text-lg font-semibold mb-2">@job.Company</p>
+                                        
+                                        <p class="text-slate-300 text-sm mb-4 line-clamp-2">@job.Description</p>
+                                        
+                                        <div class="flex flex-wrap items-center gap-4 text-sm text-slate-400">
+                                            <div class="flex items-center gap-2">
+                                                <span class="material-symbols-outlined text-base">calendar_today</span>
+                                                <span>Applied: @application.AppliedDate.ToString("MMM dd, yyyy")</span>
+                                            </div>
+                                            <div class="flex items-center gap-2">
+                                                <span class="material-symbols-outlined text-base">percent</span>
+                                                <span>Match: @application.MatchPercentage.ToString("F1")%</span>
+                                            </div>
+                                            @if (job.Deadline > DateTime.UtcNow)
+                                            {
+                                                <div class="flex items-center gap-2">
+                                                    <span class="material-symbols-outlined text-base">event</span>
+                                                    <span>Deadline: @job.Deadline.ToString("MMM dd, yyyy")</span>
+                                                </div>
+                                            }
+                                        </div>
+
+                                        @if (!string.IsNullOrEmpty(application.CoverLetter))
+                                        {
+                                            <details class="mt-4">
+                                                <summary class="text-primary cursor-pointer hover:text-primary/80 text-sm font-medium">
+                                                    View Cover Letter
+                                                </summary>
+                                                <div class="mt-2 p-4 glass-effect rounded-lg text-slate-300 text-sm whitespace-pre-wrap">
+                                                    @application.CoverLetter
+                                                </div>
+                                            </details>
+                                        }
+                                    </div>
+                                    
+                                    <div class="flex lg:flex-col gap-2">
+                                        <a href="@Url.Action("Index", "JobOffer", new { selectedJobId = job.Id })"
+                                           class="px-4 py-2 bg-primary/10 text-primary rounded-lg hover:bg-primary/20 border border-primary/30 transition-all text-sm font-medium flex items-center justify-center gap-2">
+                                            <span class="material-symbols-outlined text-base">visibility</span>
+                                            <span>View Job</span>
+                                        </a>
+                                        @if (application.Status == "Pending")
+                                        {
+                                            <form method="post" asp-action="Withdraw" asp-controller="JobOffer"
+                                                  onsubmit="return confirm('Withdraw this application? This cannot be undone.')">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="applicationId" value="@application.Id" />
+                                                <button type="submit"
+                                                        class="w-full px-4 py-2 rounded-lg text-sm font-medium flex items-center justify-center gap-2 text-red-400 border border-red-400/40 hover:bg-red-500/10 transition-colors">
+                                                    <span class="material-symbols-outlined text-base">close</span>
+                                                    <span>Withdraw</span>
+                                                </button>
+                                            </form>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="modern-card rounded-2xl p-12 text-center">
+                        <span class="material-symbols-outlined text-6xl text-slate-400 mb-4">assignment</span>
+                        <h2 class="text-gray-900 dark:text-white text-2xl font-bold mb-2">No Applications Yet</h2>
+                        <p class="text-slate-400 mb-6">You haven't applied to any jobs yet. Start exploring job opportunities!</p>
+                        <a href="@Url.Action("Index", "JobOffer")" 
+                           class="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-primary to-purple-600 text-white rounded-xl hover:shadow-lg hover:shadow-primary/50 font-semibold transition-all">
+                            <span>Browse Job Offers</span>
+                            <span class="material-symbols-outlined text-lg">arrow_forward</span>
+                        </a>
+                    </div>
+                }
+            </div>
+        </main>
+    </div>
+</body>
+</html>

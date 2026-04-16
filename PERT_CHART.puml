@@ -1,0 +1,102 @@
+@startuml
+!theme plain
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontSize 10
+skinparam activity {
+    BackgroundColor #E1F5FE
+    BorderColor #01579B
+}
+
+title PERT Network Diagram – CodeWave Learning Platform
+Project Duration: 73 Days
+
+start
+
+' ===== FOUNDATION (CRITICAL PATH) =====
+:Project Setup\nT1 (5d) #F44336;
+:Database Schema Design\nT2 (4d) #F44336;
+:Domain Entities\nT3 (6d) #F44336;
+:DB Context & Migrations\nT4 (3d) #F44336;
+
+' ===== AUTHENTICATION =====
+:User Registration\nT5 (3d);
+:OAuth Integration\nT6 (5d) #F44336;
+:Role-Based Access\nT8 (3d) #F44336;
+
+' ===== PARALLEL FEATURES AFTER DB =====
+fork
+    :User Login\nT7 (4d);
+fork again
+    :Assessment DB Models\nT9 (2d);
+    :Assessment Questions\nT10 (3d);
+    :Assessment Logic\nT11 (4d);
+    :Learning Path Assignment\nT12 (2d);
+fork again
+    :Course Repository\nT13 (3d);
+    :Course Browsing\nT14 (3d);
+    :Course Enrollment\nT15 (2d);
+fork again
+    :Lesson Repository\nT16 (3d);
+    :Lesson Display\nT17 (3d);
+    :Lesson Completion\nT26 (2d);
+fork again
+    :Exercise Repository\nT18 (3d);
+end fork
+
+' ===== CODE EXECUTION (CRITICAL PATH) =====
+:Code Editor Interface\nT19 (4d) #F44336;
+:Docker Setup\nT20 (5d) #F44336;
+
+fork
+    :Python Execution\nT21 (3d) #F44336;
+fork again
+    :Java Execution\nT22 (4d) #F44336;
+end fork
+
+:Exercise Submission\nT23 (5d) #F44336;
+:Test Case Validation\nT24 (3d) #F44336;
+
+' ===== PROGRESS & DASHBOARD =====
+:Progress Tracking Service\nT25 (4d) #F44336;
+:User Dashboard\nT27 (4d) #F44336;
+:Skills Analysis\nT28 (3d);
+
+' ===== QUIZ SYSTEM =====
+fork
+    :Quiz DB Models\nT29 (2d);
+    :Quiz Repository\nT30 (3d);
+    :Quiz Display\nT31 (3d);
+    :Quiz Taking\nT32 (4d);
+    :Quiz Results\nT33 (3d);
+end fork
+
+' ===== FOCUS MODE =====
+fork
+    :Focus Mode UI\nT34 (3d);
+    :Focus Mode Lesson\nT35 (3d);
+    :AI Helper Chat\nT36 (4d);
+end fork
+
+' ===== ADMIN =====
+fork
+    :Admin Dashboard\nT37 (3d);
+    :User Management\nT38 (5d);
+    :Course Management Admin\nT39 (4d);
+    :Job Offer Management\nT40 (3d);
+    :Reports & Analytics\nT41 (4d);
+    :Job Offers Display\nT42 (2d);
+end fork
+
+' ===== FINAL CRITICAL PATH =====
+:CV Generation\nT43 (4d) #F44336;
+:Testing & QA\nT44 (8d) #F44336;
+:Deployment\nT45 (3d) #F44336;
+
+stop
+
+legend right
+|<#F44336> Critical Path |
+| Blue = Non-critical |
+endlegend
+
+@enduml

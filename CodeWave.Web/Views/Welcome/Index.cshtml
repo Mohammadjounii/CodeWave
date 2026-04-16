@@ -1,0 +1,644 @@
+﻿
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>CodeWave Overview Page - Dark Mode</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&amp;display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+    <script>
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              colors: {
+                primary: "#34D399",
+                "background-light": "#FFFFFF",
+                "background-dark": "#0B0915",
+              },
+              fontFamily: {
+                display: ["Inter", "sans-serif"],
+              },
+              borderRadius: {
+                DEFAULT: "1rem",
+              },
+            },
+          },
+        };
+    </script>
+    <style>
+        .gradient-text {
+            background: linear-gradient(to right, #F9A8D4, #9333EA);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* ---- Dropdown nav ---- */
+        .nav-dropdown { position: relative; }
+        .nav-dropdown-menu {
+            display: none;
+            position: absolute;
+            top: calc(100% + 10px);
+            left: 50%;
+            transform: translateX(-50%);
+            min-width: 200px;
+            background: #120F22;
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 12px;
+            padding: 8px;
+            z-index: 100;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+        }
+        /* Arrow indicator */
+        .nav-dropdown-menu::before {
+            content: '';
+            position: absolute;
+            top: -6px;
+            left: 50%;
+            width: 10px; height: 10px;
+            background: #120F22;
+            border-left: 1px solid rgba(255,255,255,0.08);
+            border-top: 1px solid rgba(255,255,255,0.08);
+            transform: translateX(-50%) rotate(45deg);
+        }
+        /* Invisible bridge that fills the gap so hover doesn't break */
+        .nav-dropdown-menu::after {
+            content: '';
+            position: absolute;
+            bottom: 100%;
+            left: -20px;
+            right: -20px;
+            height: 14px;
+        }
+        .nav-dropdown:hover .nav-dropdown-menu,
+        .nav-dropdown:focus-within .nav-dropdown-menu { display: block; }
+        .nav-dropdown-menu a {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 9px 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            color: #9ca3af;
+            text-decoration: none;
+            transition: background 0.15s, color 0.15s;
+        }
+        .nav-dropdown-menu a:hover { background: rgba(255,255,255,0.05); color: #fff; }
+        .nav-dropdown-menu .menu-divider { height: 1px; background: rgba(255,255,255,0.06); margin: 4px 0; }
+        .nav-dropdown-menu .menu-label {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: #4b5563;
+            padding: 6px 12px 2px;
+        }
+
+        /* ---- Feature card hover ---- */
+        .feature-card {
+            display: block;
+            background: rgba(17,15,34,0.6);
+            border-radius: 0.75rem;
+            border: 1px solid #1f2937;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.3);
+            transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+            text-decoration: none;
+            color: inherit;
+            overflow: hidden;
+        }
+        .feature-card:hover {
+            transform: translateY(-6px);
+            border-color: rgba(52, 211, 153, 0.5);
+            box-shadow: 0 12px 40px rgba(52,211,153,0.12), 0 4px 24px rgba(0,0,0,0.4);
+        }
+        .feature-card:hover .card-arrow { color: #34D399; transform: translateX(4px); }
+        .card-arrow { transition: transform 0.2s ease, color 0.2s ease; }
+
+        /* ---- CTA buttons ---- */
+        .cta-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: #34D399;
+            color: #111827;
+            font-weight: 600;
+            padding: 14px 28px;
+            border-radius: 9999px;
+            font-size: 15px;
+            text-decoration: none;
+            transition: background 0.15s, transform 0.15s, box-shadow 0.15s;
+        }
+        .cta-btn:hover {
+            background: #10b981;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(52,211,153,0.35);
+            color: #111827;
+            text-decoration: none;
+        }
+        .cta-btn-sm {
+            padding: 10px 22px;
+            font-size: 14px;
+        }
+
+        /* ---- Footer link hover ---- */
+        footer a { transition: color 0.15s; }
+        footer a:hover { color: #34D399 !important; text-decoration: none; }
+    </style>
+</head>
+<body class="font-display bg-background-dark text-gray-200 antialiased">
+    <div class="relative overflow-hidden">
+        <header class="absolute top-0 left-0 right-0 z-10 py-6">
+            <div class="container mx-auto px-6">
+                <nav class="flex justify-between items-center">
+                    <div class="flex items-center space-x-10">
+                        <div class="flex items-center gap-3">
+                            <img src="/CodeWavelogo.PNG" alt="CodeWave Logo" class="h-10 w-10 object-contain" />
+                            <h1 class="text-2xl font-bold text-white">CodeWave</h1>
+                        </div>
+                        <ul class="hidden md:flex items-center space-x-8 text-sm font-medium text-gray-400">
+
+                            <!-- Products -->
+                            <li class="nav-dropdown flex items-center space-x-1 cursor-pointer hover:text-white select-none">
+                                <span>Products</span>
+                                <span class="material-icons text-base" style="font-size:18px">expand_more</span>
+                                <div class="nav-dropdown-menu">
+                                    <div class="menu-label">Products</div>
+                                    <a href="/User/Login"><span class="material-icons" style="font-size:16px">school</span>Coding LMS</a>
+                                    <a href="/User/Login"><span class="material-icons" style="font-size:16px">code</span>Online IDE</a>
+                                    <a href="/User/SignUp"><span class="material-icons" style="font-size:16px">star</span>CodeWave Pro</a>
+                                    <div class="menu-divider"></div>
+                                    <a href="/User/SignUp"><span class="material-icons" style="font-size:16px">verified</span>Certifications</a>
+                                </div>
+                            </li>
+
+                            <!-- Platform -->
+                            <li class="nav-dropdown flex items-center space-x-1 cursor-pointer hover:text-white select-none">
+                                <span>Platform</span>
+                                <span class="material-icons text-base" style="font-size:18px">expand_more</span>
+                                <div class="nav-dropdown-menu">
+                                    <div class="menu-label">Platform</div>
+                                    <a href="/User/Login"><span class="material-icons" style="font-size:16px">assignment</span>Assignments</a>
+                                    <a href="/User/Login"><span class="material-icons" style="font-size:16px">groups</span>Classroom Management</a>
+                                    <a href="/User/Login"><span class="material-icons" style="font-size:16px">grade</span>Grading</a>
+                                    <div class="menu-divider"></div>
+                                    <a href="/AboutUs"><span class="material-icons" style="font-size:16px">extension</span>Integrations</a>
+                                </div>
+                            </li>
+
+                            <!-- Curriculum -->
+                            <li class="nav-dropdown flex items-center space-x-1 cursor-pointer hover:text-white select-none">
+                                <span>Curriculum</span>
+                                <span class="material-icons text-base" style="font-size:18px">expand_more</span>
+                                <div class="nav-dropdown-menu">
+                                    <div class="menu-label">Learning Paths</div>
+                                    <a href="/User/Login"><span class="material-icons" style="font-size:16px">terminal</span>Python</a>
+                                    <a href="/User/Login"><span class="material-icons" style="font-size:16px">terminal</span>Java</a>
+                                    <a href="/User/Login"><span class="material-icons" style="font-size:16px">language</span>Web Development</a>
+                                    <div class="menu-divider"></div>
+                                    <a href="/User/Login"><span class="material-icons" style="font-size:16px">menu_book</span>AP Computer Science</a>
+                                </div>
+                            </li>
+
+                            <!-- Resources -->
+                            <li class="nav-dropdown flex items-center space-x-1 cursor-pointer hover:text-white select-none">
+                                <span>Resources</span>
+                                <span class="material-icons text-base" style="font-size:18px">expand_more</span>
+                                <div class="nav-dropdown-menu">
+                                    <div class="menu-label">Resources</div>
+                                    <a href="/User/Login"><span class="material-icons" style="font-size:16px">play_circle</span>Online Courses</a>
+                                    <a href="/AboutUs"><span class="material-icons" style="font-size:16px">people</span>In-Person Workshops</a>
+                                    <a href="/AboutUs"><span class="material-icons" style="font-size:16px">videocam</span>Virtual Workshops</a>
+                                    <div class="menu-divider"></div>
+                                    <a href="/AboutUs"><span class="material-icons" style="font-size:16px">article</span>Blog &amp; Guides</a>
+                                </div>
+                            </li>
+
+                        </ul>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <a href="/User/Login" class="text-sm font-medium text-gray-400 hover:text-white">Login</a>
+                        <a href="/User/SignUp" class="bg-primary text-gray-900 font-semibold px-5 py-2.5 rounded-full text-sm hover:opacity-90 transition-opacity">Sign Up</a>
+                    </div>
+                </nav>
+            </div>
+        </header>
+        <main>
+            <section class="pt-48 pb-24 text-center">
+                <div class="container mx-auto px-6">
+                    <p class="text-lg font-medium text-gray-400">The Top Coding Education Platform for Schools</p>
+                    <h2 class="text-5xl md:text-7xl font-black mt-2 text-white">Code Here. <span class="gradient-text">Code Now.</span></h2>
+                    <div class="mt-8">
+                        <a href="/Welcome/UserInterest" class="bg-primary text-gray-900 font-semibold px-8 py-4 rounded-full inline-flex items-center mx-auto space-x-2 hover:opacity-90 transition-opacity">
+                            <span class="material-icons">add</span>
+                            <span>Get Started</span>
+                        </a>
+                    </div>
+                </div>
+            </section>
+            <section class="container mx-auto px-6 pb-24">
+                <div class="bg-gray-900/50 p-4 rounded-lg border border-gray-800 shadow-lg">
+                    <div class="flex items-center justify-between pb-3 border-b border-gray-800">
+                        <div class="flex items-center space-x-2">
+                            <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                            <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+                            <div class="w-3 h-3 rounded-full bg-green-500"></div>
+                            <span class="text-sm ml-4 text-gray-300">JavaScript Graphics</span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <button class="text-sm font-medium text-gray-400 hover:text-white">Output</button>
+                            <button class="text-sm font-medium text-gray-400 hover:text-white">Docs</button>
+                            <button class="text-sm font-medium text-gray-400 hover:text-white">More</button>
+                        </div>
+                    </div>
+                    <div class="grid md:grid-cols-2 gap-8 items-center pt-6">
+                        <div class="text-sm font-mono text-gray-400">
+<pre><code class="language-javascript">
+1   <span class="text-purple-400">const</span> { createStore, bindActionCreators } = <span class="text-yellow-400">Redux</span>;
+2   <span class="text-purple-400">const</span> { Provider, connect } = <span class="text-yellow-400">ReactRedux</span>;
+3
+4   <span class="text-purple-400">class</span> <span class="text-green-400">App</span> <span class="text-purple-400">extends</span> <span class="text-green-400">React.Component</span> {
+5     <span class="text-blue-400">render</span>() {
+6       <span class="text-purple-400">return</span> (
+7         &lt;<span class="text-red-400">section</span>&gt;
+8           &lt;<span class="text-red-400">h1</span> <span class="text-yellow-400">className</span>=<span class="text-orange-400">"title"</span>&gt;Contacts&lt;/<span class="text-red-400">h1</span>&gt;
+9           &lt;<span class="text-red-400">AddContact</span> <span class="text-yellow-400">addContact</span>={ <span class="text-purple-400">this</span>.props.addContact } /&gt;
+10          &lt;<span class="text-red-400">Contacts</span> <span class="text-yellow-400">contacts</span>={ <span class="text-purple-400">this</span>.props.contacts } /&gt;
+11        &lt;/<span class="text-red-400">section</span>&gt;
+12      );
+13    }
+14  }
+                           </code></pre>
+                        </div>
+                        <div class="flex justify-center items-center">
+                            <img alt="Colorful abstract neon code visualization" class="w-64 h-64 rounded-lg object-cover" src="https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?w=400&q=85&fit=crop" />
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <section class="py-24">
+                <div class="container mx-auto px-6 text-center">
+                    <h3 class="text-4xl font-black text-white">Everything You Need</h3>
+                    <p class="mt-4 text-gray-400">
+                        All In One Spot - CodeWave is trusted by thousands of teachers and schools all over the world.
+                    </p>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 mt-12">
+
+                        <!-- CARD 1 - Curriculum -->
+                        <a href="/User/Login" class="feature-card">
+                            <div class="flex items-center space-x-2 px-3 py-2 border-b border-gray-800">
+                                <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                                <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+                                <div class="w-3 h-3 rounded-full bg-green-500"></div>
+                            </div>
+                            <div class="p-6 text-left">
+                                <div class="w-10 h-10 mb-4 rounded-xl flex items-center justify-center" style="background: linear-gradient(135deg, #6366f1, #8b5cf6)">
+                                    <span class="material-icons text-white" style="font-size:20px">menu_book</span>
+                                </div>
+                                <h4 class="font-bold text-white mt-1">Curriculum</h4>
+                                <p class="text-sm text-gray-400 mt-2">Over 60 free intro to AP computer courses</p>
+                                <span class="material-icons text-primary mt-4 card-arrow">arrow_forward</span>
+                            </div>
+                        </a>
+
+                        <!-- CARD 2 - LMS -->
+                        <a href="/User/Login" class="feature-card">
+                            <div class="flex items-center space-x-2 px-3 py-2 border-b border-gray-800">
+                                <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                                <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+                                <div class="w-3 h-3 rounded-full bg-green-500"></div>
+                            </div>
+                            <div class="p-6 text-left">
+                                <div class="w-10 h-10 mb-4 rounded-xl flex items-center justify-center" style="background: linear-gradient(135deg, #0891b2, #06b6d4)">
+                                    <span class="material-icons text-white" style="font-size:20px">dashboard</span>
+                                </div>
+                                <h4 class="font-bold text-white mt-1">LMS</h4>
+                                <p class="text-sm text-gray-400 mt-2">Classroom management tools and integrations</p>
+                                <span class="material-icons text-primary mt-4 card-arrow">arrow_forward</span>
+                            </div>
+                        </a>
+
+                        <!-- CARD 3 - Interactive IDE -->
+                        <a href="/User/Login" class="feature-card">
+                            <div class="flex items-center space-x-2 px-3 py-2 border-b border-gray-800">
+                                <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                                <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+                                <div class="w-3 h-3 rounded-full bg-green-500"></div>
+                            </div>
+                            <div class="p-6 text-left">
+                                <div class="w-10 h-10 mb-4 rounded-xl flex items-center justify-center" style="background: linear-gradient(135deg, #1d4ed8, #3b82f6)">
+                                    <span class="material-icons text-white" style="font-size:20px">terminal</span>
+                                </div>
+                                <h4 class="font-bold text-white mt-1">Interactive IDE</h4>
+                                <p class="text-sm text-gray-400 mt-2">Write, run, and debug code in 10+ languages</p>
+                                <span class="material-icons text-primary mt-4 card-arrow">arrow_forward</span>
+                            </div>
+                        </a>
+
+                        <!-- CARD 4 - CodeWave Pro -->
+                        <a href="/User/SignUp" class="feature-card">
+                            <div class="flex items-center space-x-2 px-3 py-2 border-b border-gray-800">
+                                <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                                <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+                                <div class="w-3 h-3 rounded-full bg-green-500"></div>
+                            </div>
+                            <div class="p-6 text-left">
+                                <div class="w-10 h-10 mb-4 rounded-xl flex items-center justify-center" style="background: linear-gradient(135deg, #d97706, #f59e0b)">
+                                    <span class="material-icons text-white" style="font-size:20px">workspace_premium</span>
+                                </div>
+                                <h4 class="font-bold text-white mt-1">CodeWave Pro</h4>
+                                <p class="text-sm text-gray-400 mt-2">All the tools, resources, and support school</p>
+                                <span class="material-icons text-primary mt-4 card-arrow">arrow_forward</span>
+                            </div>
+                        </a>
+
+                        <!-- CARD 5 - Certifications -->
+                        <a href="/User/SignUp" class="feature-card">
+                            <div class="flex items-center space-x-2 px-3 py-2 border-b border-gray-800">
+                                <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                                <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+                                <div class="w-3 h-3 rounded-full bg-green-500"></div>
+                            </div>
+                            <div class="p-6 text-left">
+                                <div class="w-10 h-10 mb-4 rounded-xl flex items-center justify-center" style="background: linear-gradient(135deg, #059669, #34d399)">
+                                    <span class="material-icons text-white" style="font-size:20px">verified</span>
+                                </div>
+                                <h4 class="font-bold text-white mt-1">Certifications</h4>
+                                <p class="text-sm text-gray-400 mt-2">Industry-relevant certification exams</p>
+                                <span class="material-icons text-primary mt-4 card-arrow">arrow_forward</span>
+                            </div>
+                        </a>
+
+                    </div>
+                </div>
+            </section>
+
+            <section class="py-24 space-y-24">
+                <div class="container mx-auto px-6 grid md:grid-cols-2 gap-16 items-center">
+                    <div>
+                        <h3 class="text-4xl font-black text-white">Online IDE Built for Education</h3>
+                        <p class="mt-4 text-gray-400">Write, run, &amp; debug code in any web browser, no account or downloads needed.</p>
+                        <a href="/User/SignUp" class="cta-btn mt-8">
+                            <span class="material-icons" style="font-size:18px">code</span>
+                            Start Coding
+                        </a>
+                    </div>
+                    <img alt="Code editor with colorful syntax highlighting on a dark theme" class="rounded-lg shadow-2xl object-cover" src="https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=800&q=85&fit=crop" />
+                </div>
+                <div class="container mx-auto px-6 grid md:grid-cols-2 gap-16 items-center">
+                    <img alt="Analytics and learning management dashboard with charts" class="rounded-lg shadow-2xl order-2 md:order-1 object-cover" src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&q=85&fit=crop" />
+                    <div class="order-1 md:order-2">
+                        <h3 class="text-4xl font-black text-white">Learning Management System</h3>
+                        <p class="mt-4 text-gray-400">Seamlessly manage rosters, lessons, assignments, progress, and grades for any type of classroom.</p>
+                        <a href="/AboutUs" class="cta-btn mt-8">
+                            <span class="material-icons" style="font-size:18px">school</span>
+                            Learn More
+                        </a>
+                    </div>
+                </div>
+            </section>
+            <section class="py-24">
+                <div class="container mx-auto px-6">
+                    <div class="text-center">
+                        <h3 class="text-4xl font-black text-white">Customizable <span class="gradient-text">Science Curriculum</span></h3>
+                        <p class="mt-4 text-gray-400">60+ free courses for 6-12th grade</p>
+                    </div>
+                    <div class="mt-12 space-y-8">
+                        <div class="grid md:grid-cols-2 gap-8 items-center bg-[#120F22] p-8 rounded-lg border border-gray-800">
+                            <div>
+                                <h4 class="text-xl font-bold text-white">Introduction to Web Development</h4>
+                                <p class="mt-2 text-gray-400">This course teaches the foundations of HTML, CSS, and JavaScript with an emphasis on helping students develop interactive websites.</p>
+                            </div>
+                            <img alt="HTML CSS JavaScript web development on a monitor screen" class="rounded-lg object-cover w-full h-52" src="https://images.unsplash.com/photo-1593720213428-28a5b9e94613?w=800&q=85&fit=crop" />
+                        </div>
+                        <div class="grid md:grid-cols-2 gap-8 items-start bg-[#120F22] p-8 rounded-lg border border-gray-800">
+                            <img alt="Python programming code on a dark terminal screen" class="rounded-lg object-cover w-full h-52" src="https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=800&q=85&fit=crop" />
+                            <div>
+                                <h4 class="text-xl font-bold text-white">Introduction to Computer Science in Python</h4>
+                                <p class="mt-2 text-gray-400">This course teaches the fundamental features of the Python 3 language. By the end of this course, students build a simple console-based game.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <section class="py-24">
+                <div class="container mx-auto px-6 grid md:grid-cols-2 gap-8 items-center">
+                    <div class="bg-gradient-to-br from-pink-500 to-purple-600 p-8 rounded-lg text-white">
+                        <p class="text-8xl font-black">99%</p>
+                        <p class="text-xl mt-4">of the students receive a certificate and successful get the job at TOP company</p>
+                        <div class="flex items-center space-x-6 mt-8">
+                            <img alt="Apple" class="h-7 opacity-70 filter brightness-200" src="https://cdn.simpleicons.org/apple/ffffff" />
+                            <img alt="Google" class="h-7 opacity-70 filter brightness-200" src="https://cdn.simpleicons.org/google/ffffff" />
+                            <img alt="Spotify" class="h-7 opacity-70 filter brightness-200" src="https://cdn.simpleicons.org/spotify/ffffff" />
+                            <img alt="Microsoft" class="h-7 opacity-70 filter brightness-200" src="https://cdn.simpleicons.org/microsoft/ffffff" />
+                        </div>
+                    </div>
+                    <div class="bg-[#120F22] p-8 rounded-lg border border-gray-800">
+                        <h3 class="text-3xl font-bold text-white">The CodeWave system handles SO MUCH administrative overhead to provide individual help</h3>
+                        <div class="flex items-center mt-6">
+                            <img alt="Charles Olson - Teacher" class="w-12 h-12 rounded-full object-cover" src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=96&q=85&fit=crop&crop=face" />
+                            <div class="ml-4">
+                                <p class="font-semibold text-white">Charles Olson</p>
+                                <p class="text-sm text-gray-400">Teacher at Mills High School, Millbrae, CA</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <section class="py-24">
+                <div class="container mx-auto px-6">
+                    <div class="text-center">
+                        <h3 class="text-4xl font-black text-white">Hear From Other CodeWave Educators</h3>
+                        <p class="mt-4 text-gray-400">How Schools are Using CodeWave in Virtual &amp; In-Person Classrooms</p>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mt-12">
+                        <div class="bg-[#120F22] rounded-lg border border-gray-800 overflow-hidden">
+                            <div class="relative">
+                                <img alt="Teacher helping a student with coding on a laptop" class="w-full h-40 object-cover" src="https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=400&h=160&q=85&fit=crop" />
+                                <span class="absolute top-3 left-3 bg-green-200 text-green-800 text-xs font-semibold px-2.5 py-1 rounded-full">ENGINEERING</span>
+                            </div>
+                            <div class="p-4">
+                                <h4 class="font-bold text-white">Tangible Rewards to Keep Virtual Learners Motivated</h4>
+                                <div class="flex items-center mt-4">
+                                    <img alt="Kelly Kirwan" class="w-8 h-8 rounded-full object-cover" src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=64&q=85&fit=crop&crop=face" />
+                                    <span class="ml-3 text-sm text-gray-400">Kelly Kirwan</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-[#120F22] rounded-lg border border-gray-800 overflow-hidden">
+                            <div class="relative">
+                                <img alt="Two students collaborating and discussing in a modern classroom" class="w-full h-40 object-cover" src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=400&h=160&q=85&fit=crop" />
+                                <span class="absolute top-3 left-3 bg-pink-200 text-pink-800 text-xs font-semibold px-2.5 py-1 rounded-full">DESIGN</span>
+                            </div>
+                            <div class="p-4">
+                                <h4 class="font-bold text-white">Privacy, Data, Security</h4>
+                                <div class="flex items-center mt-4">
+                                    <img alt="Geoffrey Keat" class="w-8 h-8 rounded-full object-cover" src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=64&q=85&fit=crop&crop=face" />
+                                    <span class="ml-3 text-sm text-gray-400">Geoffrey Keat</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-[#120F22] rounded-lg border border-gray-800 overflow-hidden">
+                            <div class="relative">
+                                <img alt="Student focused on coding at a computer" class="w-full h-40 object-cover" src="https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=400&h=160&q=85&fit=crop" />
+                                <span class="absolute top-3 left-3 bg-blue-200 text-blue-800 text-xs font-semibold px-2.5 py-1 rounded-full">PHP</span>
+                            </div>
+                            <div class="p-4">
+                                <h4 class="font-bold text-white">CodeWave Guides</h4>
+                                <div class="flex items-center mt-4">
+                                    <img alt="Jes Kirkwood" class="w-8 h-8 rounded-full object-cover" src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=64&q=85&fit=crop&crop=face" />
+                                    <span class="ml-3 text-sm text-gray-400">Jes Kirkwood</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-[#120F22] rounded-lg border border-gray-800 overflow-hidden">
+                            <div class="relative">
+                                <img alt="Students working together on laptops in a bright classroom" class="w-full h-40 object-cover" src="https://images.unsplash.com/photo-1509062522246-3755977927d7?w=400&h=160&q=85&fit=crop" />
+                                <span class="absolute top-3 left-3 bg-yellow-200 text-yellow-800 text-xs font-semibold px-2.5 py-1 rounded-full">PYTHON</span>
+                            </div>
+                            <div class="p-4">
+                                <h4 class="font-bold text-white">Google Classroom</h4>
+                                <div class="flex items-center mt-4">
+                                    <img alt="Kelly Kirwan" class="w-8 h-8 rounded-full object-cover" src="https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=64&q=85&fit=crop&crop=face" />
+                                    <span class="ml-3 text-sm text-gray-400">Kelly Kirwan</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <section class="py-24">
+                <div class="container mx-auto px-6 text-center">
+                    <h3 class="text-4xl font-black text-white">Case Studies &amp; Knowledge Base</h3>
+                    <p class="mt-4 text-gray-400">We are proud to work with school leaders in every type of school</p>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mt-12 text-center">
+                        <div class="bg-[#120F22] p-6 rounded-lg border border-gray-800 flex flex-col items-center">
+                            <span class="material-icons text-primary text-3xl">description</span>
+                            <span class="mt-2 font-medium text-white">CodeWave Guides</span>
+                        </div>
+                        <div class="bg-[#120F22] p-6 rounded-lg border border-gray-800 flex flex-col items-center">
+                            <span class="material-icons text-primary text-3xl">source</span>
+                            <span class="mt-2 font-medium text-white">CodeWave Resources</span>
+                        </div>
+                        <div class="bg-[#120F22] p-6 rounded-lg border border-gray-800 flex flex-col items-center">
+                            <span class="material-icons text-primary text-3xl">assignment</span>
+                            <span class="mt-2 font-medium text-white">Assignments</span>
+                        </div>
+                        <div class="bg-[#120F22] p-6 rounded-lg border border-gray-800 flex flex-col items-center">
+                            <span class="material-icons text-primary text-3xl">school</span>
+                            <span class="mt-2 font-medium text-white">Classroom</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <section class="py-24">
+                <div class="container mx-auto px-6">
+                    <div class="bg-[#120F22] p-12 rounded-lg border border-gray-800 grid md:grid-cols-2 gap-8 items-center">
+                        <div>
+                            <h3 class="text-4xl font-black text-white">Join the Community</h3>
+                            <div class="mt-6 flex items-center space-x-2 text-primary font-semibold">
+                                <a class="hover:underline" href="/AboutUs">What's next? Check out our work</a>
+                                <span class="material-icons">arrow_forward</span>
+                            </div>
+                        </div>
+                        <div class="space-y-3">
+                            <a class="flex items-center p-3 rounded-md hover:bg-gray-800 transition-colors" href="#">
+                                <span class="w-6 h-6 mr-3 flex-shrink-0 rounded flex items-center justify-center" style="background:#5865F2">
+                                    <svg viewBox="0 0 24 24" class="w-4 h-4 fill-white"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057c.002.022.015.043.033.057a19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03z"/></svg>
+                                </span>
+                                <span class="font-medium text-white">CodeWave Educator Discord Channel</span>
+                            </a>
+                            <a class="flex items-center p-3 rounded-md hover:bg-gray-800 transition-colors" href="#">
+                                <span class="w-6 h-6 mr-3 flex-shrink-0 rounded flex items-center justify-center" style="background:#1877F2">
+                                    <svg viewBox="0 0 24 24" class="w-4 h-4 fill-white"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+                                </span>
+                                <span class="font-medium text-white">CodeWave Educator Facebook Group</span>
+                            </a>
+                            <a class="flex items-center p-3 rounded-md hover:bg-gray-800 transition-colors" href="#">
+                                <span class="w-6 h-6 mr-3 flex-shrink-0 rounded flex items-center justify-center bg-black border border-gray-700">
+                                    <svg viewBox="0 0 24 24" class="w-4 h-4 fill-white"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.73-8.835L1.254 2.25H8.08l4.259 5.63 5.905-5.63zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                                </span>
+                                <span class="font-medium text-white">CodeWave on Twitter</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+        <footer class="bg-[#0B0915] border-t border-gray-800/60 py-16">
+            <div class="container mx-auto px-6">
+                <div class="grid md:grid-cols-5 gap-10">
+
+                    <!-- Brand -->
+                    <div class="md:col-span-1">
+                        <div class="flex items-center gap-2 mb-4">
+                            <img src="/CodeWavelogo.PNG" alt="CodeWave" class="h-8 w-8 object-contain" />
+                            <h2 class="text-xl font-bold text-white">CodeWave</h2>
+                        </div>
+                        <p class="text-sm text-gray-500 leading-relaxed">Sign up for a free CodeWave account and start coding today!</p>
+                        <a href="/User/SignUp" class="cta-btn cta-btn-sm mt-5">Sign Up Free</a>
+                    </div>
+
+                    <!-- Use Cases -->
+                    <div>
+                        <h4 class="text-xs font-semibold uppercase tracking-widest text-gray-500 mb-4">Use Cases</h4>
+                        <ul class="space-y-3 text-sm">
+                            <li><a href="/AboutUs" class="text-gray-400 hover:text-primary transition-colors flex items-center gap-1.5"><span class="material-icons text-xs" style="font-size:14px">chevron_right</span>District</a></li>
+                            <li><a href="/AboutUs" class="text-gray-400 hover:text-primary transition-colors flex items-center gap-1.5"><span class="material-icons text-xs" style="font-size:14px">chevron_right</span>Schools</a></li>
+                            <li><a href="/AboutUs" class="text-gray-400 hover:text-primary transition-colors flex items-center gap-1.5"><span class="material-icons text-xs" style="font-size:14px">chevron_right</span>Teachers</a></li>
+                        </ul>
+                    </div>
+
+                    <!-- Products -->
+                    <div>
+                        <h4 class="text-xs font-semibold uppercase tracking-widest text-gray-500 mb-4">Products</h4>
+                        <ul class="space-y-3 text-sm">
+                            <li><a href="/User/Login" class="text-gray-400 hover:text-primary transition-colors flex items-center gap-1.5"><span class="material-icons text-xs" style="font-size:14px">chevron_right</span>Coding LMS</a></li>
+                            <li><a href="/User/Login" class="text-gray-400 hover:text-primary transition-colors flex items-center gap-1.5"><span class="material-icons text-xs" style="font-size:14px">chevron_right</span>Online IDE</a></li>
+                            <li><a href="/User/SignUp" class="text-gray-400 hover:text-primary transition-colors flex items-center gap-1.5"><span class="material-icons text-xs" style="font-size:14px">chevron_right</span>CodeWave Pro</a></li>
+                            <li><a href="/User/SignUp" class="text-gray-400 hover:text-primary transition-colors flex items-center gap-1.5"><span class="material-icons text-xs" style="font-size:14px">chevron_right</span>Certifications</a></li>
+                        </ul>
+                    </div>
+
+                    <!-- Resources -->
+                    <div>
+                        <h4 class="text-xs font-semibold uppercase tracking-widest text-gray-500 mb-4">Resources</h4>
+                        <ul class="space-y-3 text-sm">
+                            <li><a href="/User/Login" class="text-gray-400 hover:text-primary transition-colors flex items-center gap-1.5"><span class="material-icons text-xs" style="font-size:14px">chevron_right</span>Online Courses</a></li>
+                            <li><a href="/AboutUs" class="text-gray-400 hover:text-primary transition-colors flex items-center gap-1.5"><span class="material-icons text-xs" style="font-size:14px">chevron_right</span>In-Person Workshops</a></li>
+                            <li><a href="/AboutUs" class="text-gray-400 hover:text-primary transition-colors flex items-center gap-1.5"><span class="material-icons text-xs" style="font-size:14px">chevron_right</span>Virtual Workshops</a></li>
+                        </ul>
+                    </div>
+
+                    <!-- Platform -->
+                    <div>
+                        <h4 class="text-xs font-semibold uppercase tracking-widest text-gray-500 mb-4">Platform</h4>
+                        <ul class="space-y-3 text-sm">
+                            <li><a href="/User/Login" class="text-gray-400 hover:text-primary transition-colors flex items-center gap-1.5"><span class="material-icons text-xs" style="font-size:14px">chevron_right</span>Assignments</a></li>
+                            <li><a href="/User/Login" class="text-gray-400 hover:text-primary transition-colors flex items-center gap-1.5"><span class="material-icons text-xs" style="font-size:14px">chevron_right</span>Classroom Management</a></li>
+                            <li><a href="/User/Login" class="text-gray-400 hover:text-primary transition-colors flex items-center gap-1.5"><span class="material-icons text-xs" style="font-size:14px">chevron_right</span>Grading</a></li>
+                            <li><a href="/AboutUs" class="text-gray-400 hover:text-primary transition-colors flex items-center gap-1.5"><span class="material-icons text-xs" style="font-size:14px">chevron_right</span>Integrations</a></li>
+                        </ul>
+                    </div>
+
+                </div>
+
+                <!-- Bottom bar -->
+                <div class="mt-12 pt-6 border-t border-gray-800/60 flex flex-col md:flex-row justify-between items-center gap-4">
+                    <p class="text-xs text-gray-600">&copy; 2025 CodeWave. All rights reserved.</p>
+                    <div class="flex items-center gap-6 text-xs text-gray-600">
+                        <a href="/Home/Privacy" class="hover:text-primary transition-colors">Privacy Policy</a>
+                        <a href="/AboutUs" class="hover:text-primary transition-colors">Terms of Service</a>
+                        <a href="/AboutUs" class="hover:text-primary transition-colors">Contact Us</a>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </div>
+</body>
+</html>

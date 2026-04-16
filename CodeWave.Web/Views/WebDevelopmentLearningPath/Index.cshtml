@@ -1,0 +1,233 @@
+﻿
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Web Development Learning Path</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&amp;display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet" />
+    <script id="tailwind-config">tailwind.config = {darkMode: "class", theme: {extend: {colors: {primary: "#b887e3", "background-light": "#f7f6f8", "background-dark": "#19131f"}, fontFamily: {display: "Inter"}, borderRadius: {DEFAULT: "0.25rem", lg: "0.5rem", xl: "0.75rem", full: "9999px"}}}};</script>
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-gray-800 dark:text-gray-200">
+    <div class="flex h-screen w-full flex-col">
+        <header class="flex shrink-0 items-center justify-between whitespace-nowrap border-b border-solid border-gray-200/10 dark:border-white/10 px-6 py-3 bg-background-light dark:bg-background-dark z-20">
+            <div class="flex items-center gap-4 text-gray-800 dark:text-white">
+                <img src="/codewaveblacklogo.png" alt="CodeWave Logo" class="h-10 w-10 object-contain dark:hidden" />
+                <img src="/CodeWavelogo.PNG" alt="CodeWave Logo" class="h-10 w-10 object-contain hidden dark:block" />
+                <h2 class="text-lg font-bold leading-tight tracking-[-0.015em]">CodeWave</h2>
+            </div>
+            <div class="hidden md:flex flex-1 justify-center gap-8">
+                <div class="flex items-center gap-9">
+                    <a class="text-sm font-medium leading-normal text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary" href="/Home">Dashboard</a>
+                    <a class="text-sm font-medium leading-normal text-gray-800 dark:text-white hover:text-primary dark:hover:text-primary" href="/Home">Learning Paths</a>
+                    <a class="text-sm font-medium leading-normal text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary" href="/Projects">Projects</a>
+                    <a class="text-sm font-medium leading-normal text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary" href="/JobOffer">Jobs</a>
+                </div>
+            </div>
+            <div class="flex items-center gap-4">
+                <a href="/Cv" class="flex h-10 min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg bg-primary px-4 text-sm font-bold leading-normal tracking-[0.015em] text-white">
+                    <span class="truncate">My CV</span>
+                </a>
+                <button class="flex h-10 cursor-pointer items-center justify-center overflow-hidden rounded-lg bg-gray-200/50 dark:bg-white/10 px-2.5 text-gray-800 dark:text-white">
+                    <span class="material-symbols-outlined">notifications</span>
+                </button>
+                <div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10" data-alt="User profile avatar" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuALNR4RiDaDzTd9JLEqAvH0JIMU5cyIoVFp7ue57vk_i1ozRydJmGR7K62DH66ut5Hztm1ozRR0zrcPWS5xuMRZMtcRoXwyC8GrajE346G6TLM1Mmh3B5wfY91Yyf-Dn4sohEwtlxH59KAHysIEvQpLqlHQhVcKjkAikPIvnOATCYZiHTfkpAUYeWrp1PZ3I4KjH1Fyj2S15ewwqmJfgxwRnaDdENgQOjlBgJDUQZkvD5Vx_zJpCGQO2PHc6rkn57vMnXJgLj4Qaag");'></div>
+            </div>
+        </header>
+        <div class="flex flex-1 overflow-hidden">
+            <aside class="flex w-80 shrink-0 flex-col border-r border-gray-200/10 dark:border-white/10 bg-background-light dark:bg-background-dark">
+                <div class="flex flex-col gap-4 p-4">
+                    <div class="flex flex-col gap-1">
+                        <h1 class="text-lg font-bold text-gray-900 dark:text-white">Web Development</h1>
+                        <p class="text-sm font-normal leading-normal text-gray-500 dark:text-gray-400">Learning Path</p>
+                    </div>
+                    <div class="flex flex-col gap-2">
+                        <div class="flex justify-between gap-6">
+                            <p class="text-sm font-medium leading-normal text-gray-800 dark:text-white">Overall Progress</p>
+                            <p class="text-sm font-normal leading-normal text-gray-800 dark:text-white">45%</p>
+                        </div>
+                        <div class="rounded-full bg-gray-200 dark:bg-white/10"><div class="h-2 rounded-full bg-primary" style="width: 45%;"></div></div>
+                    </div>
+                    <div class="py-2">
+                        <label class="flex flex-col h-11 w-full">
+                            <div class="flex w-full flex-1 items-stretch rounded-lg h-full">
+                                <div class="text-gray-400 flex items-center justify-center pl-3.5 bg-gray-100 dark:bg-white/5 rounded-l-lg border-r-0">
+                                    <span class="material-symbols-outlined" style="font-size: 20px;">search</span>
+                                </div>
+                                <input class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-r-lg text-gray-800 dark:text-white focus:outline-0 focus:ring-0 border-none bg-gray-100 dark:bg-white/5 h-full placeholder:text-gray-400 dark:placeholder:text-gray-500 px-2.5 text-sm font-normal leading-normal" placeholder="Find a lesson..." value="" />
+                            </div>
+                        </label>
+                    </div>
+                </div>
+                <nav class="flex-1 overflow-y-auto px-4 pb-4">
+                    <ul class="space-y-1">
+                        <li>
+                            <button class="flex w-full items-center justify-between rounded-lg p-2.5 text-left text-sm font-medium text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-white/5">
+                                <span>Introduction to Web Dev</span>
+                                <span class="material-symbols-outlined">expand_more</span>
+                            </button>
+                        </li>
+                        <li>
+                            <button class="flex w-full items-center justify-between rounded-lg p-2.5 text-left text-sm font-medium text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-white/5">
+                                <span>HTML Fundamentals</span>
+                                <span class="material-symbols-outlined">expand_more</span>
+                            </button>
+                        </li>
+                        <li>
+                            <button class="flex w-full items-center justify-between rounded-lg p-2.5 text-left text-sm font-medium text-gray-900 dark:text-white bg-primary/10">
+                                <span>CSS Styling</span>
+                                <span class="material-symbols-outlined transform -rotate-180">expand_more</span>
+                            </button>
+                            <ul class="mt-1 space-y-1 pl-4 border-l-2 border-primary ml-4">
+                                <li>
+                                    <a class="flex items-center gap-3 rounded-md px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/5" href="/Home">
+                                        <span class="material-symbols-outlined text-teal-500" style="font-size: 20px; font-variation-settings: 'FILL' 1;">check_circle</span>
+                                        Selectors
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="flex items-center gap-3 rounded-md px-3 py-2 text-sm text-gray-900 dark:text-white bg-primary/20" href="#">
+                                        <span class="material-symbols-outlined text-primary" style="font-size: 20px; font-variation-settings: 'FILL' 1;">play_circle</span>
+                                        Box Model
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="flex items-center gap-3 rounded-md px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/5" href="/Home">
+                                        <span class="material-symbols-outlined text-gray-400" style="font-size: 20px;">radio_button_unchecked</span>
+                                        Flexbox
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="flex items-center gap-3 rounded-md px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/5" href="/Home">
+                                        <span class="material-symbols-outlined text-gray-400" style="font-size: 20px;">radio_button_unchecked</span>
+                                        Grid
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                        <li>
+                            <button class="flex w-full items-center justify-between rounded-lg p-2.5 text-left text-sm font-medium text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-white/5">
+                                <span>JavaScript Core</span>
+                                <span class="material-symbols-outlined">expand_more</span>
+                            </button>
+                        </li>
+                        <li>
+                            <button class="flex w-full items-center justify-between rounded-lg p-2.5 text-left text-sm font-medium text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-white/5">
+                                <span>Modern Frameworks</span>
+                                <span class="material-symbols-outlined">expand_more</span>
+                            </button>
+                        </li>
+                        <li>
+                            <button class="flex w-full items-center justify-between rounded-lg p-2.5 text-left text-sm font-medium text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-white/5">
+                                <span>Final Project</span>
+                                <span class="material-symbols-outlined">expand_more</span>
+                            </button>
+                        </li>
+                    </ul>
+                </nav>
+            </aside>
+            <main class="flex flex-1 flex-col overflow-hidden bg-gray-50 dark:bg-black/20">
+                <div class="flex shrink-0 flex-wrap gap-2 p-4 border-b border-gray-200/10 dark:border-white/10 items-center">
+                    <a class="text-sm font-medium leading-normal text-gray-500 dark:text-gray-400 hover:text-primary" href="/Home">Home</a>
+                    <span class="text-sm font-medium leading-normal text-gray-500 dark:text-gray-400">/</span>
+                    <a class="text-sm font-medium leading-normal text-gray-500 dark:text-gray-400 hover:text-primary" href="/Home">Learning Paths</a>
+                    <span class="text-sm font-medium leading-normal text-gray-500 dark:text-gray-400">/</span>
+                    <span class="text-sm font-medium leading-normal text-gray-800 dark:text-white">Web Development</span>
+                </div>
+                <div class="flex flex-1 overflow-hidden">
+                    <div class="flex w-1/2 flex-col overflow-y-auto">
+                        <div class="p-8 space-y-6">
+                            <div>
+                                <span class="text-primary text-sm font-bold uppercase tracking-wider">Lesson 2 of 4</span>
+                                <h1 class="text-3xl font-bold mt-1 text-gray-900 dark:text-white">The CSS Box Model</h1>
+                                <p class="text-gray-500 dark:text-gray-400 mt-2">Understand the fundamental concept that governs layout on the web. Every element is a rectangular box!</p>
+                            </div>
+                            <div class="aspect-video w-full rounded-xl overflow-hidden bg-gray-200 dark:bg-white/10">
+                                <img class="w-full h-full object-cover" data-alt="A placeholder video thumbnail showing abstract code on a screen" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBJt7YZ18ByQfqvCkYNor1sp2TghMhraAxE_sFUmVTjcJd8qAgIPaXOprYTYpQd6Nh4u24nLMhrht5wi1gssFDqyCo24iSqIbKQ5L-BDl_pbZRpPACztiRU3sD92BFTCGgqmxJbW1TW5mdl-kxz0YS0cskj0bPHYJOpyGTlHdtc5HE4g_xRFOeXqoxxtmjsTaf-20gz-m3XVsVhQRt8SaPAywcR8n1IfvqzDUvviXLZ7qTHVHt1adrTDssExrxcKGgWBFjAyH2GGMo" />
+                            </div>
+                            <div class="prose prose-sm dark:prose-invert max-w-none text-gray-600 dark:text-gray-300">
+                                <h2 class="text-xl font-semibold text-gray-900 dark:text-white">What You'll Learn</h2>
+                                <p>The CSS box model is essentially a box that wraps around every HTML element. It consists of: margins, borders, padding, and the actual content. The image below illustrates the box model:</p>
+                                <div class="p-4 rounded-lg bg-gray-100 dark:bg-white/5 my-4 flex justify-center items-center">
+                                    <img class="max-w-sm" data-alt="Diagram of the CSS Box model, showing content, padding, border, and margin layers." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBO-5P0XLlFvj8VaNhpJamNGryDNdJHdbBnvQAhcZpRW1foz0-NSckrhnfyt03XUI7mCP90m2LLzLrjHrkAyYzGS_1JzweU7Pep0Uehsn6N7kBwyfeshG2vQuHcQdPBpiOxbPTZvL8OSRPK3TEJV5DdFyjpg3wE16lpp-6tpL2CSh4vwRYfcUjIuCsDhCn_k1MP09Jrf_QVPdXl7oPVDxP0t-ySJhrkfWqAfnxTOJKjwQqM7AHmfKst5dcbqELucRFF_CDNL9JmCb8" />
+                                </div>
+                                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Your Task</h3>
+                                <p>In the interactive workspace to your right, you'll find an HTML file with a `div` element and a CSS file. Your goal is to:</p>
+                                <ol>
+                                    <li>Add a <strong>20px</strong> padding to all sides of the box.</li>
+                                    <li>Give it a solid <strong>5px</strong> blue border.</li>
+                                    <li>Set a <strong>15px</strong> margin on the outside.</li>
+                                </ol>
+                                <p>Use the live preview to see your changes instantly. Good luck!</p>
+                            </div>
+                        </div>
+                        <div class="flex justify-between p-8 mt-auto border-t border-gray-200/10 dark:border-white/10">
+                            <button class="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-gray-200/80 dark:bg-white/10 text-gray-800 dark:text-white text-sm font-bold leading-normal tracking-[0.015em] gap-2">
+                                <span class="material-symbols-outlined">arrow_back</span>
+                                <span class="truncate">Previous</span>
+                            </button>
+                            <button class="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-primary text-white text-sm font-bold leading-normal tracking-[0.015em] gap-2">
+                                <span class="truncate">Next Lesson</span>
+                                <span class="material-symbols-outlined">arrow_forward</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="flex w-1/2 flex-col border-l border-gray-200/10 dark:border-white/10">
+                        <div class="flex h-full flex-col">
+                            <div class="flex h-1/2 flex-col">
+                                <div class="flex items-center justify-between border-b border-gray-200/10 dark:border-white/10 px-4 py-2">
+                                    <div class="flex gap-1">
+                                        <button class="px-3 py-1.5 text-sm rounded-md bg-gray-200/50 dark:bg-white/10 text-gray-800 dark:text-white">style.css</button>
+                                        <button class="px-3 py-1.5 text-sm rounded-md text-gray-500 dark:text-gray-400">index.html</button>
+                                    </div>
+                                    <div class="flex gap-2">
+                                        <button class="flex h-8 items-center justify-center rounded-md bg-gray-200/50 dark:bg-white/10 px-3 text-sm text-gray-800 dark:text-white gap-2">
+                                            <span class="material-symbols-outlined" style="font-size: 16px;">refresh</span> Reset
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="flex-1 bg-[#1E1E1E] p-4 overflow-auto font-mono text-sm text-white">
+<pre><code><span style="color: #569cd6;">.box</span> {
+                                    <span style="color: #9cdcfe;">width</span>: <span style="color: #b5cea8;">200px</span>;
+                                    <span style="color: #9cdcfe;">height</span>: <span style="color: #b5cea8;">200px</span>;
+                                    <span style="color: #9cdcfe;">background-color</span>: <span style="color: #ce9178;">#3a86ff</span>;
+                                    <span style="color: #6a9955;"></span>
+}</code></pre>
+                                </div>
+                            </div>
+                            <div class="flex h-1/2 flex-col border-t border-gray-200/10 dark:border-white/10">
+                                <div class="flex items-center justify-between border-b border-gray-200/10 dark:border-white/10 px-4 py-2">
+                                    <h3 class="text-sm font-medium text-gray-800 dark:text-white">Live Preview</h3>
+                                    <button class="flex h-8 items-center justify-center rounded-md bg-primary/20 px-3 text-sm text-primary gap-2">
+                                        <span class="material-symbols-outlined" style="font-size: 16px;">play_arrow</span> Run Code
+                                    </button>
+                                </div>
+                                <div class="flex flex-1 items-center justify-center bg-white dark:bg-[#282a36] p-4">
+                                    <div class="w-[200px] h-[200px] bg-[#3a86ff]"></div>
+                                </div>
+                                <div class="flex justify-end p-4 border-t border-gray-200/10 dark:border-white/10">
+                                    <button class="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-teal-600 hover:bg-teal-700 text-white text-sm font-bold leading-normal tracking-[0.015em] gap-2">
+                                        <span class="material-symbols-outlined">check</span>
+                                        <span class="truncate">Submit</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+</body>
+</html>

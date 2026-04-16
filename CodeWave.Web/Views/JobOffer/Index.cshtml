@@ -1,0 +1,1140 @@
+﻿@using CodeWave.Web.Controllers
+@using CodeWave.Domain.Entities
+@{
+    Layout = null;
+    var jobs = ViewBag.Jobs as List<JobOfferViewModel> ?? new List<JobOfferViewModel>();
+    var selectedJob = ViewBag.SelectedJob as CodeWave.Domain.Entities.JobOffer;
+    var selectedJobId = ViewBag.SelectedJobId as Guid?;
+    var userSkills = ViewBag.UserSkills as List<string> ?? new List<string>();
+    var searchTerm = ViewBag.SearchTerm as string ?? "";
+    var userApplications = ViewBag.UserApplications as List<Guid> ?? new List<Guid>();
+    var userGuid = ViewBag.UserGuid as Guid?;
+    var user = ViewBag.User as ApplicationUser;
+    var learningPath = ViewBag.LearningPath as string ?? "";
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script>
+        // Initialize theme immediately to prevent flash
+        (function() {
+            try {
+                const html = document.documentElement;
+                const savedTheme = localStorage.getItem('theme');
+                const theme = savedTheme || 'dark';
+                if (theme === 'dark') {
+                    html.classList.add('dark');
+                } else {
+                    html.classList.remove('dark');
+                }
+            } catch(e) {
+                document.documentElement.classList.add('dark');
+            }
+        })();
+    </script>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Career Opportunities - CodeWave</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@300..700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
+    <style>
+        * {
+            scroll-behavior: smooth;
+        }
+        body {
+            font-family: 'Inter', 'Space Grotesk', sans-serif;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-morphism {
+            background: rgba(17, 19, 24, 0.7);
+            backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+        }
+        
+        /* CRITICAL: Override glass-morphism in light mode - MUST come after .glass-morphism definition */
+        html:not(.dark) .glass-morphism {
+            background: white !important;
+            background-color: white !important;
+            background-image: none !important;
+            backdrop-filter: none !important;
+            -webkit-backdrop-filter: none !important;
+            border: none !important;
+        }
+        
+        /* Additional force for Career Opportunities header - MOST SPECIFIC */
+        html:not(.dark) .sticky.top-0.z-20,
+        html:not(.dark) .sticky.top-0.z-20.glass-morphism,
+        html:not(.dark) .sticky.top-0.z-20.bg-white,
+        html:not(.dark) div.sticky.top-0.z-20,
+        html:not(.dark) div.sticky.top-0.z-20.bg-white,
+        html:not(.dark) .job-list-panel .sticky.top-0.z-20,
+        html:not(.dark) .job-list-panel > div.sticky.top-0.z-20,
+        html:not(.dark) div.job-list-panel > div.sticky.top-0.z-20.bg-white {
+            background: white !important;
+            background-color: white !important;
+            background-image: none !important;
+            backdrop-filter: none !important;
+            -webkit-backdrop-filter: none !important;
+        }
+        
+        /* Force white on all sticky headers in light mode */
+        html:not(.dark) .sticky {
+            background-color: white !important;
+        }
+        
+        /* Dark mode header background */
+        html.dark .job-list-panel .sticky.top-0.z-20,
+        html.dark .sticky.top-0.z-20 {
+            background: #0a0a0f !important;
+            background-color: #0a0a0f !important;
+        }
+        
+        /* Dark mode glass effect */
+        html.dark .glass-morphism {
+            background: rgba(17, 19, 24, 0.7) !important;
+            backdrop-filter: blur(20px) saturate(180%) !important;
+        }
+        .premium-card {
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        /* Override premium-card border when it's an active job card */
+        .premium-card.job-card.active {
+            border: none !important;
+        }
+        /* Force remove border from active job cards - highest specificity */
+        div.job-card.active.premium-card,
+        div.premium-card.job-card.active,
+        .job-card.active.premium-card,
+        .premium-card.job-card.active,
+        .premium-card.job-card.active:hover,
+        .premium-card.job-card.active:focus,
+        [class*="job-card"][class*="active"][class*="premium-card"] {
+            border: none !important;
+            border-color: transparent !important;
+            border-width: 0 !important;
+            border-style: none !important;
+            outline: none !important;
+            box-shadow: -4px 0 16px rgba(184, 135, 227, 0.15) !important;
+        }
+        
+        /* Additional override for any border that might be applied */
+        .premium-card.job-card.active * {
+            border: none !important;
+        }
+        .premium-card:hover {
+            background: rgba(255, 255, 255, 0.04);
+            border-color: rgba(184, 135, 227, 0.25);
+            transform: translateY(-1px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
+        }
+        /* Prevent hover border on active job cards */
+        .premium-card.job-card.active:hover,
+        .job-card.active.premium-card:hover,
+        .premium-card.job-card.active:hover * {
+            border: none !important;
+            border-color: transparent !important;
+            border-width: 0 !important;
+            border-style: none !important;
+        }
+        .job-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        .job-card::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 0;
+            background: linear-gradient(90deg, rgba(184, 135, 227, 0.12) 0%, transparent 100%);
+            transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .job-card:hover::after {
+            width: 3px;
+        }
+        .job-card:hover {
+            transform: translateX(4px);
+        }
+        .job-card.active,
+        .premium-card.job-card.active,
+        .premium-card.job-card.active:hover,
+        div.job-card.active.premium-card,
+        div.premium-card.job-card.active {
+            background: linear-gradient(90deg, rgba(184, 135, 227, 0.1) 0%, rgba(184, 135, 227, 0.02) 100%) !important;
+            border-radius: 0.75rem;
+            box-shadow: -4px 0 16px rgba(184, 135, 227, 0.15);
+            border: none !important;
+            border-color: transparent !important;
+            border-width: 0 !important;
+            border-style: none !important;
+            outline: none !important;
+        }
+        .job-card.active::after {
+            width: 1.5px;
+        }
+        .skill-tag {
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .skill-tag:hover {
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+        }
+        .cta-button {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        .cta-button::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, transparent 100%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .cta-button:hover::before {
+            opacity: 1;
+        }
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 24px rgba(184, 135, 227, 0.4), 0 0 40px rgba(139, 92, 246, 0.2);
+        }
+        .cta-button:active {
+            transform: translateY(-1px);
+        }
+        .modal-overlay {
+            animation: fadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .modal-panel {
+            animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        @@keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @@keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px) scale(0.98);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+        @@keyframes shimmer {
+            0% { background-position: -500px 0; }
+            100% { background-position: 500px 0; }
+        }
+        .shimmer {
+            background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.1) 50%, transparent 100%);
+            background-size: 500px 100%;
+            animation: shimmer 2s infinite;
+        }
+        /* Override text-gradient in light mode to be dark */
+        html:not(.dark) .text-gradient {
+            background: none !important;
+            -webkit-background-clip: unset !important;
+            background-clip: unset !important;
+            -webkit-text-fill-color: rgb(17, 24, 39) !important; /* gray-900 */
+            color: rgb(17, 24, 39) !important; /* gray-900 */
+        }
+        .text-gradient {
+            background: linear-gradient(135deg, #ffffff 0%, #e2e8f0 70%, #cbd5e1 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .match-indicator {
+            background: linear-gradient(135deg, rgba(184, 135, 227, 0.2) 0%, rgba(139, 92, 246, 0.15) 100%);
+            border: 1px solid rgba(184, 135, 227, 0.4);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 12px rgba(184, 135, 227, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+        .search-field:focus {
+            box-shadow: 0 0 0 3px rgba(184, 135, 227, 0.12), 0 8px 20px rgba(0, 0, 0, 0.15);
+        }
+        .nav-item {
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .nav-item:hover {
+            background: rgba(255, 255, 255, 0.06);
+            transform: translateX(4px);
+        }
+        .nav-item.active {
+            background: rgba(184, 135, 227, 0.2);
+            color: #b887e3;
+        }
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            width: 16rem;
+            z-index: 40;
+        }
+        @@media (min-width: 1024px) {
+            .sidebar {
+                position: relative;
+                width: 16rem;
+                height: 100vh;
+                flex-shrink: 0;
+            }
+        }
+        @@media (max-width: 1023px) {
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+            .sidebar.mobile-open {
+                transform: translateX(0);
+            }
+        }
+        .sidebar > aside {
+            height: 100%;
+            background: white !important;
+            border-right: 0.5px solid rgb(229, 231, 235) !important;
+        }
+        .dark .sidebar > aside {
+            background: #111318 !important;
+            border-right: 0.5px solid rgb(31, 41, 55) !important;
+        }
+        .sidebar nav a {
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .sidebar nav a:hover {
+            background: rgba(255, 255, 255, 0.06) !important;
+            transform: translateX(4px);
+        }
+        .sidebar nav a.bg-primary\/20 {
+            background: rgba(184, 135, 227, 0.2) !important;
+            color: #b887e3 !important;
+        }
+        
+        /* ULTRA SPECIFIC - Remove border from active job cards - must override everything */
+        body .premium-card.job-card.active,
+        body .job-card.active.premium-card,
+        body div.premium-card.job-card.active,
+        body div.job-card.active.premium-card {
+            border: none !important;
+            border-color: transparent !important;
+            border-width: 0 !important;
+            border-style: none !important;
+            outline: none !important;
+        }
+        body .premium-card.job-card.active:hover,
+        body .job-card.active.premium-card:hover {
+            border: none !important;
+            border-color: transparent !important;
+            border-width: 0 !important;
+        }
+        @@media (max-width: 1024px) {
+            .job-list-panel {
+                width: 100%;
+                max-width: 100%;
+            }
+            .job-details-panel {
+                display: none;
+            }
+            .job-details-panel.mobile-active {
+                display: block;
+                position: fixed;
+                inset: 0;
+                z-index: 50;
+                background: #0a0a0f;
+            }
+        }
+    </style>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#b887e3",
+                        "primary-dark": "#9d6fd9",
+                        "background-light": "#f7f6f8",
+                        "background-dark": "#0a0a0f"
+                    },
+                    fontFamily: {
+                        display: ["Inter", "Space Grotesk", "sans-serif"]
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="font-display bg-background-light dark:bg-gradient-to-br dark:from-[#0a0a0f] dark:via-[#0f0f1a] dark:to-[#0a0a0f] text-gray-900 dark:text-white h-screen overflow-hidden">
+    <div class="flex h-screen w-full">
+        <!-- Mobile Menu Button -->
+        <button id="mobileMenuBtn" class="fixed top-4 left-4 z-50 lg:hidden p-2 bg-gray-100 dark:bg-white/5 rounded-lg border border-gray-300 dark:border-white/10">
+            <span class="material-symbols-outlined text-gray-900 dark:text-white">menu</span>
+        </button>
+
+        <!-- Sidebar -->
+        <div id="sidebar" class="sidebar">
+            @await Html.PartialAsync("_UserSidebar")
+        </div>
+
+        <!-- Main Content -->
+        <main class="flex-1 flex flex-col lg:flex-row overflow-hidden h-full">
+            <!-- Job List Panel -->
+            <div class="job-list-panel w-full lg:w-2/5 border-r border-gray-200 dark:border-white/5 bg-white dark:bg-gradient-to-b dark:from-[#0a0a0f] dark:via-[#0f1117] dark:to-[#0a0a0f] h-full flex flex-col overflow-hidden">
+                <!-- Header -->
+                <div class="sticky top-0 z-20 bg-white dark:bg-[#0a0a0f] border-b border-gray-200 dark:border-white/5 p-4 lg:p-5 flex-shrink-0">
+                    <div class="mb-4">
+                        <div class="flex items-center gap-3 mb-2">
+                            <div class="p-2 rounded-xl bg-gradient-to-br from-primary/25 to-purple-600/15 border border-primary/40 shadow-lg">
+                                <span class="material-symbols-outlined text-primary text-xl">work</span>
+                            </div>
+                            <div>
+                                <h1 class="text-xl lg:text-2xl font-bold text-gray-900 dark:text-gradient mb-0.5">
+                                    Career Opportunities
+                                </h1>
+                                <p class="text-gray-600 dark:text-slate-400 text-xs lg:text-sm font-medium">Discover positions that align with your expertise</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Messages -->
+                    @if (TempData["Success"] != null)
+                    {
+                        <div class="mb-3 p-3 bg-green-500/20 border border-green-500/40 rounded-lg text-green-200 backdrop-blur-sm text-sm">
+                            <div class="flex items-center gap-2">
+                                <span class="material-symbols-outlined text-base">check_circle</span>
+                                <span class="font-medium">@TempData["Success"]</span>
+                            </div>
+                        </div>
+                    }
+                    @if (TempData["Error"] != null)
+                    {
+                        <div class="mb-3 p-3 bg-red-500/20 border border-red-500/40 rounded-lg text-red-200 backdrop-blur-sm text-sm">
+                            <div class="flex items-center gap-2">
+                                <span class="material-symbols-outlined text-base">error</span>
+                                <span class="font-medium">@TempData["Error"]</span>
+                            </div>
+                        </div>
+                    }
+
+                    <!-- Search -->
+                    <form method="get" action="@Url.Action("Index")" class="mb-2" id="searchForm">
+                        <div class="relative group">
+                            <span class="absolute left-3 top-1/2 transform -translate-y-1/2 material-symbols-outlined text-gray-500 dark:text-slate-400 group-focus-within:text-primary transition-all duration-300 z-10 text-base">search</span>
+                            <input type="text" name="searchTerm" id="searchInput" value="@searchTerm" 
+                                   placeholder="Search by title, company, or skills..." 
+                                   class="search-field w-full pl-10 pr-10 py-2.5 bg-gray-100 dark:bg-white/4 border border-gray-300 dark:border-white/8 rounded-xl text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-slate-500/60 focus:outline-none focus:border-primary/70 focus:bg-gray-200 dark:focus:bg-white/6 focus:ring-2 focus:ring-primary/20 transition-all duration-300 text-sm font-medium backdrop-blur-sm" />
+                            @if (!string.IsNullOrEmpty(searchTerm))
+                            {
+                                <button type="button" onclick="clearSearch()" class="absolute right-3 top-1/2 transform -translate-y-1/2 material-symbols-outlined text-gray-500 dark:text-slate-400 hover:text-red-500 dark:hover:text-red-400 transition-colors cursor-pointer z-10 text-base" title="Clear search">close</button>
+                            }
+                        </div>
+                        @if (selectedJobId.HasValue)
+                        {
+                            <input type="hidden" name="selectedJobId" value="@selectedJobId.Value" />
+                        }
+                    </form>
+                </div>
+
+                <!-- Job List -->
+                <div class="p-3 lg:p-4 space-y-3 overflow-y-auto flex-1">
+                    @if (jobs != null && jobs.Count > 0)
+                    {
+                        @foreach (var jobItem in jobs)
+                        {
+                            var job = jobItem.Job;
+                            var matchPercentage = jobItem.MatchPercentage;
+                            var hasApplied = jobItem.HasApplied;
+                            var isSelected = selectedJob?.Id == job.Id;
+
+                            <div class="job-card premium-card rounded-xl p-4 cursor-pointer @(isSelected ? "active" : "")"
+                                 style="@(isSelected ? "border: none !important; border-color: transparent !important; border-width: 0 !important; border-style: none !important; outline: none !important;" : "")"
+                                 data-job-id="@job.Id"
+                                 onclick="if(typeof selectJob === 'function') { selectJob('@job.Id', this); } else { window.location.href = window.location.pathname + '?selectedJobId=@job.Id'; } return false;">
+                                <div class="flex items-start justify-between gap-3 mb-3">
+                                    <div class="flex-1 min-w-0">
+                                        <div class="flex items-center gap-2 mb-2 flex-wrap">
+                                            <h3 class="text-base lg:text-lg font-bold text-gray-900 dark:text-white leading-snug">@job.JobTitle</h3>
+                                            @if (hasApplied)
+                                            {
+                                                <span class="px-2 py-1 text-xs font-semibold bg-gradient-to-r from-green-500/25 to-emerald-500/20 text-green-200 border border-green-400/40 rounded-full flex items-center gap-1 whitespace-nowrap backdrop-blur-sm">
+                                                    <span class="material-symbols-outlined text-xs">check_circle</span>
+                                                    Applied
+                                                </span>
+                                            }
+                                        </div>
+                                        <p class="text-gray-800 dark:text-slate-200 text-sm lg:text-base font-semibold mb-2">@job.Company</p>
+                                        <div class="flex items-center gap-2 text-xs text-gray-600 dark:text-slate-400 flex-wrap">
+                                            <span class="flex items-center gap-1.5 px-2 py-1 bg-white/4 rounded-md backdrop-blur-sm">
+                                                <span class="material-symbols-outlined text-xs">schedule</span>
+                                                <span class="font-medium">@job.PostedDate.ToString("MMM dd, yyyy")</span>
+                                            </span>
+                                            <span class="flex items-center gap-1.5 px-2 py-1 bg-white/4 rounded-md backdrop-blur-sm">
+                                                <span class="material-symbols-outlined text-xs">event</span>
+                                                <span class="font-medium">@job.Deadline.ToString("MMM dd")</span>
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="shrink-0">
+                                        <div class="px-3 py-1.5 rounded-lg text-sm font-bold @GetMatchBadgeClass(matchPercentage) match-indicator min-w-[50px] text-center">
+                                            @matchPercentage.ToString("0")%
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="p-20 text-center">
+                            <div class="premium-card rounded-3xl p-16 max-w-md mx-auto">
+                                <div class="p-8 rounded-full bg-slate-700/40 w-32 h-32 mx-auto mb-8 flex items-center justify-center">
+                                    <span class="material-symbols-outlined text-6xl text-gray-600 dark:text-slate-500">work_off</span>
+                                </div>
+                                <p class="text-gray-900 dark:text-slate-200 text-2xl font-bold mb-4">No opportunities found</p>
+                                @if (!string.IsNullOrEmpty(searchTerm))
+                                {
+                                    <p class="text-gray-600 dark:text-slate-400 text-base font-medium">Try adjusting your search criteria</p>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Job Details Panel -->
+            <div id="jobDetailsPanel" class="job-details-panel flex-1 overflow-y-auto bg-white dark:bg-gradient-to-b dark:from-[#0a0a0f] dark:via-[#0f0f1a] dark:to-[#0a0a0f] h-full">
+                @if (selectedJob != null)
+                {
+                    var jobMatch = jobs?.FirstOrDefault(j => j.Job.Id == selectedJob.Id);
+                    var matchPercentage = jobMatch?.MatchPercentage ?? 0;
+                    var hasApplied = jobMatch?.HasApplied ?? false;
+                    var requiredSkills = ExtractSkills(selectedJob.RequiredSkills ?? "");
+
+                    <div class="p-4 lg:p-6">
+                        <!-- Mobile Back Button -->
+                        <button id="closeJobDetails" class="lg:hidden mb-4 p-2 bg-white/5 rounded-lg border border-white/10">
+                            <span class="material-symbols-outlined text-gray-900 dark:text-white text-lg">arrow_back</span>
+                        </button>
+
+                        <!-- Header Card -->
+                        <div class="premium-card rounded-xl lg:rounded-2xl p-5 lg:p-6 mb-4 lg:mb-6 bg-gradient-to-br from-primary/10 via-purple-600/5 to-primary/10 border-primary/20">
+                            <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4 mb-4">
+                                <div class="flex-1">
+                                    <div class="flex items-center gap-3 mb-3">
+                                        <div class="p-2 rounded-xl bg-gradient-to-br from-primary/30 to-purple-600/20 border border-primary/40">
+                                            <span class="material-symbols-outlined text-primary text-xl">work</span>
+                                        </div>
+                                        <div>
+                                            <h2 class="text-xl lg:text-2xl font-bold text-gray-900 dark:text-gradient mb-1 leading-tight">@selectedJob.JobTitle</h2>
+                                            <p class="text-base lg:text-lg text-gray-800 dark:text-slate-200 font-semibold">@selectedJob.Company</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-3 lg:flex-col lg:items-end lg:text-right shrink-0">
+                                    <div class="px-4 py-2 rounded-xl text-base font-bold @GetMatchBadgeClass(matchPercentage) match-indicator">
+                                        @matchPercentage.ToString("0")% Match
+                                    </div>
+                                    @if (hasApplied)
+                                    {
+                                        <div class="flex items-center gap-2 text-xs text-green-200 font-semibold px-3 py-1.5 bg-green-500/15 rounded-lg border border-green-400/30 backdrop-blur-sm">
+                                            <span class="material-symbols-outlined text-sm">check_circle</span>
+                                            <span>Applied</span>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+
+                            <div class="flex items-center gap-2 text-xs lg:text-sm flex-wrap">
+                                <span class="flex items-center gap-2 px-3 py-1.5 bg-white/6 rounded-lg backdrop-blur-sm border border-white/10">
+                                    <span class="material-symbols-outlined text-sm text-primary">schedule</span>
+                                    <span class="text-gray-800 dark:text-slate-200 font-medium">Posted @selectedJob.PostedDate.ToString("MMM dd, yyyy")</span>
+                                </span>
+                                <span class="flex items-center gap-2 px-3 py-1.5 bg-white/6 rounded-lg backdrop-blur-sm border border-white/10">
+                                    <span class="material-symbols-outlined text-sm text-primary">event</span>
+                                    <span class="text-gray-800 dark:text-slate-200 font-medium">Deadline: @selectedJob.Deadline.ToString("MMM dd, yyyy")</span>
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Apply Button -->
+                        @if (!hasApplied && selectedJob.Deadline > DateTime.UtcNow)
+                        {
+                            <button onclick="openApplyModal('@selectedJob.Id')" 
+                                    class="cta-button w-full bg-gradient-to-r from-primary via-purple-600 to-primary text-white px-6 py-3.5 rounded-xl font-bold text-base lg:text-lg mb-4 lg:mb-6 shadow-xl relative overflow-hidden group">
+                                <span class="relative z-10 flex items-center justify-center gap-2">
+                                    <span class="material-symbols-outlined text-lg">send</span>
+                                    <span>Apply Now</span>
+                                    <span class="material-symbols-outlined text-lg group-hover:translate-x-1 transition-transform duration-300">arrow_forward</span>
+                                </span>
+                                <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity shimmer"></div>
+                            </button>
+                        }
+                        else if (hasApplied)
+                        {
+                            <button disabled 
+                                    class="w-full bg-slate-700/40 text-gray-700 dark:text-slate-400 border border-slate-600/60 px-6 py-3.5 rounded-xl font-semibold text-base lg:text-lg mb-4 lg:mb-6 cursor-not-allowed backdrop-blur-sm">
+                                <span class="flex items-center justify-center gap-2">
+                                    <span class="material-symbols-outlined text-lg">check_circle</span>
+                                    <span>Already Applied</span>
+                                </span>
+                            </button>
+                        }
+                        else
+                        {
+                            <button disabled 
+                                    class="w-full bg-red-900/30 text-red-400 border border-red-500/40 px-6 py-3.5 rounded-xl font-semibold text-base lg:text-lg mb-4 lg:mb-6 cursor-not-allowed backdrop-blur-sm">
+                                <span class="flex items-center justify-center gap-2">
+                                    <span class="material-symbols-outlined text-lg">event_busy</span>
+                                    <span>Application Deadline Passed</span>
+                                </span>
+                            </button>
+                        }
+
+                        <!-- Content Sections -->
+                        <div class="space-y-4 lg:space-y-6">
+                            <!-- Description -->
+                            <div class="premium-card rounded-xl lg:rounded-2xl p-4 lg:p-6">
+                                <h3 class="text-lg lg:text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                                    <div class="p-2 rounded-lg bg-primary/20 border border-primary/30">
+                                        <span class="material-symbols-outlined text-primary text-base">description</span>
+                                    </div>
+                                    <span>Job Description</span>
+                                </h3>
+                                <div class="prose prose-invert max-w-none">
+                                    <p class="text-gray-800 dark:text-slate-200 leading-relaxed whitespace-pre-line text-sm lg:text-base">@selectedJob.Description</p>
+                                </div>
+                            </div>
+
+                            <!-- Required Skills -->
+                            @if (requiredSkills.Any())
+                            {
+                                <div class="premium-card rounded-xl lg:rounded-2xl p-4 lg:p-6">
+                                    <h3 class="text-lg lg:text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                                        <div class="p-2 rounded-lg bg-primary/20 border border-primary/30">
+                                            <span class="material-symbols-outlined text-primary text-base">code</span>
+                                        </div>
+                                        <span>Required Skills</span>
+                                    </h3>
+                                    <div class="flex flex-wrap gap-2 lg:gap-3">
+                                        @foreach (var skill in requiredSkills)
+                                        {
+                                            var userHasSkill = userSkills.Any(us => 
+                                                us.Equals(skill, StringComparison.OrdinalIgnoreCase) ||
+                                                us.Contains(skill, StringComparison.OrdinalIgnoreCase) ||
+                                                skill.Contains(us, StringComparison.OrdinalIgnoreCase));
+                                            
+                                            <span class="skill-tag px-3 py-1.5 lg:px-4 lg:py-2 rounded-lg text-xs lg:text-sm font-semibold backdrop-blur-sm @(userHasSkill ? "bg-gradient-to-br from-green-500/25 to-emerald-500/15 text-green-700 dark:text-green-100 border border-green-400/50 shadow-lg" : "bg-slate-700/50 text-gray-700 dark:text-slate-300 border border-slate-600/50")">
+                                                @if (userHasSkill)
+                                                {
+                                                    <span class="material-symbols-outlined text-sm align-middle mr-1">check_circle</span>
+                                                }
+                                                @skill
+                                            </span>
+                                        }
+                                    </div>
+                                </div>
+                            }
+
+                            <!-- Match Analysis -->
+                            @if (matchPercentage > 0)
+                            {
+                                <div class="premium-card rounded-xl lg:rounded-2xl p-4 lg:p-6 bg-gradient-to-br from-primary/15 via-purple-600/10 to-primary/15 border-primary/30 relative overflow-hidden">
+                                    <div class="absolute top-0 right-0 w-48 h-48 bg-primary/8 rounded-full blur-2xl -mr-24 -mt-24"></div>
+                                    <div class="absolute bottom-0 left-0 w-36 h-36 bg-purple-600/8 rounded-full blur-2xl -ml-18 -mb-18"></div>
+                                    <div class="relative z-10">
+                                        <h3 class="text-lg lg:text-xl font-bold text-primary mb-4 flex items-center gap-2">
+                                            <div class="p-2 rounded-lg bg-primary/25 border border-primary/40">
+                                                <span class="material-symbols-outlined text-base">auto_awesome</span>
+                                            </div>
+                                            <span>Why You're a @matchPercentage.ToString("0")% Match</span>
+                                        </h3>
+                                        <ul class="space-y-3">
+                                            @if (userSkills.Any())
+                                            {
+                                                var matchedSkills = userSkills.Where(us => 
+                                                    requiredSkills.Any(rs => 
+                                                        us.Equals(rs, StringComparison.OrdinalIgnoreCase) ||
+                                                        us.Contains(rs, StringComparison.OrdinalIgnoreCase) ||
+                                                        rs.Contains(us, StringComparison.OrdinalIgnoreCase)
+                                                    )
+                                                ).Take(5);
+                                                
+                                                @foreach (var skill in matchedSkills)
+                                                {
+                                                    <li class="flex items-start gap-3 p-3 bg-white/5 rounded-xl backdrop-blur-sm border border-white/10">
+                                                        <span class="material-symbols-outlined text-green-400 text-lg mt-0.5">check_circle</span>
+                                                        <span class="text-sm lg:text-base text-green-700 dark:text-green-100 font-medium">You have experience with <strong class="text-gray-900 dark:text-white font-bold">@skill</strong></span>
+                                                    </li>
+                                                }
+                                            }
+                                            else
+                                            {
+                                                <li class="text-gray-700 dark:text-slate-300 flex items-start gap-3 p-3 bg-white/5 rounded-xl backdrop-blur-sm border border-white/10">
+                                                    <span class="material-symbols-outlined text-gray-600 dark:text-slate-400 text-base">info</span>
+                                                    <span class="font-medium text-sm lg:text-base">Update your CV with your programming skills to see your match details.</span>
+                                                </li>
+                                            }
+                                        </ul>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="p-6 lg:p-12 flex items-center justify-center h-full">
+                        <div class="text-center premium-card rounded-xl lg:rounded-2xl p-8 lg:p-12 max-w-md">
+                            <div class="p-6 rounded-full bg-gradient-to-br from-primary/20 to-purple-600/10 border border-primary/30 w-24 h-24 lg:w-28 lg:h-28 mx-auto mb-6 lg:mb-8 flex items-center justify-center">
+                                <span class="material-symbols-outlined text-4xl lg:text-5xl text-primary">work</span>
+                            </div>
+                            <p class="text-gray-900 dark:text-slate-100 text-xl lg:text-2xl font-bold mb-3 text-gradient">Select a job to view details</p>
+                            <p class="text-gray-600 dark:text-slate-400 text-sm lg:text-base font-medium">Click on any job from the list to see full details</p>
+                        </div>
+                    </div>
+                }
+            </div>
+        </main>
+    </div>
+
+    <!-- Apply Modal -->
+    <div id="applyModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/85 backdrop-blur-md modal-overlay p-4">
+        <div class="glass-morphism rounded-xl lg:rounded-2xl p-6 lg:p-8 max-w-2xl w-full border border-white/10 shadow-2xl modal-panel max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-6">
+                <div class="flex items-center gap-3">
+                    <div class="p-2 rounded-lg bg-gradient-to-br from-primary/30 to-purple-600/20 border border-primary/40">
+                        <span class="material-symbols-outlined text-primary text-xl">send</span>
+                    </div>
+                    <h2 class="text-xl lg:text-2xl font-bold text-gradient">Apply for Position</h2>
+                </div>
+                <button onclick="closeApplyModal()" class="text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white transition-all duration-300 p-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-lg group">
+                    <span class="material-symbols-outlined text-xl group-hover:rotate-90 transition-transform duration-300">close</span>
+                </button>
+            </div>
+            
+            <form id="applyForm" method="post" action="@Url.Action("Apply", "JobOffer")">
+                @Html.AntiForgeryToken()
+                <input type="hidden" id="jobIdInput" name="jobId" value="" />
+                
+                <div class="mb-6">
+                    <label for="coverLetter" class="block text-gray-900 dark:text-white text-sm lg:text-base font-semibold mb-2">
+                        Cover Letter <span class="text-gray-600 dark:text-slate-400 text-xs font-normal">(Optional)</span>
+                    </label>
+                    <textarea id="coverLetter" name="coverLetter" rows="6" 
+                              placeholder="Tell us why you're interested in this position and what makes you a great fit..."
+                              class="w-full px-4 py-3 bg-gray-100 dark:bg-white/5 border border-gray-300 dark:border-white/10 rounded-xl text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-slate-500/60 focus:outline-none focus:border-primary/70 focus:bg-gray-200 dark:focus:bg-white/8 focus:ring-2 focus:ring-primary/20 transition-all duration-300 text-sm font-medium backdrop-blur-sm resize-none"></textarea>
+                </div>
+
+                <div class="flex flex-col sm:flex-row gap-3">
+                    <button type="button" onclick="closeApplyModal()" 
+                            class="flex-1 px-6 py-3 bg-gray-100 dark:bg-white/5 border border-gray-300 dark:border-white/10 rounded-xl text-gray-900 dark:text-white font-semibold text-sm lg:text-base hover:bg-gray-200 dark:hover:bg-white/10 transition-all duration-300">
+                        Cancel
+                    </button>
+                    <button type="submit" id="submitApplicationBtn"
+                            class="flex-1 px-6 py-3 bg-gradient-to-r from-primary to-purple-600 text-white rounded-xl font-bold text-sm lg:text-base shadow-xl hover:shadow-2xl hover:shadow-primary/50 transition-all duration-300">
+                        Submit Application
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Define openApplyModal and closeApplyModal FIRST, before any other code
+        // Assign directly to window to ensure they're available immediately
+        window.openApplyModal = function(jobId) {
+            console.log('Opening apply modal for jobId:', jobId);
+            const modal = document.getElementById('applyModal');
+            const jobIdInput = document.getElementById('jobIdInput');
+            
+            if (!modal) {
+                console.error('applyModal element not found!');
+                alert('Error: Modal not found. Please refresh the page.');
+                return;
+            }
+            
+            if (!jobIdInput) {
+                console.error('jobIdInput element not found!');
+                alert('Error: Form not found. Please refresh the page.');
+                return;
+            }
+            
+            // Set the jobId value
+            jobIdInput.value = jobId;
+            console.log('Set jobIdInput value to:', jobIdInput.value);
+            console.log('jobIdInput type:', typeof jobIdInput.value);
+            
+            // Show the modal
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            document.body.style.overflow = 'hidden';
+            
+            // Verify the form is ready
+            const form = document.getElementById('applyForm');
+            if (form) {
+                console.log('Form found, action:', form.action);
+            } else {
+                console.error('Form not found!');
+            }
+        };
+
+        window.closeApplyModal = function() {
+            document.getElementById('applyModal').classList.add('hidden');
+            document.getElementById('applyModal').classList.remove('flex');
+            document.body.style.overflow = 'auto';
+        };
+
+        // Make selectJob available globally - define it immediately on window
+        window.selectJob = function(jobId, element) {
+            console.log('selectJob called with jobId:', jobId);
+            
+            if (!jobId) {
+                console.error('No jobId provided to selectJob');
+                return;
+            }
+            
+            try {
+                // Remove active class and border from all job cards
+                document.querySelectorAll('.job-card').forEach(card => {
+                    card.classList.remove('active');
+                    card.style.border = '';
+                    card.style.borderColor = '';
+                    card.style.borderWidth = '';
+                });
+                
+                // Add active class to selected card and force remove border
+                if (element) {
+                    element.classList.add('active');
+                    element.style.border = 'none';
+                    element.style.borderColor = 'transparent';
+                    element.style.borderWidth = '0';
+                }
+                
+                // Build URL with selectedJobId parameter
+                const currentUrl = window.location.href.split('?')[0];
+                const urlParams = new URLSearchParams(window.location.search);
+                urlParams.set('selectedJobId', jobId);
+                
+                // Preserve searchTerm if it exists
+                const searchTerm = urlParams.get('searchTerm');
+                if (searchTerm) {
+                    urlParams.set('searchTerm', searchTerm);
+                }
+                
+                const newUrl = currentUrl + '?' + urlParams.toString();
+                console.log('Navigating to:', newUrl);
+                
+                // On mobile, show job details panel
+                const detailsPanel = document.getElementById('jobDetailsPanel');
+                if (window.innerWidth < 1024 && detailsPanel) {
+                    detailsPanel.classList.add('mobile-active');
+                }
+                
+                // Navigate to the new URL
+                window.location.href = newUrl;
+            } catch (error) {
+                console.error('Error selecting job:', error);
+                // Fallback: try simple URL construction
+                const fallbackUrl = window.location.pathname + '?selectedJobId=' + jobId;
+                console.log('Using fallback URL:', fallbackUrl);
+                window.location.href = fallbackUrl;
+            }
+        };
+        
+        // Also define it as a regular function for backwards compatibility
+        function selectJob(jobId, element) {
+            window.selectJob(jobId, element);
+        }
+        
+        // Also add event delegation as a backup
+        function setupJobCardListeners() {
+            const jobListPanel = document.querySelector('.job-list-panel');
+            if (jobListPanel) {
+                jobListPanel.addEventListener('click', function(e) {
+                    const jobCard = e.target.closest('.job-card');
+                    if (jobCard) {
+                        const jobId = jobCard.getAttribute('data-job-id');
+                        if (jobId) {
+                            const isInteractiveElement = e.target.closest('a, button, input, select, textarea');
+                            if (!isInteractiveElement) {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                selectJob(jobId, jobCard);
+                            }
+                        }
+                    }
+                });
+            }
+        }
+        
+        // Setup listeners when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', setupJobCardListeners);
+        } else {
+            // DOM is already loaded
+            setupJobCardListeners();
+        }
+        
+        // On page load, ensure active job card has no border
+        document.addEventListener('DOMContentLoaded', function() {
+            const activeCards = document.querySelectorAll('.job-card.active, .premium-card.job-card.active, .job-card.premium-card.active');
+            activeCards.forEach(card => {
+                card.style.setProperty('border', 'none', 'important');
+                card.style.setProperty('border-color', 'transparent', 'important');
+                card.style.setProperty('border-width', '0', 'important');
+                card.style.setProperty('border-style', 'none', 'important');
+            });
+        });
+        
+        // Force correct background on Career Opportunities header based on theme
+        function forceHeaderBackground() {
+            const headers = document.querySelectorAll('.sticky.top-0.z-20, .job-list-panel .sticky.top-0.z-20');
+            const isDark = document.documentElement.classList.contains('dark');
+            
+            headers.forEach(header => {
+                if (!isDark) {
+                    // Light mode: white background
+                    header.classList.remove('glass-morphism');
+                    header.classList.remove('dark:glass-morphism');
+                    header.style.cssText += 'background: white !important; background-color: white !important; background-image: none !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important;';
+                } else {
+                    // Dark mode: dark background
+                    header.style.cssText += 'background: #0a0a0f !important; background-color: #0a0a0f !important;';
+                }
+            });
+        }
+        
+        // Run immediately
+        forceHeaderBackground();
+        
+        // Run on DOMContentLoaded
+        document.addEventListener('DOMContentLoaded', forceHeaderBackground);
+        
+        // Run after a short delay to ensure all styles are applied
+        setTimeout(forceHeaderBackground, 100);
+        setTimeout(forceHeaderBackground, 500);
+        
+        // Watch for theme changes
+        const observer = new MutationObserver(function(mutations) {
+            mutations.forEach(function(mutation) {
+                if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+                    forceHeaderBackground();
+                }
+            });
+        });
+        observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+        
+        // Also run immediately in case DOMContentLoaded already fired
+        (function() {
+            const activeCards = document.querySelectorAll('.job-card.active, .premium-card.job-card.active, .job-card.premium-card.active');
+            activeCards.forEach(card => {
+                card.style.setProperty('border', 'none', 'important');
+                card.style.setProperty('border-color', 'transparent', 'important');
+                card.style.setProperty('border-width', '0', 'important');
+                card.style.setProperty('border-style', 'none', 'important');
+            });
+        })();
+
+        // Mobile menu toggle
+        document.getElementById('mobileMenuBtn')?.addEventListener('click', function() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('mobile-open');
+        });
+
+        // Close job details on mobile
+        document.getElementById('closeJobDetails')?.addEventListener('click', function() {
+            const detailsPanel = document.getElementById('jobDetailsPanel');
+            detailsPanel.classList.remove('mobile-active');
+        });
+
+        // Close modal on backdrop click (but not on form clicks)
+        document.getElementById('applyModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeApplyModal();
+            }
+        });
+
+        // Prevent modal from closing when clicking inside the form
+        document.querySelector('.modal-panel')?.addEventListener('click', function(e) {
+            e.stopPropagation();
+        });
+
+        // Handle apply form submission using event delegation (works even if form is added dynamically)
+        document.addEventListener('submit', function(e) {
+            if (e.target && e.target.id === 'applyForm') {
+                const jobIdInput = document.getElementById('jobIdInput');
+                console.log('=== FORM SUBMIT EVENT TRIGGERED ===');
+                console.log('jobIdInput element:', jobIdInput);
+                console.log('jobIdInput value:', jobIdInput?.value);
+                console.log('Form action:', e.target.action);
+                console.log('Form method:', e.target.method);
+                
+                if (!jobIdInput || !jobIdInput.value || jobIdInput.value.trim() === '') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    alert('Error: Job ID is missing. Please try again.');
+                    console.error('Job ID is missing from form');
+                    return false;
+                }
+                
+                console.log('Form validation passed, submitting for jobId:', jobIdInput.value);
+                // Allow form to submit normally - don't prevent default
+                return true;
+            }
+        }, true); // Use capture phase to catch the event early
+        
+
+        // Auto-submit search on input with debouncing
+        const searchInput = document.getElementById('searchInput');
+        if (searchInput) {
+            let searchTimeout;
+            
+            // Function to toggle clear button visibility
+            function toggleClearButton() {
+                const clearButton = searchInput.parentElement.querySelector('button[onclick="clearSearch()"]');
+                if (clearButton) {
+                    if (searchInput.value.trim().length > 0) {
+                        clearButton.style.display = 'block';
+                    } else {
+                        clearButton.style.display = 'none';
+                    }
+                }
+            }
+            
+            // Initialize clear button visibility
+            toggleClearButton();
+            
+            // Handle input changes with debouncing
+            searchInput.addEventListener('input', function(e) {
+                clearTimeout(searchTimeout);
+                const inputValue = this.value.trim();
+                
+                // Toggle clear button visibility
+                toggleClearButton();
+                
+                // Submit if empty or at least 2 characters (reduced from 3 for better UX)
+                searchTimeout = setTimeout(() => {
+                    // Preserve selectedJobId when searching
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const currentSelectedJobId = urlParams.get('selectedJobId');
+                    
+                    // Build form data
+                    const form = this.form;
+                    const formData = new FormData(form);
+                    
+                    // If there's a selectedJobId in URL but not in form, add it
+                    if (currentSelectedJobId && !formData.has('selectedJobId')) {
+                        const hiddenInput = document.createElement('input');
+                        hiddenInput.type = 'hidden';
+                        hiddenInput.name = 'selectedJobId';
+                        hiddenInput.value = currentSelectedJobId;
+                        form.appendChild(hiddenInput);
+                    }
+                    
+                    // Submit the form
+                    if (inputValue.length === 0 || inputValue.length >= 2) {
+                        form.submit();
+                    }
+                }, 500);
+            });
+            
+            // Handle Enter key press for immediate search
+            searchInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    clearTimeout(searchTimeout);
+                    
+                    // Preserve selectedJobId when searching
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const currentSelectedJobId = urlParams.get('selectedJobId');
+                    
+                    // Build form data
+                    const form = this.form;
+                    const formData = new FormData(form);
+                    
+                    // If there's a selectedJobId in URL but not in form, add it
+                    if (currentSelectedJobId && !formData.has('selectedJobId')) {
+                        const hiddenInput = document.createElement('input');
+                        hiddenInput.type = 'hidden';
+                        hiddenInput.name = 'selectedJobId';
+                        hiddenInput.value = currentSelectedJobId;
+                        form.appendChild(hiddenInput);
+                    }
+                    
+                    // Submit immediately on Enter
+                    form.submit();
+                }
+            });
+        }
+
+        // Handle window resize
+        window.addEventListener('resize', function() {
+            const detailsPanel = document.getElementById('jobDetailsPanel');
+            if (window.innerWidth >= 1024) {
+                detailsPanel.classList.remove('mobile-active');
+            }
+        });
+
+        // Clear search function
+        function clearSearch() {
+            const searchInput = document.getElementById('searchInput');
+            const searchForm = document.getElementById('searchForm');
+            if (searchInput && searchForm) {
+                searchInput.value = '';
+                // Preserve selectedJobId when clearing search
+                const urlParams = new URLSearchParams(window.location.search);
+                const currentSelectedJobId = urlParams.get('selectedJobId');
+                
+                if (currentSelectedJobId) {
+                    const hiddenInput = document.createElement('input');
+                    hiddenInput.type = 'hidden';
+                    hiddenInput.name = 'selectedJobId';
+                    hiddenInput.value = currentSelectedJobId;
+                    searchForm.appendChild(hiddenInput);
+                }
+                
+                searchForm.submit();
+            }
+        }
+
+        // Show job details on mobile if job is selected
+        @if (selectedJob != null)
+        {
+            @:if (window.innerWidth < 1024) {
+            @:    document.getElementById('jobDetailsPanel').classList.add('mobile-active');
+            @:}
+        }
+    </script>
+
+    @functions {
+        public string GetMatchBadgeClass(double matchPercentage)
+        {
+            if (matchPercentage >= 80) return "bg-green-500/20 text-green-300 border-green-500/40";
+            if (matchPercentage >= 60) return "bg-blue-500/20 text-blue-300 border-blue-500/40";
+            if (matchPercentage >= 40) return "bg-yellow-500/20 text-yellow-300 border-yellow-500/40";
+            return "bg-red-500/20 text-red-300 border-red-500/40";
+        }
+
+        public List<string> ExtractSkills(string skillsString)
+        {
+            if (string.IsNullOrWhiteSpace(skillsString))
+                return new List<string>();
+
+            return skillsString.Split(new[] { ',', ';', '\n' }, StringSplitOptions.RemoveEmptyEntries)
+                .Select(s => s.Trim())
+                .Where(s => !string.IsNullOrWhiteSpace(s))
+                .ToList();
+        }
+    }
+</body>
+</html>

@@ -1,0 +1,140 @@
+﻿@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Python Learning Path - Functional</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
+    <style>
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .hidden { display: none; }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt-stdlib.js"></script>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-[#111827]">
+    <div class="flex h-screen w-full flex-col">
+        <!-- Header -->
+        <header class="flex shrink-0 items-center justify-between border-b border-white/10 px-6 py-3 bg-background-dark text-white">
+            <h2 class="text-white text-lg font-bold">CodeWave</h2>
+        </header>
+
+        <div class="flex flex-1 overflow-hidden">
+            <!-- Sidebar -->
+            <aside class="w-72 shrink-0 flex-col border-r border-gray-200 bg-white p-4 hidden md:flex">
+                <h3 class="text-gray-900 text-lg font-bold mb-3">Lessons</h3>
+                <div id="sidebar-lessons" class="flex flex-col gap-2">
+                    <!-- Lessons populated by JS -->
+                </div>
+            </aside>
+
+            <!-- Main Content -->
+            <main class="flex-1 flex flex-col lg:flex-row overflow-hidden bg-background-dark p-6">
+                <div class="flex-1 flex flex-col">
+                    <div class="flex flex-col mb-6">
+                        <p id="lessonTitle" class="text-white text-3xl font-bold mb-2">Loading...</p>
+                    </div>
+
+                    <!-- Tabs -->
+                    <div class="flex border-b border-white/10 mb-4">
+                        <button class="tab-button border-b-2 border-b-primary text-white px-4 py-2">Instructions</button>
+                        <button class="tab-button border-b-2 border-b-transparent text-gray-400 px-4 py-2">Code Editor</button>
+                        <button class="tab-button border-b-2 border-b-transparent text-gray-400 px-4 py-2">Terminal</button>
+                    </div>
+
+                    <div id="lessonContent" class="tab-content text-gray-300 mb-4">
+                        Loading instructions...
+                    </div>
+
+                    <div class="tab-content hidden mb-4">
+                        <textarea id="codeEditor" class="w-full h-48 bg-gray-900 text-green-300 p-2 rounded"></textarea>
+                        <button onclick="runCode()" class="mt-2 bg-[#22c55e] text-white px-4 py-2 rounded hover:bg-[#16a34a] flex items-center gap-2">
+                            <span class="material-symbols-outlined">play_arrow</span> Run Code
+                        </button>
+                    </div>
+
+                    <div class="tab-content hidden">
+                        <pre id="terminalOutput" class="bg-black text-green-300 p-2 rounded h-48 overflow-y-auto"></pre>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        // Sample lessons JSON
+        const lessons = [
+            {
+                id: 1,
+                title: "Understanding For Loops",
+                content: "<p>Use a <code>for</code> loop to sum numbers.</p>",
+                exercises: [{ starterCode: "numbers = [10,20,30,40,50]\ntotal_sum = 0\nfor num in numbers:\n    # add num to total_sum\nprint('The sum is:', total_sum)" }]
+            },
+            {
+                id: 2,
+                title: "While Loops",
+                content: "<p>Use a <code>while</code> loop to repeat until a condition is met.</p>",
+                exercises: [{ starterCode: "count = 0\nwhile count < 5:\n    print(count)\n    count += 1" }]
+            }
+        ];
+
+        // Populate sidebar
+        const sidebar = document.getElementById("sidebar-lessons");
+        lessons.forEach(l => {
+            const btn = document.createElement("button");
+            btn.textContent = l.title;
+            btn.className = "text-left px-2 py-1 rounded hover:bg-primary/20";
+            btn.onclick = () => loadLesson(l.id);
+            sidebar.appendChild(btn);
+        });
+
+        // Load lesson
+        function loadLesson(id) {
+            const lesson = lessons.find(l => l.id === id);
+            document.getElementById("lessonTitle").innerHTML = lesson.title;
+            document.getElementById("lessonContent").innerHTML = lesson.content;
+            document.getElementById("codeEditor").value = lesson.exercises[0].starterCode;
+            document.getElementById("terminalOutput").textContent = "";
+        }
+
+        // Tabs functionality
+        const tabs = document.querySelectorAll(".tab-button");
+        const contents = document.querySelectorAll(".tab-content");
+        tabs.forEach((tab, idx) => {
+            tab.addEventListener("click", () => {
+                tabs.forEach(t => t.classList.remove("border-b-primary", "text-white"));
+                tabs.forEach(t => t.classList.add("border-b-transparent", "text-gray-400"));
+                contents.forEach(c => c.classList.add("hidden"));
+
+                tab.classList.remove("border-b-transparent", "text-gray-400");
+                tab.classList.add("border-b-primary", "text-white");
+                contents[idx].classList.remove("hidden");
+            });
+        });
+
+        // Run Python code in-browser using Skulpt
+        function runCode() {
+            const prog = document.getElementById("codeEditor").value;
+            const outputElement = document.getElementById("terminalOutput");
+            outputElement.textContent = "";
+
+            function builtinRead(x) {
+                if (Sk.builtinFiles === undefined || Sk.builtinFiles["files"][x] === undefined)
+                    throw "File not found: '" + x + "'";
+                return Sk.builtinFiles["files"][x];
+            }
+
+            Sk.configure({ output: (text) => { outputElement.textContent += text; }, read: builtinRead });
+            Sk.misceval.asyncToPromise(() => Sk.importMainWithBody("<stdin>", false, prog));
+        }
+
+        // Load first lesson by default
+        loadLesson(1);
+    </script>
+</body>
+</html>

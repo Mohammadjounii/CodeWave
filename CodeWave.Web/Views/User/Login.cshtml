@@ -1,0 +1,344 @@
+﻿@model CodeWave.Web.Models.LoginViewModel
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Login Page</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&amp;family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#8B5CF6", // A vibrant purple
+                        secondary: "#A78BFA",
+                        "background-light": "#F8F9FA",
+                        "background-dark": "#111827",
+                    },
+                    fontFamily: {
+                        display: ["Space Mono", "monospace"],
+                        sans: ["Inter", "sans-serif"],
+                    },
+                    borderRadius: {
+                        DEFAULT: "12px",
+                        lg: '1rem',
+                        xl: '1.25rem',
+                        '2xl': '1.5rem',
+                    },
+                    animation: {
+                        'blob': 'blob 7s infinite',
+                        'fade-in': 'fadeIn 0.5s ease-out',
+                    },
+                    keyframes: {
+                        blob: {
+                            '0%': { transform: 'translate(0px, 0px) scale(1)' },
+                            '33%': { transform: 'translate(30px, -50px) scale(1.1)' },
+                            '66%': { transform: 'translate(-20px, 20px) scale(0.9)' },
+                            '100%': { transform: 'translate(0px, 0px) scale(1)' },
+                        },
+                        fadeIn: {
+                            '0%': { opacity: '0', transform: 'translateY(10px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        }
+                    }
+                },
+            },
+        };
+    </script>
+    <style>
+        body {
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        .animate-blob {
+            animation: blob 7s infinite;
+        }
+        .animation-delay-2000 {
+            animation-delay: 2s;
+        }
+        .animation-delay-4000 {
+            animation-delay: 4s;
+        }
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            background: linear-gradient(135deg, #e9d5ff 0%, #ddd6fe 50%, #e0e7ff 100%);
+            backdrop-filter: blur(10px);
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            padding: 2rem;
+        }
+        .dark .loading-overlay {
+            background: linear-gradient(135deg, #4c1d95 0%, #5b21b6 50%, #6d28d9 100%);
+        }
+        .loading-overlay.active {
+            display: flex;
+        }
+        .loading-logo {
+            animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+            margin-bottom: 2rem;
+        }
+        .loading-content {
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+        .loading-message {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #6b21a8;
+            margin-bottom: 2rem;
+            min-height: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: fadeInOut 2s ease-in-out infinite;
+        }
+        .dark .loading-message {
+            color: #e9d5ff;
+        }
+        .progress-bar-container {
+            width: 100%;
+            height: 8px;
+            background: rgba(139, 92, 246, 0.2);
+            border-radius: 9999px;
+            overflow: hidden;
+            margin-bottom: 1rem;
+        }
+        .dark .progress-bar-container {
+            background: rgba(196, 181, 253, 0.2);
+        }
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #8b5cf6 0%, #a78bfa 50%, #c4b5fd 100%);
+            border-radius: 9999px;
+            width: 0%;
+            animation: fillProgress 3s ease-out forwards;
+            box-shadow: 0 0 20px rgba(139, 92, 246, 0.5);
+        }
+        @@keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 0.9;
+                transform: scale(1.05);
+            }
+        }
+        @@keyframes fillProgress {
+            0% {
+                width: 0%;
+            }
+            100% {
+                width: 100%;
+            }
+        }
+        @@keyframes fadeInOut {
+            0%, 100% {
+                opacity: 0.7;
+            }
+            50% {
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-sans text-gray-800 dark:text-gray-200 antialiased min-h-screen flex flex-col relative selection:bg-primary/30 selection:text-primary">
+    <div class="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+        <!-- Top Right Purple Gradient - Theme Gradient -->
+        <div class="absolute -top-32 -right-32 w-[900px] h-[900px] bg-gradient-to-br from-primary/35 via-purple-300/20 to-secondary/30 rounded-full filter blur-[140px] opacity-75"></div>
+        <!-- Bottom Left Light Blue Gradient -->
+        <div class="absolute -bottom-32 -left-32 w-[900px] h-[900px] bg-gradient-to-tr from-blue-300/35 via-cyan-300/20 to-sky-300/30 rounded-full filter blur-[140px] opacity-75"></div>
+        <!-- Center Blending Gradient - Purple to Blue Transition -->
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-gradient-to-br from-purple-400/20 via-indigo-300/15 to-blue-400/20 rounded-full filter blur-[150px] opacity-60"></div>
+        <div class="absolute top-0 -left-1/4 w-96 h-96 bg-primary/20 rounded-full filter blur-3xl opacity-60 animate-blob"></div>
+        <div class="absolute top-0 -right-1/4 w-96 h-96 bg-purple-300/20 rounded-full filter blur-3xl opacity-60 animate-blob animation-delay-2000"></div>
+        <div class="absolute -bottom-32 left-1/4 w-96 h-96 bg-indigo-300/20 rounded-full filter blur-3xl opacity-60 animate-blob animation-delay-4000"></div>
+    </div>
+    <header class="w-full px-6 lg:px-12 py-6 z-20 flex justify-between items-center absolute top-0 left-0">
+        <a class="flex items-center gap-3 group" href="#">
+            <img src="/codewaveblacklogo.png" alt="CodeWave Logo" class="h-12 w-12 object-contain dark:hidden" />
+            <img src="/CodeWavelogo.PNG" alt="CodeWave Logo" class="h-12 w-12 object-contain hidden dark:block" />
+            <div class="flex flex-col">
+                <span class="text-xl font-display font-bold text-gray-900 dark:text-white tracking-tight group-hover:text-primary transition-colors">CodeWave</span>
+            </div>
+        </a>
+        <div class="hidden sm:block">
+            <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Interactive Coding Platform</p>
+        </div>
+    </header>
+    <main class="flex-grow flex items-center justify-center px-4 sm:px-6 lg:px-8 z-10 w-full py-20">
+        <div class="w-full max-w-[440px] bg-white/70 dark:bg-gray-800/60 backdrop-blur-xl rounded-2xl p-8 sm:p-12 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white/40 dark:border-gray-700/50 ring-1 ring-gray-900/5 dark:ring-white/10 animate-fade-in">
+            <div class="text-center mb-10">
+                <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br from-primary/10 to-purple-100/50 dark:from-primary/20 dark:to-purple-900/20 text-primary mb-6 ring-1 ring-primary/20 shadow-sm">
+                    <span class="material-symbols-outlined text-[28px]"><img src="/codewaveblacklogo.png" alt="CodeWave Logo" class="h-12 w-12 object-contain dark:hidden" /></span>
+                </div>
+                <h1 class="font-display text-2xl font-bold text-gray-900 dark:text-white tracking-tight">Welcome Back!</h1>
+                <p class="mt-3 text-sm text-gray-500 dark:text-gray-400 font-medium leading-relaxed">Login to access your personalized learning path and project tracking.</p>
+            </div>
+            <form asp-action="Login" asp-controller="User" method="post" class="space-y-5">
+                @Html.AntiForgeryToken()
+                @if (!ViewData.ModelState.IsValid && ViewData.ModelState.ErrorCount > 0)
+                {
+                    <div asp-validation-summary="All" class="text-red-500 text-sm bg-red-50 dark:bg-red-900/20 p-3 rounded-xl border border-red-200 dark:border-red-800"></div>
+                }
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2" asp-for="Email">Email address</label>
+                    <div class="relative group">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400 group-focus-within:text-primary transition-colors">
+                            <span class="material-symbols-outlined text-[20px]">mail</span>
+                        </div>
+                        <input asp-for="Email" autocomplete="email" class="block w-full pl-11 pr-4 py-3.5 border border-gray-200 dark:border-gray-700 rounded-xl bg-white/50 dark:bg-gray-900/50 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-[3px] focus:ring-primary/10 focus:border-primary transition-all duration-200 sm:text-sm shadow-sm hover:border-gray-300 dark:hover:border-gray-600" placeholder="you@codewave.com" type="email"/>
+                    </div>
+                    @if (ViewData.ModelState["Email"]?.Errors?.Count > 0)
+                    {
+                        <span asp-validation-for="Email" class="text-red-500 text-xs mt-1"></span>
+                    }
+                </div>
+                <div>
+                    <div class="flex items-center justify-between mb-2">
+                        <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300" asp-for="Password">Password</label>
+                        <a class="text-sm font-semibold text-primary hover:text-primary/80 transition-colors" asp-controller="Settings" asp-action="ForgotPassword">Forgot Password?</a>
+                    </div>
+                    <div class="relative group">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400 group-focus-within:text-primary transition-colors">
+                            <span class="material-symbols-outlined text-[20px]">lock</span>
+                        </div>
+                        <input asp-for="Password" autocomplete="current-password" class="block w-full pl-11 pr-4 py-3.5 border border-gray-200 dark:border-gray-700 rounded-xl bg-white/50 dark:bg-gray-900/50 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-[3px] focus:ring-primary/10 focus:border-primary transition-all duration-200 sm:text-sm shadow-sm hover:border-gray-300 dark:hover:border-gray-600" placeholder="••••••••" type="password"/>
+                    </div>
+                    @if (ViewData.ModelState["Password"]?.Errors?.Count > 0)
+                    {
+                        <span asp-validation-for="Password" class="text-red-500 text-xs mt-1"></span>
+                    }
+                </div>
+                <button class="w-full flex justify-center items-center py-3.5 px-4 mt-6 border border-transparent rounded-xl shadow-lg shadow-primary/20 text-sm font-bold text-white bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary dark:focus:ring-offset-gray-900 transition-all duration-200 transform hover:-translate-y-0.5 active:translate-y-0" type="submit">
+                    Login
+                    <span class="material-symbols-outlined ml-2 text-lg">arrow_forward</span>
+                </button>
+            </form>
+            <div class="mt-8 flex items-center justify-between gap-4">
+                <div class="h-px bg-gray-200 dark:bg-gray-700 w-full rounded-full"></div>
+                <span class="text-xs font-bold text-gray-400 uppercase tracking-wider whitespace-nowrap">Or continue with</span>
+                <div class="h-px bg-gray-200 dark:bg-gray-700 w-full rounded-full"></div>
+            </div>
+            <div class="mt-8 grid grid-cols-2 gap-4">
+                <a asp-controller="User" asp-action="GoogleLogin" asp-route-returnUrl="@Url.Action("Index", "Home")" class="flex w-full items-center justify-center gap-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-3 text-sm font-semibold text-gray-700 dark:text-gray-200 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-600 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all duration-200 group hover:-translate-y-0.5">
+                    <svg aria-hidden="true" class="h-5 w-5 transition-transform group-hover:scale-110" viewBox="0 0 24 24">
+                        <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"></path>
+                        <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"></path>
+                        <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"></path>
+                        <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"></path>
+                    </svg>
+                    <span>Google</span>
+                </a>
+                <a asp-controller="User" asp-action="GitHubLogin" asp-route-returnUrl="@Url.Action("Index", "Home")" class="flex w-full items-center justify-center gap-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-3 text-sm font-semibold text-gray-700 dark:text-gray-200 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-600 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all duration-200 group hover:-translate-y-0.5">
+                    <svg aria-hidden="true" class="h-5 w-5 fill-current text-gray-900 dark:text-white transition-transform group-hover:scale-110" viewBox="0 0 24 24">
+                        <path clip-rule="evenodd" d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.168 6.839 9.49.5.092.682-.217.682-.482 0-.237-.009-.868-.014-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.031-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.203 2.398.1 2.651.64.7 1.03 1.595 1.03 2.688 0 3.848-2.338 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.001 10.001 0 0022 12c0-5.523-4.477-10-10-10z" fill-rule="evenodd"></path>
+                    </svg>
+                    <span>GitHub</span>
+                </a>
+            </div>
+            <p class="mt-8 text-center text-sm text-gray-600 dark:text-gray-400">
+                Don't have an account?
+                <a asp-controller="User" asp-action="SignUp" class="font-bold text-primary hover:text-primary/80 hover:underline transition-colors duration-200">
+                    Sign up
+                </a>
+            </p>
+        </div>
+    </main>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="loading-logo">
+            <img src="/codewaveblacklogo.png" alt="CodeWave Logo" class="h-24 w-24 object-contain dark:hidden" />
+            <img src="/CodeWavelogo.PNG" alt="CodeWave Logo" class="h-24 w-24 object-contain hidden dark:block" />
+        </div>
+        <div class="loading-content">
+            <div id="loadingMessage" class="loading-message">Creating perfect pixels...</div>
+            <div class="progress-bar-container">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.querySelector('form');
+            const loadingOverlay = document.getElementById('loadingOverlay');
+            const loadingMessage = document.getElementById('loadingMessage');
+            const progressBar = document.getElementById('progressBar');
+            
+            const messages = [
+                'Creating perfect pixels...',
+                'Never stop until done...',
+                'Building your future...',
+                'Crafting excellence...',
+                'Every line of code matters...',
+                'Turning ideas into reality...',
+                'Excellence is a journey...',
+                'Code with purpose...',
+                'Dream it. Build it. Ship it.',
+                'Greatness takes time...'
+            ];
+            
+            let messageIndex = 0;
+            let progressInterval;
+            
+            function updateMessage() {
+                if (loadingMessage) {
+                    loadingMessage.style.opacity = '0';
+                    setTimeout(() => {
+                        loadingMessage.textContent = messages[messageIndex];
+                        loadingMessage.style.opacity = '1';
+                        messageIndex = (messageIndex + 1) % messages.length;
+                    }, 300);
+                }
+            }
+            
+            function startProgress() {
+                if (progressBar) {
+                    progressBar.style.width = '0%';
+                    progressBar.style.animation = 'none';
+                    setTimeout(() => {
+                        progressBar.style.animation = 'fillProgress 3s ease-out forwards';
+                    }, 10);
+                }
+            }
+            
+            if (form && loadingOverlay) {
+                form.addEventListener('submit', function(e) {
+                    e.preventDefault(); // Prevent immediate form submission
+                    
+                    // Show loading overlay
+                    loadingOverlay.classList.add('active');
+                    
+                    // Start progress bar
+                    startProgress();
+                    
+                    // Update message every 1.5 seconds
+                    updateMessage();
+                    const messageInterval = setInterval(updateMessage, 1500);
+                    
+                    // Wait for the loading animation to be visible (at least 3 seconds)
+                    // This ensures users see the animation before redirect
+                    setTimeout(function() {
+                        clearInterval(messageInterval);
+                        form.submit();
+                    }, 3000);
+                });
+            }
+        });
+    </script>
+</body>
+</html>

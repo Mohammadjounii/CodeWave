@@ -1,0 +1,171 @@
+@startuml CodeWave_Context_DFD
+
+!define PROCESS_COLOR #9e47eb
+!define ENTITY_COLOR #E6F3FF
+!define STORE_COLOR #FFE6E6
+
+skinparam defaultFontSize 10
+skinparam rectangle {
+  BackgroundColor ENTITY_COLOR
+  BorderColor #0066CC
+}
+
+skinparam database {
+  BackgroundColor STORE_COLOR
+  BorderColor #CC0000
+}
+
+skinparam component {
+  BackgroundColor PROCESS_COLOR
+  BorderColor #7c3aed
+}
+
+rectangle "Learner" as Learner
+rectangle "Administrator" as Admin
+rectangle "Guest User" as Guest
+rectangle "Google OAuth" as Google
+rectangle "GitHub OAuth" as GitHub
+rectangle "Code Execution\nSystem" as CodeRunner
+
+component "CodeWave Learning\nPlatform" as System
+
+Learner --> System : Registration Data\nLogin Credentials\nCourse Requests\nCode Submissions\nQuiz Answers
+System --> Learner : Course Content\nProgress Data\nQuiz Results\nJob Offers
+
+Admin --> System : Admin Credentials\nManagement Requests\nContent Updates
+System --> Admin : User Data\nCourse Data\nAnalytics Reports
+
+Guest --> System : Registration Data\nLogin Credentials
+System --> Guest : Login Page\nRegistration Form
+
+Google --> System : OAuth Token\nUser Profile
+System --> Google : OAuth Request
+
+GitHub --> System : OAuth Token\nUser Profile
+System --> GitHub : OAuth Request
+
+CodeRunner --> System : Execution Results\nOutput Data
+System --> CodeRunner : Code\nLanguage Type
+
+@enduml
+
+@startuml CodeWave_Level1_DFD
+
+!define PROCESS_COLOR #9e47eb
+!define ENTITY_COLOR #E6F3FF
+!define STORE_COLOR #FFE6E6
+
+skinparam defaultFontSize 9
+skinparam rectangle {
+  BackgroundColor ENTITY_COLOR
+  BorderColor #0066CC
+}
+
+skinparam database {
+  BackgroundColor STORE_COLOR
+  BorderColor #CC0000
+}
+
+skinparam component {
+  BackgroundColor PROCESS_COLOR
+  BorderColor #7c3aed
+}
+
+rectangle "Learner" as Learner
+rectangle "Administrator" as Admin
+rectangle "Guest User" as Guest
+rectangle "Google OAuth" as Google
+rectangle "GitHub OAuth" as GitHub
+rectangle "Code Execution\nSystem" as CodeRunner
+
+component "1.0\nAuthenticate User" as P1
+component "2.0\nManage Assessment" as P2
+component "3.0\nManage Learning\nContent" as P3
+component "4.0\nExecute Code" as P4
+component "5.0\nTrack Progress" as P5
+component "6.0\nManage Quizzes" as P6
+component "7.0\nManage Admin\nFunctions" as P7
+component "8.0\nGenerate Reports" as P8
+
+database "D1: User\nDatabase" as D1
+database "D2: Course\nDatabase" as D2
+database "D3: Progress\nDatabase" as D3
+database "D4: Quiz\nDatabase" as D4
+database "D5: Assessment\nDatabase" as D5
+database "D6: Session\nStore" as D6
+database "D7: Code\nCache" as D7
+
+' Authentication flows
+Learner --> P1 : Login Credentials
+Guest --> P1 : Registration Data
+Google --> P1 : OAuth Token
+GitHub --> P1 : OAuth Token
+P1 --> D1 : User Data
+P1 --> D6 : Session Data
+D1 --> P1 : User Info
+P1 --> Learner : Authenticated User
+P1 --> Admin : Authenticated Admin
+
+' Assessment flows
+Learner --> P2 : Assessment Answers
+P2 --> D5 : Assessment Data
+P2 --> D1 : User Assessment
+D5 --> P2 : Questions
+D1 --> P2 : User Profile
+P2 --> Learner : Learning Path
+
+' Learning Content flows
+Learner --> P3 : Course Request
+Admin --> P3 : Course Management
+P3 --> D2 : Course Data
+D2 --> P3 : Course Content
+P3 --> Learner : Lessons & Exercises
+P3 --> Admin : Course Updates
+
+' Code Execution flows
+Learner --> P4 : Code
+P4 --> CodeRunner : Code Request
+CodeRunner --> P4 : Execution Results
+P4 --> D7 : Code Results
+P4 --> D3 : Submission Data
+D7 --> P4 : Cached Results
+P4 --> Learner : Output
+
+' Progress Tracking flows
+Learner --> P5 : Progress Query
+P5 --> D3 : Progress Data
+D3 --> P5 : Completion Records
+D1 --> P5 : User Data
+D2 --> P5 : Course Data
+P5 --> Learner : Progress Statistics
+
+' Quiz Management flows
+Learner --> P6 : Quiz Answers
+Admin --> P6 : Quiz Management
+P6 --> D4 : Quiz Data
+D4 --> P6 : Questions & Answers
+P6 --> Learner : Quiz Results
+P6 --> Admin : Quiz Updates
+
+' Admin Functions flows
+Admin --> P7 : Management Requests
+P7 --> D1 : User Data
+P7 --> D2 : Course Data
+D1 --> P7 : User Information
+D2 --> P7 : Course Information
+P7 --> Admin : Management Results
+
+' Report Generation flows
+Admin --> P8 : Report Request
+P8 --> D1 : Analytics Data
+P8 --> D2 : Analytics Data
+P8 --> D3 : Analytics Data
+P8 --> D4 : Analytics Data
+D1 --> P8 : User Statistics
+D2 --> P8 : Course Statistics
+D3 --> P8 : Progress Statistics
+D4 --> P8 : Quiz Statistics
+P8 --> Admin : Reports
+
+@enduml
+

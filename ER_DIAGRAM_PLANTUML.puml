@@ -1,0 +1,294 @@
+@startuml CodeWave_ER_Diagram
+
+!define PK_COLOR #FFE6E6
+!define FK_COLOR #E6F3FF
+
+skinparam linetype ortho
+skinparam packageStyle rectangle
+
+entity "ApplicationUser" as User {
+  PK_COLOR * Id : GUID <<PK>>
+  --
+  * UserName : STRING
+  * Email : STRING
+  * FirstName : STRING
+  * LastName : STRING
+  Description : STRING
+  Level : STRING
+  LearningPath : STRING
+  Interests : STRING
+  Goal : STRING
+  SkillLevel : STRING
+  Motivation : STRING
+  WeeklyHours : INT
+  PreferredLanguage : STRING
+  ProfilePictureUrl : STRING
+  * IsAdmin : BOOLEAN
+}
+
+entity "Assessment" as Assessment {
+  PK_COLOR * Id : GUID <<PK>>
+  --
+  * Title : STRING
+  CreatedAt : DATETIME
+  isDeleted : BOOLEAN
+}
+
+entity "Question" as Question {
+  PK_COLOR * Id : GUID <<PK>>
+  FK_COLOR * AssessmentId : GUID <<FK>>
+  --
+  * Text : STRING
+  Difficulty : STRING
+  CreatedAt : DATETIME
+  isDeleted : BOOLEAN
+}
+
+entity "AnswerOption" as AnswerOption {
+  PK_COLOR * Id : GUID <<PK>>
+  FK_COLOR * QuestionId : GUID <<FK>>
+  --
+  * Text : STRING
+  * IsCorrect : BOOLEAN
+  CreatedAt : DATETIME
+  isDeleted : BOOLEAN
+}
+
+entity "UserAssesment" as UserAssessment {
+  PK_COLOR * Id : GUID <<PK>>
+  FK_COLOR * UserId : GUID <<FK>>
+  FK_COLOR * AssessmentId : GUID <<FK>>
+  --
+  * Score : DOUBLE
+  * ResultLevel : STRING
+  * AssignedLearningPath : STRING
+  * DateTaken : DATETIME
+  CreatedAt : DATETIME
+  isDeleted : BOOLEAN
+}
+
+entity "UserAnswer" as UserAnswer {
+  PK_COLOR * Id : GUID <<PK>>
+  FK_COLOR * UserAssessmentId : GUID <<FK>>
+  FK_COLOR * QuestionId : GUID <<FK>>
+  FK_COLOR * AnswerOptionId : GUID <<FK>>
+  --
+  * IsCorrect : BOOLEAN
+}
+
+entity "Course" as Course {
+  PK_COLOR * Id : GUID <<PK>>
+  --
+  * Title : STRING
+  * Description : STRING
+  DifficultyLevel : STRING
+  * LearningPath : STRING
+  ProgrammingLanguage : INT
+  CreatedAt : DATETIME
+  IsDeleted : BOOLEAN
+}
+
+entity "Lesson" as Lesson {
+  PK_COLOR * Id : GUID <<PK>>
+  FK_COLOR * CourseId : GUID <<FK>>
+  --
+  * Title : STRING
+  * Content : STRING
+  VideoUrl : STRING
+  ImageUrl : STRING
+  * OrderNumber : INT
+  CreatedAt : DATETIME
+  isDeleted : BOOLEAN
+}
+
+entity "CodingExercise" as Exercise {
+  PK_COLOR * Id : GUID <<PK>>
+  FK_COLOR * LessonId : GUID <<FK>>
+  --
+  * Title : STRING
+  * Description : STRING
+  * StarterCode : STRING
+  * ExpectedOutput : STRING
+  CreatedAt : DATETIME
+  isDeleted : BOOLEAN
+}
+
+entity "ExerciseTestCase" as TestCase {
+  PK_COLOR * Id : GUID <<PK>>
+  FK_COLOR * ExerciseId : GUID <<FK>>
+  --
+  * Input : STRING
+  * ExpectedOutput : STRING
+  * Description : STRING
+  * OrderNumber : INT
+  CreatedAt : DATETIME
+  IsDeleted : BOOLEAN
+}
+
+entity "ExerciseSubmission" as Submission {
+  PK_COLOR * Id : GUID <<PK>>
+  FK_COLOR * UserId : GUID <<FK>>
+  FK_COLOR * ExerciseId : GUID <<FK>>
+  --
+  * SubmittedCode : STRING
+  * Output : STRING
+  * IsCorrect : BOOLEAN
+  * SubmissionDate : DATETIME
+  CreatedAt : DATETIME
+  isDeleted : BOOLEAN
+}
+
+entity "LessonCompletion" as LessonCompletion {
+  PK_COLOR * Id : GUID <<PK>>
+  FK_COLOR * UserId : GUID <<FK>>
+  FK_COLOR * LessonId : GUID <<FK>>
+  --
+  * IsCompleted : BOOLEAN
+  CompletionDate : DATETIME
+  * TimeSpentMinutes : INT
+  CreatedAt : DATETIME
+  isDeleted : BOOLEAN
+}
+
+entity "UserCourse" as UserCourse {
+  PK_COLOR * Id : GUID <<PK>>
+  FK_COLOR * UserId : GUID <<FK>>
+  FK_COLOR * CourseId : GUID <<FK>>
+  --
+  * ProgressPercent : INT
+  CompletionDate : DATETIME
+  CreatedAt : DATETIME
+  isDeleted : BOOLEAN
+}
+
+entity "Quiz" as Quiz {
+  PK_COLOR * Id : GUID <<PK>>
+  FK_COLOR * CourseId : GUID <<FK>>
+  --
+  * Title : STRING
+  * Description : STRING
+  TimeLimitMinutes : INT
+  * PassingScore : INT
+  CreatedAt : DATETIME
+  IsDeleted : BOOLEAN
+}
+
+entity "QuizQuestion" as QuizQuestion {
+  PK_COLOR * Id : GUID <<PK>>
+  FK_COLOR * QuizId : GUID <<FK>>
+  --
+  * Text : STRING
+  Difficulty : STRING
+  * OrderNumber : INT
+  CreatedAt : DATETIME
+  IsDeleted : BOOLEAN
+}
+
+entity "QuizAnswerOption" as QuizAnswer {
+  PK_COLOR * Id : GUID <<PK>>
+  FK_COLOR * QuizQuestionId : GUID <<FK>>
+  --
+  * Text : STRING
+  * IsCorrect : BOOLEAN
+  CreatedAt : DATETIME
+  IsDeleted : BOOLEAN
+}
+
+entity "UserQuizAttempt" as QuizAttempt {
+  PK_COLOR * Id : GUID <<PK>>
+  FK_COLOR * UserId : GUID <<FK>>
+  FK_COLOR * QuizId : GUID <<FK>>
+  --
+  * Score : DOUBLE
+  * IsPassed : BOOLEAN
+  * StartedAt : DATETIME
+  CompletedAt : DATETIME
+  * TimeSpentMinutes : INT
+  CreatedAt : DATETIME
+  IsDeleted : BOOLEAN
+}
+
+entity "UserQuizAnswer" as UserQuizAnswer {
+  PK_COLOR * Id : GUID <<PK>>
+  FK_COLOR * UserQuizAttemptId : GUID <<FK>>
+  FK_COLOR * QuizQuestionId : GUID <<FK>>
+  FK_COLOR * SelectedAnswerOptionId : GUID <<FK>>
+  --
+  * IsCorrect : BOOLEAN
+  CreatedAt : DATETIME
+  IsDeleted : BOOLEAN
+}
+
+entity "JobOffer" as JobOffer {
+  PK_COLOR * Id : GUID <<PK>>
+  --
+  * JobTitle : STRING
+  * Company : STRING
+  * Description : STRING
+  * RequiredSkills : STRING
+  * PostedDate : DATETIME
+  * Deadline : DATETIME
+  CreatedAt : DATETIME
+  isDeleted : BOOLEAN
+}
+
+entity "Project" as Project {
+  PK_COLOR * Id : GUID <<PK>>
+  FK_COLOR * UserId : GUID <<FK>>
+  --
+  * Title : STRING
+  * Description : STRING
+  * CompletionDate : DATETIME
+  * Result : STRING
+  CreatedAt : DATETIME
+  isDeleted : BOOLEAN
+}
+
+entity "CV" as CV {
+  PK_COLOR * Id : GUID <<PK>>
+  FK_COLOR * UserId : GUID <<FK>>
+  --
+  * Summary : STRING
+  * Skills : STRING
+  Education : STRING
+  Experience : STRING
+  Certifications : STRING
+  * LastUpdated : DATETIME
+}
+
+' Relationships - Assessment Module
+Assessment ||--o{ Question : "contains"
+Question ||--o{ AnswerOption : "has"
+Assessment ||--o{ UserAssessment : "taken_by"
+User ||--o{ UserAssessment : "takes"
+UserAssessment ||--o{ UserAnswer : "contains"
+Question ||--o{ UserAnswer : "answered_in"
+AnswerOption ||--o{ UserAnswer : "selected_as"
+
+' Relationships - Learning Module
+Course ||--o{ Lesson : "contains"
+Course ||--o{ UserCourse : "enrolled_by"
+Course ||--o{ Quiz : "has"
+Lesson ||--o{ Exercise : "has"
+Lesson ||--o{ LessonCompletion : "completed_by"
+Exercise ||--o{ TestCase : "has"
+Exercise ||--o{ Submission : "submitted_for"
+User ||--o{ UserCourse : "enrolls"
+User ||--o{ LessonCompletion : "completes"
+User ||--o{ Submission : "submits"
+
+' Relationships - Quiz Module
+Quiz ||--o{ QuizQuestion : "contains"
+Quiz ||--o{ QuizAttempt : "attempted_by"
+QuizQuestion ||--o{ QuizAnswer : "has"
+QuizQuestion ||--o{ UserQuizAnswer : "answered_in"
+QuizAnswer ||--o{ UserQuizAnswer : "selected_as"
+QuizAttempt ||--o{ UserQuizAnswer : "contains"
+User ||--o{ QuizAttempt : "attempts"
+
+' Relationships - User Profile Module
+User ||--o| CV : "has"
+User ||--o{ Project : "creates"
+
+@enduml
+

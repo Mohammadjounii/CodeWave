@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - CodeWave Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#9e47eb",
+                        "primary-dark": "#7c3aed",
+                        "background-light": "#f7f6f8",
+                        "background-dark": "#1a1121",
+                        "surface-light": "#ffffff",
+                        "surface-dark": "#2d2438",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "2xl": "1rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #d1d5db; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #9ca3af; 
+        }
+        .dark ::-webkit-scrollbar-thumb {
+            background: #4b5563;
+        }
+    </style>
+    @RenderSection("Styles", required: false)
+</head>
+<body class="font-display bg-background-light dark:bg-background-dark text-slate-900 dark:text-white antialiased transition-colors duration-200">
+<div class="flex h-screen w-full overflow-hidden">
+<!-- Sidebar -->
+<aside class="w-64 flex-shrink-0 border-r border-slate-200 dark:border-slate-800 bg-surface-light dark:bg-surface-dark flex flex-col justify-between p-4 hidden md:flex">
+<div class="flex flex-col gap-6">
+<!-- Logo -->
+<div class="flex items-center gap-3 px-2">
+<div class="bg-center bg-no-repeat bg-cover rounded-full size-10 shadow-sm" data-alt="CodeWave Logo Abstract Gradient" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDkIv230oRCKKfK20Hn3Xv7lVcbWnVXh1Uh7dOFBnWGygQ_nVuMjV5xv0ZDqTqr29f0oGaV219TCQyE4_x4ZwTZKysV4_oRqyykxw-QzUJ-sg6bsVurRwBUgw_-DXHayQdvmJpIZS5sLKWlSw2hS195lZUANJcAdhNJ-WDA-LmXbLGLy-leUawxfvrtqc5O0wPASX5N0pjqCLlxeSvmajcwljtIobQByBLXEaCRxCQCDoFKMw8q-ySGh7duzFQs8d_SZWulf8vXZfk");'></div>
+<div class="flex flex-col">
+<h1 class="text-slate-900 dark:text-white text-base font-bold leading-tight">CodeWave</h1>
+<p class="text-primary text-xs font-medium">Admin Panel</p>
+</div>
+</div>
+<!-- Navigation -->
+<nav class="flex flex-col gap-2">
+@{
+    var currentAction = ViewContext.RouteData.Values["action"]?.ToString();
+    var isDashboard = currentAction == "Index";
+    var isUsers = currentAction == "UserManagment" || currentAction == "UserDetails" || currentAction == "CRUDUser";
+    var isCourses = currentAction == "CourseManagment" || currentAction == "CRUDCourse";
+    var isJobs = currentAction == "JobOffers" || currentAction == "CRUDJobOffer";
+    var isReports = currentAction == "Reports";
+}
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg @(isDashboard ? "bg-primary/10 text-primary dark:text-white" : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors group")" asp-controller="Admin" asp-action="Index">
+<span class="material-symbols-outlined @(isDashboard ? "text-primary fill-1" : "text-slate-500 dark:text-slate-400 group-hover:text-primary transition-colors")">dashboard</span>
+<span class="text-sm @(isDashboard ? "font-bold" : "font-medium")">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg @(isUsers ? "bg-primary/10 text-primary dark:text-white" : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors group")" asp-controller="Admin" asp-action="UserManagment">
+<span class="material-symbols-outlined @(isUsers ? "text-primary fill-1" : "text-slate-500 dark:text-slate-400 group-hover:text-primary transition-colors")">group</span>
+<span class="text-sm @(isUsers ? "font-bold" : "font-medium")">User Management</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg @(isCourses ? "bg-primary/10 text-primary dark:text-white" : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors group")" asp-controller="Admin" asp-action="CourseManagment">
+<span class="material-symbols-outlined @(isCourses ? "text-primary fill-1" : "text-slate-500 dark:text-slate-400 group-hover:text-primary transition-colors")">school</span>
+<span class="text-sm @(isCourses ? "font-bold" : "font-medium")">Courses</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg @(isJobs ? "bg-primary/10 text-primary dark:text-white" : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors group")" asp-controller="Admin" asp-action="JobOffers">
+<span class="material-symbols-outlined @(isJobs ? "text-primary fill-1" : "text-slate-500 dark:text-slate-400 group-hover:text-primary transition-colors")">work</span>
+<span class="text-sm @(isJobs ? "font-bold" : "font-medium")">Jobs</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg @(isReports ? "bg-primary/10 text-primary dark:text-white" : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors group")" asp-controller="Admin" asp-action="Reports">
+<span class="material-symbols-outlined @(isReports ? "text-primary fill-1" : "text-slate-500 dark:text-slate-400 group-hover:text-primary transition-colors")">analytics</span>
+<span class="text-sm @(isReports ? "font-bold" : "font-medium")">Reports</span>
+</a>
+</nav>
+</div>
+<!-- Bottom Settings -->
+<div class="flex flex-col gap-2 pt-4 border-t border-slate-200 dark:border-slate-800">
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors group" asp-controller="Home" asp-action="Index">
+<span class="material-symbols-outlined text-slate-500 dark:text-slate-400 group-hover:text-primary transition-colors">home</span>
+<span class="text-sm font-medium">Back to Site</span>
+</a>
+<div class="flex items-center gap-3 px-3 py-2">
+<img alt="Admin Profile Picture" class="w-8 h-8 rounded-full border border-slate-200" data-alt="Profile picture of the current admin user" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBiCgCiEkw7g6lrNBHjqW9Q1fBXvcaIpjh3KwXcpR6UOZ1AZ9GwtdxT_Y2VZ28W40KRIUBBYQpzoJbE5l3pWBaW5pGuCLv-HfsvUM9hDuR0djOeLfgIZEm1aVuXWSdPNjjz5XVNWWajYtqT8_2pwKb5sNlCqBMLAEup3ynU6LK9r1cTnC93ZA2U9mGCZDVogctVkkZtgDL-ks-P0oi4BRsjlHnPoU-iSHHSGfbMP6DA6Jzw3Qmj-_KyTZVgw0BbWXJiwJOE5VTRLks"/>
+<div class="flex flex-col">
+<span class="text-xs font-bold text-slate-900 dark:text-white">@(User.Identity?.Name ?? "Admin")</span>
+<span class="text-[10px] text-slate-500">Super Admin</span>
+</div>
+</div>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="flex-1 flex flex-col h-full overflow-hidden bg-background-light dark:bg-background-dark relative">
+<!-- Mobile Header Placeholder -->
+<div class="md:hidden flex items-center justify-between p-4 bg-surface-light dark:bg-surface-dark border-b border-slate-200 dark:border-slate-800">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">menu</span>
+<span class="font-bold text-lg">CodeWave</span>
+</div>
+<div class="size-8 rounded-full bg-slate-200" data-alt="Mobile user avatar placeholder"></div>
+</div>
+<div class="flex-1 overflow-y-auto p-4 md:p-8">
+@RenderBody()
+</div>
+</main>
+</div>
+@RenderSection("Scripts", required: false)
+</body>
+</html>
