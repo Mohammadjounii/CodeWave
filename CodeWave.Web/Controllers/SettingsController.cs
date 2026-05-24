@@ -128,6 +128,33 @@ namespace CodeWave.Web.Controllers
             return View("Index", model);
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> SwitchLearningPath(string learningPath)
+        {
+            var allowed = new[] { "Python", "Java" };
+            if (!allowed.Contains(learningPath))
+            {
+                TempData["Error"] = "Invalid learning path selected.";
+                return RedirectToAction("Index");
+            }
+
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
+                return RedirectToAction("Login", "User");
+
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+                return RedirectToAction("Login", "User");
+
+            user.LearningPath = learningPath;
+            user.PreferredLanguage = learningPath;
+            await _userManager.UpdateAsync(user);
+
+            TempData["Success"] = $"Learning path switched to {learningPath} successfully!";
+            return RedirectToAction("Index");
+        }
+
         [HttpGet]
         [AllowAnonymous]
         public IActionResult ForgotPassword()

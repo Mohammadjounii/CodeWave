@@ -81,28 +81,13 @@
             50% { transform: scale(1.05); }
         }
         
-        /* Custom scrollbar for chat messages */
-        #aiChatMessagesPopup::-webkit-scrollbar,
-        #aiChatMessages::-webkit-scrollbar {
-            width: 6px;
-        }
-        
-        #aiChatMessagesPopup::-webkit-scrollbar-track,
-        #aiChatMessages::-webkit-scrollbar-track {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 3px;
-        }
-        
-        #aiChatMessagesPopup::-webkit-scrollbar-thumb,
-        #aiChatMessages::-webkit-scrollbar-thumb {
-            background: rgba(184, 135, 227, 0.5);
-            border-radius: 3px;
-        }
-        
-        #aiChatMessagesPopup::-webkit-scrollbar-thumb:hover,
-        #aiChatMessages::-webkit-scrollbar-thumb:hover {
-            background: rgba(184, 135, 227, 0.7);
-        }
+        /* Universal scrollbar */
+        ::-webkit-scrollbar { width: 10px; height: 10px; }
+        ::-webkit-scrollbar-track { background: rgba(155,89,245,0.08); border-radius: 999px; }
+        ::-webkit-scrollbar-thumb { background: #9b59f5; border-radius: 999px; box-shadow: 0 0 10px rgba(155,89,245,0.9), 0 0 20px rgba(155,89,245,0.5), 0 0 35px rgba(155,89,245,0.2); }
+        ::-webkit-scrollbar-thumb:hover { background: #b07eff; box-shadow: 0 0 14px rgba(176,126,255,1), 0 0 28px rgba(176,126,255,0.6), 0 0 45px rgba(155,89,245,0.3); }
+        ::-webkit-scrollbar-corner { background: transparent; }
+        * { scrollbar-width: thin; scrollbar-color: #9b59f5 rgba(155,89,245,0.08); }
 
         .glass-effect {
             background: rgba(255, 255, 255, 0.05);
@@ -163,23 +148,8 @@
             max-height: 120px !important;
         }
 
-        #testCaseResultsList::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        #testCaseResultsList::-webkit-scrollbar-track {
-            background: rgba(0, 0, 0, 0.2);
-            border-radius: 4px;
-        }
-
-        #testCaseResultsList::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.4);
-            border-radius: 4px;
-        }
-
-        #testCaseResultsList::-webkit-scrollbar-thumb:hover {
-            background: rgba(255, 255, 255, 0.6);
-        }
+        #testCaseResultsList::-webkit-scrollbar { width: 6px; }
+        #testCaseResultsList::-webkit-scrollbar-thumb { background: #9b59f5; border-radius: 999px; box-shadow: 0 0 8px rgba(155,89,245,0.6); }
     </style>
 </head>
 
@@ -589,6 +559,7 @@
         // Global state
         const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
         const lessonId = '@lesson.Id';
+        const pageStartTime = Date.now();
         const exercises = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(exercises.Select(e => new {
             id = e.Id.ToString(),
             title = e.Title,
@@ -762,8 +733,12 @@
                 }
             }
 
-            // Load code
-            const savedCode = loadCodeFromLocalStorage();
+            // Load code — if saved code has bare backslash lines (broken starter), discard it
+            let savedCode = loadCodeFromLocalStorage();
+            if (savedCode && /^\s*\\\s/m.test(savedCode)) {
+                localStorage.removeItem(currentExerciseId ? `focus_code_${currentExerciseId}` : `focus_code_experiment_${lessonId}`);
+                savedCode = null;
+            }
             const codeToSet = savedCode || exercise.starterCode || "// Write your code here...";
             
             if (monacoEditor) {
@@ -811,9 +786,10 @@
         });
         
         function updateSubmitButton() {
-            // Must have exercises AND all of them solved — never allow empty-exercise auto-pass
+            const noExercises = exercises.length === 0;
             const allSolved = exercises.length > 0 && exercises.every(e => e.isSolved);
-            if (allSolved) {
+            const singleSolved = exercises.length === 1 && isExerciseSolved;
+            if (noExercises || allSolved || singleSolved) {
                 submitBtn.classList.remove("opacity-50", "cursor-not-allowed");
                 submitBtn.disabled = false;
             } else {
@@ -947,6 +923,17 @@
         }
 
         // -------------------------
+        // ONE-TIME: clear all saved exercise codes from localStorage for a fresh start
+        // -------------------------
+        (function clearAllSavedCodes() {
+            if (localStorage.getItem("cw_codes_cleared_v1")) return;
+            Object.keys(localStorage)
+                .filter(k => k.startsWith("focus_code_") || k.startsWith("code_"))
+                .forEach(k => localStorage.removeItem(k));
+            localStorage.setItem("cw_codes_cleared_v1", "1");
+        })();
+
+        // -------------------------
         // RUN CODE
         // -------------------------
         runCodeBtn.addEventListener("click", async () => {
@@ -1003,9 +990,11 @@
                         }
                     }
 
-                    if (data.isCorrect === true) {
-                        // Update exercise solved status
-                        const exercise = exercises.find(e => e.id === currentExerciseId);
+                    if (data.isCorrect) {
+                        // Update exercise solved status — use index fallback in case ID lookup fails
+                        const exercise = exercises.find(e => e.id === currentExerciseId)
+                            || (currentExerciseIndex >= 0 && currentExerciseIndex < exercises.length
+                                ? exercises[currentExerciseIndex] : null);
                         if (exercise) {
                             exercise.isSolved = true;
                         }
@@ -1113,7 +1102,7 @@
                             <div class="text-sm font-medium ${
                                 testCase.passed ? "text-green-300" : "text-red-300"
                             }">
-                                Test ${index + 1}: ${testCase.description || "Test case"}
+                                Test ${testCase.orderNumber || (index + 1)}: ${testCase.description || "Test case"}
                             </div>
                             ${testCase.input ? `<div class="text-xs text-gray-400 mt-1">Input: <code class="bg-black/50 px-1 rounded">${testCase.input}</code></div>` : ""}
                             <div class="text-xs text-gray-400 mt-1">
@@ -1144,8 +1133,7 @@
         // SUBMIT & COMPLETE
         // -------------------------
         submitBtn.addEventListener("click", async () => {
-            // Check if all exercises are solved (exercises.length > 0 guards against vacuous true)
-            const allSolved = exercises.length > 0 && exercises.every(e => e.isSolved);
+            const allSolved = exercises.length === 0 || exercises.every(e => e.isSolved);
             if (!allSolved) {
                 showPopup("error", "Please solve all exercises before completing the lesson.");
                 return;
@@ -1164,18 +1152,22 @@
                 saveCodeToLocalStorage();
 
                 // Complete lesson
-                const res = await fetch(`/LearningPath/CompleteLesson?lessonId=${lessonId}`, {
+                const elapsedSeconds = Math.round((Date.now() - pageStartTime) / 1000);
+                const res = await fetch('/LearningPath/CompleteLesson', {
                     method: "POST",
-                    headers: { "RequestVerificationToken": csrfToken }
+                    headers: {
+                        "Content-Type": "application/json",
+                        "RequestVerificationToken": csrfToken
+                    },
+                    body: JSON.stringify({ lessonId, timeSpentSeconds: elapsedSeconds })
                 });
 
-                if (!res.ok) {
-                    throw new Error("Failed to complete lesson");
-                }
+                let result = null;
+                try { result = await res.json(); } catch { result = null; }
 
-                const result = await res.json();
-                if (result.success === false) {
-                    showPopup("error", result.message || "Lesson completion failed.");
+                if (!res.ok || result?.success === false) {
+                    const msg = result?.message || "Lesson completion failed. Please try again.";
+                    showPopup("error", msg);
                     return;
                 }
 

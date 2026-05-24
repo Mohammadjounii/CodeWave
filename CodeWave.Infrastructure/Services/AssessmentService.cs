@@ -67,8 +67,12 @@ namespace CodeWave.Application.Services
 
             foreach (var q in questions)
             {
-                var selectedOptionId = dto.Answers[q.Id];
-                var selectedOption = q.AnswerOptions.First(o => o.Id == selectedOptionId);
+                if (!dto.Answers.TryGetValue(q.Id, out var selectedOptionId))
+                    continue;
+
+                var selectedOption = q.AnswerOptions.FirstOrDefault(o => o.Id == selectedOptionId);
+                if (selectedOption == null)
+                    continue;
 
                 if (selectedOption.IsCorrect)
                     correct++;
@@ -83,21 +87,31 @@ namespace CodeWave.Application.Services
                 });
             }
 
-            double score = (double)correct / total * 100;
+            double score = total > 0 ? (double)correct / total * 100 : 0;
 
-            string level =
-                score >= 80 ? "Advanced" :
-                score >= 50 ? "Intermediate" :
-                "Beginner";
+            bool passed = score >= 70;
+            string level = passed ? "Advanced" : "Beginner";
 
-            string learningPath =
-                level switch
+            var user = await _context.Users.FindAsync(dto.UserId);
+            if (user == null)
+            {
+                throw new InvalidOperationException($"User with ID {dto.UserId} not found.");
+            }
+
+            // Respect the language the user chose during onboarding.
+            // The assessment score determines skill level only, not the language path.
+            string learningPath = user.PreferredLanguage switch
+            {
+                "Python" => "Python",
+                "Java"   => "Java",
+                _        => level switch          // fallback if no preference was set
                 {
-                    "Beginner" => "Python",
+                    "Beginner"     => "Python",
                     "Intermediate" => "Web Development",
-                    "Advanced" => "Java",
-                    _ => "Python"
-                };
+                    "Advanced"     => "Java",
+                    _              => "Python"
+                }
+            };
 
             userAssessment.Score = score;
             userAssessment.ResultLevel = level;
@@ -106,11 +120,6 @@ namespace CodeWave.Application.Services
             // Save the result
             await _context.UserAssessments.AddAsync(userAssessment);
 
-            var user = await _context.Users.FindAsync(dto.UserId);
-            if (user == null)
-            {
-                throw new InvalidOperationException($"User with ID {dto.UserId} not found.");
-            }
             user.Level = level;
             user.LearningPath = learningPath;
 
@@ -120,7 +129,8 @@ namespace CodeWave.Application.Services
             {
                 Score = score,
                 Level = level,
-                LearningPath = learningPath
+                LearningPath = learningPath,
+                Passed = passed
             };
         }
     }

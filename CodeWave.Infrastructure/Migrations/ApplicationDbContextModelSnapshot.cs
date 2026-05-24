@@ -255,7 +255,8 @@ namespace CodeWave.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("UserId")
+                        .IsUnique();
 
                     b.ToTable("CVs");
                 });
@@ -919,9 +920,6 @@ namespace CodeWave.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid?>("ApplicationUserId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<DateTime?>("CompletedAt")
                         .HasColumnType("datetime2");
 
@@ -950,8 +948,6 @@ namespace CodeWave.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("ApplicationUserId");
 
                     b.HasIndex("QuizId");
 
@@ -1105,8 +1101,8 @@ namespace CodeWave.Infrastructure.Migrations
             modelBuilder.Entity("CodeWave.Domain.Entities.CV", b =>
                 {
                     b.HasOne("CodeWave.Domain.Entities.ApplicationUser", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
+                        .WithOne("CV")
+                        .HasForeignKey("CodeWave.Domain.Entities.CV", "UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -1351,10 +1347,6 @@ namespace CodeWave.Infrastructure.Migrations
 
             modelBuilder.Entity("CodeWave.Domain.Entities.UserQuizAttempt", b =>
                 {
-                    b.HasOne("CodeWave.Domain.Entities.ApplicationUser", null)
-                        .WithMany("UserQuizAttempts")
-                        .HasForeignKey("ApplicationUserId");
-
                     b.HasOne("CodeWave.Domain.Entities.Quiz", "Quiz")
                         .WithMany("UserQuizAttempts")
                         .HasForeignKey("QuizId")
@@ -1362,7 +1354,7 @@ namespace CodeWave.Infrastructure.Migrations
                         .IsRequired();
 
                     b.HasOne("CodeWave.Domain.Entities.ApplicationUser", "User")
-                        .WithMany()
+                        .WithMany("UserQuizAttempts")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -1430,6 +1422,8 @@ namespace CodeWave.Infrastructure.Migrations
 
             modelBuilder.Entity("CodeWave.Domain.Entities.ApplicationUser", b =>
                 {
+                    b.Navigation("CV");
+
                     b.Navigation("ExerciseSubmissions");
 
                     b.Navigation("LessonCompletions");

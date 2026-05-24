@@ -68,6 +68,14 @@ namespace CodeWave.Web.Models
         public string Email { get; set; }
     }
 
+    public class GitHubEnterEmailViewModel
+    {
+        [Required(ErrorMessage = "Email is required.")]
+        [EmailAddress(ErrorMessage = "Enter a valid email address.")]
+        [Display(Name = "Email address")]
+        public string Email { get; set; }
+    }
+
     public class ResetPasswordViewModel
     {
         [Required]

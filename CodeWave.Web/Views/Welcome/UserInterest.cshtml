@@ -33,6 +33,12 @@
                 --tw-text-opacity: 1;
                 color: rgb(248 250 252 / var(--tw-text-opacity));
             }
+        ::-webkit-scrollbar { width: 10px; height: 10px; }
+        ::-webkit-scrollbar-track { background: rgba(155,89,245,0.08); border-radius: 999px; }
+        ::-webkit-scrollbar-thumb { background: #9b59f5; border-radius: 999px; box-shadow: 0 0 10px rgba(155,89,245,0.9), 0 0 20px rgba(155,89,245,0.5), 0 0 35px rgba(155,89,245,0.2); }
+        ::-webkit-scrollbar-thumb:hover { background: #b07eff; box-shadow: 0 0 14px rgba(176,126,255,1), 0 0 28px rgba(176,126,255,0.6), 0 0 45px rgba(155,89,245,0.3); }
+        ::-webkit-scrollbar-corner { background: transparent; }
+        * { scrollbar-width: thin; scrollbar-color: #9b59f5 rgba(155,89,245,0.08); }
     </style>
     <script id="tailwind-config">
         tailwind.config = {
@@ -62,10 +68,10 @@
         <main class="relative z-10 flex w-full max-w-4xl flex-col gap-8 rounded-xl bg-white/50 p-6 backdrop-blur-xl dark:bg-black/20 md:p-12">
             <div class="flex flex-col gap-3">
                 <div class="flex justify-between gap-6">
-                    <p class="text-sm font-medium text-slate-600 dark:text-slate-400">Step 2 of 4</p>
+                    <p class="text-sm font-medium text-slate-600 dark:text-slate-400">Step 1 of 6</p>
                 </div>
                 <div class="h-1.5 w-full rounded-full bg-slate-200 dark:bg-slate-700">
-                    <div class="h-1.5 w-1/2 rounded-full bg-primary"></div>
+                    <div class="h-1.5 rounded-full bg-primary" style="width: 17%;"></div>
                 </div>
             </div>
             <div class="flex flex-wrap items-center justify-between gap-4">
@@ -138,7 +144,7 @@
             </div>
             <form method="post" asp-controller="Welcome" asp-action="UserInterest">
                 <div class="mt-4 flex flex-col-reverse items-center gap-3 sm:flex-row sm:justify-end">
-                    <a asp-controller="Welcome" asp-action="UserInterest" class="flex h-12 w-full cursor-pointer items-center justify-center rounded-xl bg-slate-200 px-6 text-base font-bold text-slate-700 transition-colors hover:bg-slate-300 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 sm:w-auto">
+                    <a asp-controller="Welcome" asp-action="UserGoal" class="flex h-12 w-full cursor-pointer items-center justify-center rounded-xl bg-slate-200 px-6 text-base font-bold text-slate-700 transition-colors hover:bg-slate-300 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 sm:w-auto">
                         <span class="truncate">Skip</span>
                     </a>
                     <button type="submit" class="flex h-12 w-full cursor-pointer items-center justify-center rounded-xl bg-primary px-6 text-base font-bold text-white transition-colors hover:bg-primary/90 sm:w-auto">

@@ -36,6 +36,7 @@ public class ServiceResult
 public class TestCaseResultDto
 {
     public Guid TestCaseId { get; set; }
+    public int OrderNumber { get; set; }
     public string Description { get; set; } = string.Empty;
     public bool Passed { get; set; }
     public string? ExpectedOutput { get; set; }

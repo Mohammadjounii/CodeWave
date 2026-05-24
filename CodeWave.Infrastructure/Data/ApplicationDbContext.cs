@@ -121,6 +121,12 @@ namespace CodeWave.Infrastructure.Data
                 entity.Property(e => e.Certifications).IsRequired(false);
                 entity.Property(e => e.Projects).IsRequired(false);
                 entity.Property(e => e.Template).IsRequired(false);
+
+                entity.HasOne(c => c.User)
+                    .WithOne(u => u.CV)
+                    .HasForeignKey<CV>(c => c.UserId);
+
+                entity.HasIndex(c => c.UserId).IsUnique();
             });
 
             // ==============================
@@ -215,7 +221,7 @@ namespace CodeWave.Infrastructure.Data
 
             builder.Entity<UserQuizAttempt>()
                 .HasOne(uqa => uqa.User)
-                .WithMany()
+                .WithMany(u => u.UserQuizAttempts)
                 .HasForeignKey(uqa => uqa.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
 

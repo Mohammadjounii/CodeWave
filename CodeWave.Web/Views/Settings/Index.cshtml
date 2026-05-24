@@ -34,6 +34,12 @@
         .material-symbols-outlined {
             font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
         }
+        ::-webkit-scrollbar { width: 10px; height: 10px; }
+        ::-webkit-scrollbar-track { background: rgba(155,89,245,0.08); border-radius: 999px; }
+        ::-webkit-scrollbar-thumb { background: #9b59f5; border-radius: 999px; box-shadow: 0 0 10px rgba(155,89,245,0.9), 0 0 20px rgba(155,89,245,0.5), 0 0 35px rgba(155,89,245,0.2); }
+        ::-webkit-scrollbar-thumb:hover { background: #b07eff; box-shadow: 0 0 14px rgba(176,126,255,1), 0 0 28px rgba(176,126,255,0.6), 0 0 45px rgba(155,89,245,0.3); }
+        ::-webkit-scrollbar-corner { background: transparent; }
+        * { scrollbar-width: thin; scrollbar-color: #9b59f5 rgba(155,89,245,0.08); }
     </style>
     <script id="tailwind-config">
         tailwind.config = {
@@ -129,11 +135,79 @@
                         </form>
                     </div>
 
+                    <!-- Switch Learning Path Section -->
+                    <div class="bg-gray-100 dark:bg-[#111318] border border-gray-300 dark:border-[#3b4354] rounded-xl p-6 mb-6">
+                        <h2 class="text-gray-900 dark:text-white text-2xl font-bold mb-2">Learning Path</h2>
+                        <p class="text-gray-600 dark:text-[#9da6b9] mb-6">
+                            Currently on: <span class="font-semibold text-primary">@(ViewBag.LearningPath ?? "Not set")</span>
+                        </p>
+
+                        <form asp-controller="Settings" asp-action="SwitchLearningPath" method="post">
+                            @Html.AntiForgeryToken()
+                            <div class="grid grid-cols-2 gap-4 mb-5">
+
+                                @* Python card *@
+                                <label class="cursor-pointer">
+                                    <input type="radio" name="learningPath" value="Python" class="sr-only peer"
+                                           @(ViewBag.LearningPath == "Python" ? "checked" : "") />
+                                    <div class="flex flex-col items-center gap-3 p-5 rounded-xl border-2
+                                                border-gray-300 dark:border-[#3b4354]
+                                                peer-checked:border-primary peer-checked:bg-primary/10
+                                                hover:border-primary/50 transition-all">
+                                        <span class="text-3xl">🐍</span>
+                                        <span class="font-bold text-gray-900 dark:text-white">Python</span>
+                                        <span class="text-xs text-center text-gray-500 dark:text-[#9da6b9]">Beginner-friendly, data science, automation</span>
+                                    </div>
+                                </label>
+
+                                @* Java card *@
+                                <label class="cursor-pointer">
+                                    <input type="radio" name="learningPath" value="Java" class="sr-only peer"
+                                           @(ViewBag.LearningPath == "Java" ? "checked" : "") />
+                                    <div class="flex flex-col items-center gap-3 p-5 rounded-xl border-2
+                                                border-gray-300 dark:border-[#3b4354]
+                                                peer-checked:border-primary peer-checked:bg-primary/10
+                                                hover:border-primary/50 transition-all">
+                                        <span class="text-3xl">☕</span>
+                                        <span class="font-bold text-gray-900 dark:text-white">Java</span>
+                                        <span class="text-xs text-center text-gray-500 dark:text-[#9da6b9]">Enterprise apps, Android, backend systems</span>
+                                    </div>
+                                </label>
+                            </div>
+
+                            <button type="submit"
+                                    class="w-full bg-primary text-white h-12 px-4 rounded-lg hover:bg-primary/90 font-medium flex items-center justify-center gap-2">
+                                <span class="material-symbols-outlined text-sm">swap_horiz</span>
+                                Switch Learning Path
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Skill Assessment Section -->
+                    <div class="bg-gray-100 dark:bg-[#111318] border border-gray-300 dark:border-[#3b4354] rounded-xl p-6 mb-6">
+                        <div class="flex items-start justify-between gap-4 flex-wrap">
+                            <div class="flex-1 min-w-0">
+                                <h2 class="text-gray-900 dark:text-white text-2xl font-bold mb-2">Skill Assessment</h2>
+                                <p class="text-gray-600 dark:text-[#9da6b9] mb-1">
+                                    Current level: <span class="font-semibold text-primary">@(ViewBag.UserLevelRaw ?? "Not set")</span>
+                                </p>
+                                <p class="text-gray-500 dark:text-[#9da6b9] text-sm">
+                                    Retake the assessment to update your skill level. Your result will determine whether you're placed as Beginner or Advanced, which affects access to Job Opportunities and CV sections.
+                                </p>
+                            </div>
+                        </div>
+                        <button onclick="document.getElementById('retakeModal').classList.remove('hidden')"
+                                class="mt-5 inline-flex items-center gap-2 bg-primary text-white h-12 px-6 rounded-lg hover:bg-primary/90 font-medium transition-colors">
+                            <span class="material-symbols-outlined">quiz</span>
+                            <span>Retake Assessment</span>
+                        </button>
+                    </div>
+
                     <!-- Forgot Password Section -->
                     <div class="bg-gray-100 dark:bg-[#111318] border border-gray-300 dark:border-[#3b4354] rounded-xl p-6">
                         <h2 class="text-gray-900 dark:text-white text-2xl font-bold mb-4">Forgot Password?</h2>
                         <p class="text-gray-600 dark:text-[#9da6b9] mb-6">If you've forgotten your password, you can reset it using your email address.</p>
-                        
+
                         <a asp-controller="Settings" asp-action="ForgotPassword" class="inline-flex items-center gap-2 bg-gray-100 dark:bg-white/10 text-gray-900 dark:text-white h-12 px-6 rounded-lg hover:bg-gray-200 dark:hover:bg-white/20 font-medium">
                             <span class="material-symbols-outlined">lock_reset</span>
                             <span>Reset Password via Email</span>
@@ -141,6 +215,34 @@
                     </div>
                 </div>
             </main>
+
+    <!-- Retake Assessment Confirmation Modal -->
+    <div id="retakeModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+        <div class="bg-white dark:bg-[#1c1f27] border border-gray-200 dark:border-[#3b4354] rounded-2xl p-8 max-w-md w-full shadow-2xl">
+            <div class="flex items-center gap-3 mb-4">
+                <span class="material-symbols-outlined text-primary text-3xl" style="font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 48;">quiz</span>
+                <h3 class="text-gray-900 dark:text-white text-xl font-bold">Retake Assessment?</h3>
+            </div>
+            <p class="text-gray-600 dark:text-[#9da6b9] mb-2 text-sm leading-relaxed">
+                You're about to retake the skill assessment. Your current level (<strong class="text-gray-900 dark:text-white">@(ViewBag.UserLevelRaw ?? "Not set")</strong>) will be replaced by your new score:
+            </p>
+            <ul class="text-sm text-gray-500 dark:text-[#9da6b9] list-disc list-inside mb-6 space-y-1">
+                <li>Score <strong class="text-white">≥ 70%</strong> → Advanced level (full access)</li>
+                <li>Score <strong class="text-white">&lt; 70%</strong> → Beginner level (restricted access)</li>
+            </ul>
+            <div class="flex gap-3">
+                <button onclick="document.getElementById('retakeModal').classList.add('hidden')"
+                        class="flex-1 h-12 rounded-lg border border-gray-300 dark:border-[#3b4354] text-gray-700 dark:text-slate-300 font-medium hover:bg-gray-100 dark:hover:bg-white/5 transition-colors">
+                    Cancel
+                </button>
+                <a href="@Url.Action("Start", "Assessment")"
+                   class="flex-1 h-12 rounded-lg bg-primary text-white font-bold flex items-center justify-center gap-2 hover:bg-primary/90 transition-colors">
+                    <span class="material-symbols-outlined text-sm">arrow_forward</span>
+                    Start Now
+                </a>
+            </div>
+        </div>
+    </div>
 
     </div>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>

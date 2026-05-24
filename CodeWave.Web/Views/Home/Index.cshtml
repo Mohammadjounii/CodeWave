@@ -567,16 +567,16 @@
                                         var overallProgress = userProgress?.OverallProgressPercent ?? 0;
                                         
                                         // Determine color scheme based on learning path (declare outside if block for use in foreach)
-                                        string cardBgClass = learningPathLower.Contains("python") ? "bg-gradient-to-br from-primary/10 to-purple-500/10 border border-primary-500/30 ring-2 ring-primary-500/20" :
+                                        string cardBgClass = learningPathLower.Contains("python") ? "bg-gradient-to-br from-purple-500/10 to-fuchsia-500/10 border border-purple-500/30 ring-2 ring-purple-500/20" :
                                                            learningPathLower.Contains("java") ? "bg-gradient-to-br from-orange-500/10 to-red-500/10 border border-orange-500/30 ring-2 ring-orange-500/20" :
                                                            "bg-gradient-to-br from-cyan-500/10 to-blue-500/10 border border-cyan-500/30 ring-2 ring-cyan-500/20";
-                                        string progressBarClass = learningPathLower.Contains("python") ? "bg-gradient-to-r from-primary to-purple-500 shadow-lg shadow-primary/50" :
+                                        string progressBarClass = learningPathLower.Contains("python") ? "bg-gradient-to-r from-purple-500 to-fuchsia-500 shadow-lg shadow-purple-500/50" :
                                                                  learningPathLower.Contains("java") ? "bg-gradient-to-r from-orange-500 to-red-500 shadow-lg shadow-orange-500/50" :
                                                                  "bg-gradient-to-r from-cyan-500 to-blue-500 shadow-lg shadow-cyan-500/50";
-                                        string iconBgClass = learningPathLower.Contains("python") ? "bg-primary/20" :
+                                        string iconBgClass = learningPathLower.Contains("python") ? "bg-purple-500/20" :
                                                              learningPathLower.Contains("java") ? "bg-orange-500/20" :
                                                              "bg-cyan-500/20";
-                                        string iconTextClass = learningPathLower.Contains("python") ? "text-primary" :
+                                        string iconTextClass = learningPathLower.Contains("python") ? "text-purple-400" :
                                                                learningPathLower.Contains("java") ? "text-orange-400" :
                                                                "text-cyan-400";
                                     }

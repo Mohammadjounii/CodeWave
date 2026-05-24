@@ -94,6 +94,16 @@ namespace CodeWave.Web.Controllers
             return RedirectToAction("Question");
         }
 
+        [HttpGet]
+        public IActionResult Skip()
+        {
+            var indexStr = HttpContext.Session.GetString("CurrentIndex");
+            int index = int.TryParse(indexStr, out var parsed) ? parsed : 0;
+            index++;
+            HttpContext.Session.SetString("CurrentIndex", index.ToString());
+            return RedirectToAction("Question");
+        }
+
         public async Task<IActionResult> Finish()
         {
             var assessmentJson = HttpContext.Session.GetString("AssessmentJson");
@@ -122,7 +132,26 @@ namespace CodeWave.Web.Controllers
 
             HttpContext.Session.Clear();
 
-            return RedirectToAction("Index", "Home");
+            TempData["AssessmentScore"] = result.Score.ToString("F0");
+            TempData["AssessmentLevel"] = result.Level;
+            TempData["AssessmentPassed"] = result.Passed.ToString();
+            TempData["AssessmentLearningPath"] = result.LearningPath;
+
+            return RedirectToAction("Results");
+        }
+
+        public IActionResult Results()
+        {
+            var score = TempData["AssessmentScore"]?.ToString();
+            if (score == null)
+                return RedirectToAction("Start");
+
+            ViewBag.Score = score;
+            ViewBag.Level = TempData["AssessmentLevel"]?.ToString();
+            ViewBag.Passed = bool.TryParse(TempData["AssessmentPassed"]?.ToString(), out var p) && p;
+            ViewBag.LearningPath = TempData["AssessmentLearningPath"]?.ToString();
+
+            return View();
         }
     }
 

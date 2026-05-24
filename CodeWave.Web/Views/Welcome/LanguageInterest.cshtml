@@ -33,6 +33,12 @@
                 --tw-text-opacity: 1;
                 color: rgb(248 250 252 / var(--tw-text-opacity));
             }
+        ::-webkit-scrollbar { width: 10px; height: 10px; }
+        ::-webkit-scrollbar-track { background: rgba(155,89,245,0.08); border-radius: 999px; }
+        ::-webkit-scrollbar-thumb { background: #9b59f5; border-radius: 999px; box-shadow: 0 0 10px rgba(155,89,245,0.9), 0 0 20px rgba(155,89,245,0.5), 0 0 35px rgba(155,89,245,0.2); }
+        ::-webkit-scrollbar-thumb:hover { background: #b07eff; box-shadow: 0 0 14px rgba(176,126,255,1), 0 0 28px rgba(176,126,255,0.6), 0 0 45px rgba(155,89,245,0.3); }
+        ::-webkit-scrollbar-corner { background: transparent; }
+        * { scrollbar-width: thin; scrollbar-color: #9b59f5 rgba(155,89,245,0.08); }
     </style>
     <script id="tailwind-config">
         tailwind.config = {
@@ -94,16 +100,16 @@
                                 </div>
                             </label>
 
-                            <!-- Web Development Option -->
+                            <!-- Java Option -->
                             <label class="group relative flex cursor-pointer flex-col gap-3 rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-6 transition-all hover:border-primary/50 hover:shadow-lg">
-                                <input type="radio" name="preferredLanguage" value="Web Development" class="sr-only" required />
+                                <input type="radio" name="preferredLanguage" value="Java" class="sr-only" required />
                                 <div class="flex items-center gap-4">
                                     <div class="icon flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400">
-                                        <span class="material-symbols-outlined text-3xl">language</span>
+                                        <span class="material-symbols-outlined text-3xl">coffee</span>
                                     </div>
                                     <div class="flex-1">
-                                        <h2 class="text-slate-900 dark:text-white text-lg font-bold leading-tight">Web Development</h2>
-                                        <p class="text-slate-600 dark:text-slate-400 text-sm font-normal leading-normal mt-1">Build modern websites and web applications with HTML, CSS, and JavaScript.</p>
+                                        <h2 class="text-slate-900 dark:text-white text-lg font-bold leading-tight">Java</h2>
+                                        <p class="text-slate-600 dark:text-slate-400 text-sm font-normal leading-normal mt-1">A powerful, object-oriented language widely used in enterprise, Android, and backend development.</p>
                                     </div>
                                 </div>
                             </label>

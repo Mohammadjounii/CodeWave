@@ -11,6 +11,24 @@
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
 
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&display=swap" rel="stylesheet" />
+
+    <style>
+        /* Glowing scrollbar — placed after Tailwind CDN so it always wins */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: rgba(255,255,255,0.04); border-radius: 999px; }
+        ::-webkit-scrollbar-thumb {
+            background: #9b59f5;
+            border-radius: 999px;
+            box-shadow: 0 0 8px rgba(155,89,245,0.6), 0 0 16px rgba(155,89,245,0.3);
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #b07eff;
+            box-shadow: 0 0 14px rgba(176,126,255,0.85), 0 0 28px rgba(155,89,245,0.5);
+        }
+        ::-webkit-scrollbar-corner { background: transparent; }
+        /* Firefox */
+        * { scrollbar-width: thin; scrollbar-color: #9b59f5 rgba(255,255,255,0.04); }
+    </style>
 </head>
 <body>
    

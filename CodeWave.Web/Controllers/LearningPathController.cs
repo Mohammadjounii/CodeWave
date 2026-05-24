@@ -113,17 +113,20 @@ namespace CodeWave.Web.Controllers
         [HttpPost]
         [Authorize]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> CompleteLesson(Guid lessonId)
+        public async Task<IActionResult> CompleteLesson([FromBody] CompleteLessonWebRequest request)
         {
+            if (request == null || request.LessonId == Guid.Empty)
+                return BadRequest(new { success = false, message = "Valid lessonId is required." });
+
             var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (!Guid.TryParse(userIdStr, out var userId))
                 return Unauthorized();
 
-            var result = await _learningPathService.CompleteLessonAsync(lessonId, userId);
+            var result = await _learningPathService.CompleteLessonAsync(
+                request.LessonId, userId, request.TimeSpentSeconds);
+
             if (!result.Success)
-            {
                 return BadRequest(new { success = false, message = result.Message });
-            }
 
             return Ok(new { success = true });
         }
@@ -564,6 +567,12 @@ namespace CodeWave.Web.Controllers
         public Guid ExerciseId { get; set; }
         public string? SubmittedCode { get; set; }
         public string? Output { get; set; }
+    }
+
+    public class CompleteLessonWebRequest
+    {
+        public Guid LessonId { get; set; }
+        public int TimeSpentSeconds { get; set; } = 0;
     }
 }
 

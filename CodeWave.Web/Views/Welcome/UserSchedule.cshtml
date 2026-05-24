@@ -27,6 +27,12 @@
             background: rgba(30, 41, 59, 0.5);
             border: 1px solid rgba(255, 255, 255, 0.05);
         }
+        ::-webkit-scrollbar { width: 10px; height: 10px; }
+        ::-webkit-scrollbar-track { background: rgba(155,89,245,0.08); border-radius: 999px; }
+        ::-webkit-scrollbar-thumb { background: #9b59f5; border-radius: 999px; box-shadow: 0 0 10px rgba(155,89,245,0.9), 0 0 20px rgba(155,89,245,0.5), 0 0 35px rgba(155,89,245,0.2); }
+        ::-webkit-scrollbar-thumb:hover { background: #b07eff; box-shadow: 0 0 14px rgba(176,126,255,1), 0 0 28px rgba(176,126,255,0.6), 0 0 45px rgba(155,89,245,0.3); }
+        ::-webkit-scrollbar-corner { background: transparent; }
+        * { scrollbar-width: thin; scrollbar-color: #9b59f5 rgba(155,89,245,0.08); }
     </style>
 </head>
 <body class="font-display">
@@ -40,8 +46,8 @@
                 <div class="w-full max-w-lg rounded-xl shadow-soft dark:shadow-soft-dark glass-card p-6 sm:p-8 md:p-10 space-y-8">
                     <!-- ProgressBar -->
                     <div class="flex flex-col gap-2">
-                        <div class="flex gap-6 justify-between"><p class="text-slate-600 dark:text-slate-400 text-sm font-medium leading-normal">Step 2 of 5</p></div>
-                        <div class="rounded-full bg-slate-200 dark:bg-slate-700 h-2"><div class="h-2 rounded-full bg-primary" style="width: 40%;"></div></div>
+                        <div class="flex gap-6 justify-between"><p class="text-slate-600 dark:text-slate-400 text-sm font-medium leading-normal">Step 5 of 6</p></div>
+                        <div class="rounded-full bg-slate-200 dark:bg-slate-700 h-2"><div class="h-2 rounded-full bg-primary" style="width: 83%;"></div></div>
                     </div>
                     <div class="space-y-4">
                         <!-- HeadlineText -->

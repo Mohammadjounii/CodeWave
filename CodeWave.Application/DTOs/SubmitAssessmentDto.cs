@@ -17,6 +17,7 @@ namespace CodeWave.Application.Assessments.DTOs
         public double Score { get; set; }
         public string Level { get; set; }
         public string LearningPath { get; set; }
+        public bool Passed { get; set; }
     }
 
     public class SubmitExerciseRequest

@@ -403,58 +403,92 @@ with open(""output.txt"", ""w"") as f:
             var exercises = new List<CodingExercise>
             {
                 // Lesson 2 – First Program
+                // NOTE: GUIDs use "d" prefix to avoid collision with Java exercise GUIDs ("b" prefix)
                 new CodingExercise
                 {
-                    Id = Guid.Parse("b2222222-2222-2222-2222-222222222221"),
+                    Id = Guid.Parse("d2222222-2222-2222-2222-222222222221"),
                     LessonId = Guid.Parse("f2222222-2222-2222-2222-222222222222"),
                     Title = "Hello World",
-                    Description = "Print a greeting message to the console.",
-                    StarterCode = "print(\"Hello, World!\")",
+                    Description = "Print a greeting message to the console. Your output must include the word 'Hello'.",
+                    StarterCode = "# Print your greeting message below\nprint(\"\")\n",
                     ExpectedOutput = "Hello, World!"
                 },
 
                 // Lesson 3 – Variables
                 new CodingExercise
                 {
-                    Id = Guid.Parse("b3333333-3333-3333-3333-333333333331"),
+                    Id = Guid.Parse("d3333333-3333-3333-3333-333333333331"),
                     LessonId = Guid.Parse("f3333333-3333-3333-3333-333333333333"),
                     Title = "Variable Practice",
-                    Description = "Create variables for name, age, and city. Print them in a sentence.",
-                    StarterCode = "name = \"Alice\"\nage = 25\ncity = \"New York\"\nprint(\"Name: \" + name + \", Age: \" + str(age) + \", City: \" + city)\n",
+                    Description = "The variables name, age, and city are already set. Write a print statement that outputs all three in one sentence.",
+                    StarterCode = "name = \"Alice\"\nage = 25\ncity = \"New York\"\n# Print name, age, and city together in a sentence below\nprint(\"\")\n",
                     ExpectedOutput = "Name: Alice, Age: 25, City: New York"
                 },
 
                 // Lesson 4 – Control Flow
                 new CodingExercise
                 {
-                    Id = Guid.Parse("b4444444-4444-4444-4444-444444444441"),
+                    Id = Guid.Parse("d4444444-4444-4444-4444-444444444441"),
                     LessonId = Guid.Parse("f4444444-4444-4444-4444-444444444444"),
                     Title = "Grade Calculator",
-                    Description = "Given a score, print the corresponding grade (A, B, C, or F).",
-                    StarterCode = "score = 85\nif score >= 90:\n    print(\"A grade\")\nelif score >= 80:\n    print(\"B grade\")\nelif score >= 70:\n    print(\"C grade\")\nelse:\n    print(\"F grade\")\n",
+                    Description = "Write a function called get_grade(score) that returns the grade as a string. Return 'A grade' for score >= 90, 'B grade' for >= 80, 'C grade' for >= 70, and 'F grade' for anything lower.",
+                    StarterCode = "def get_grade(score):\n    # Write your if/elif/else logic here\n    # Return 'A grade', 'B grade', 'C grade', or 'F grade'\n    pass\n",
                     ExpectedOutput = "B grade"
                 },
 
                 // Lesson 5 – Loops
                 new CodingExercise
                 {
-                    Id = Guid.Parse("b5555555-5555-5555-5555-555555555551"),
+                    Id = Guid.Parse("d5555555-5555-5555-5555-555555555551"),
                     LessonId = Guid.Parse("f5555555-5555-5555-5555-555555555555"),
                     Title = "Sum of Numbers",
-                    Description = "Use a loop to calculate the sum of numbers from 1 to 10.",
-                    StarterCode = "total = 0\nfor i in range(1, 11):\n    total += i\nprint(\"Sum: \" + str(total))\n",
+                    Description = "Use a for loop and the range() function to calculate the sum of all numbers from 1 to 10, then print it in the format: Sum: 55",
+                    StarterCode = "total = 0\n# Complete the loop to add each number from 1 to 10\nfor i in range(1, 11):\n    pass  # replace this with: total += i\nprint(\"Sum: \" + str(total))\n",
                     ExpectedOutput = "Sum: 55"
                 },
 
                 // Lesson 6 – Functions
                 new CodingExercise
                 {
-                    Id = Guid.Parse("b6666666-6666-6666-6666-666666666661"),
+                    Id = Guid.Parse("d6666666-6666-6666-6666-666666666661"),
                     LessonId = Guid.Parse("f6666666-6666-6666-6666-666666666666"),
                     Title = "Area Calculator",
-                    Description = "Create a function that calculates the area of a rectangle.",
-                    StarterCode = "def calculate_area(length, width):\n    return length * width\n\nresult = calculate_area(5, 4)\nprint(\"Area: \" + str(result))\n",
-                    ExpectedOutput = "Area: 20"
+                    Description = "Write a function called calculate_area(length, width) that returns the area of a rectangle (length × width).",
+                    StarterCode = "def calculate_area(length, width):\n    # Return the area of the rectangle\n    pass\n",
+                    ExpectedOutput = "20"
+                },
+
+                // Lesson 7 – Lists
+                new CodingExercise
+                {
+                    Id = Guid.Parse("d7777777-7777-7777-7777-777777777771"),
+                    LessonId = Guid.Parse("f7777777-7777-7777-7777-777777777777"),
+                    Title = "List Squares",
+                    Description = "Write a function called build_squares(n) that returns a list of squared numbers from 1 to n (inclusive). For example, build_squares(3) should return [1, 4, 9]. Use a list comprehension.",
+                    StarterCode = "def build_squares(n):\n    # Use a list comprehension to return squares from 1 to n\n    # Example: build_squares(3) -> [1, 4, 9]\n    pass\n",
+                    ExpectedOutput = "[1, 4, 9, 16]"
+                },
+
+                // Lesson 8 – Dictionaries
+                new CodingExercise
+                {
+                    Id = Guid.Parse("d8888888-8888-8888-8888-888888888881"),
+                    LessonId = Guid.Parse("f8888888-8888-8888-8888-888888888888"),
+                    Title = "Day Name Lookup",
+                    Description = "Write a function called get_day_name(day_number) that uses a dictionary to return the name of the day. Map: 1→'Monday', 2→'Tuesday', 3→'Wednesday', 4→'Thursday', 5→'Friday', 6→'Saturday', 7→'Sunday'.",
+                    StarterCode = "def get_day_name(day_number):\n    # Create a dictionary mapping numbers 1-7 to day names\n    # Return the day name for the given number\n    pass\n",
+                    ExpectedOutput = "Wednesday"
+                },
+
+                // Lesson 9 – OOP
+                new CodingExercise
+                {
+                    Id = Guid.Parse("d9999999-9999-9999-9999-999999999991"),
+                    LessonId = Guid.Parse("f9999999-9999-9999-9999-999999999999"),
+                    Title = "Temperature Converter",
+                    Description = "Define a class called Temperature with an __init__(self, celsius) method that stores the value. Add a method to_fahrenheit(self) that returns celsius * 9/5 + 32. Then write a function convert_temp(celsius) that creates a Temperature object and returns the Fahrenheit value.",
+                    StarterCode = "class Temperature:\n    def __init__(self, celsius):\n        # Store the celsius value\n        pass\n\n    def to_fahrenheit(self):\n        # Return celsius converted to Fahrenheit: celsius * 9/5 + 32\n        pass\n\ndef convert_temp(celsius):\n    # Create a Temperature object and return its Fahrenheit value\n    pass\n",
+                    ExpectedOutput = "212.0"
                 }
             };
 
@@ -481,9 +515,322 @@ with open(""output.txt"", ""w"") as f:
             await context.SaveChangesAsync();
 
             // ---------------------------------------------------------
-            // 4) QUIZZES
+            // 4) EXERCISE TEST CASES
+            // ---------------------------------------------------------
+            await SeedPythonExerciseTestCasesAsync(context);
+
+            // ---------------------------------------------------------
+            // 5) QUIZZES
             // ---------------------------------------------------------
             await SeedPythonQuizzesAsync(context, pythonCourseId);
+        }
+
+        private static async Task SeedPythonExerciseTestCasesAsync(ApplicationDbContext context)
+        {
+            // Remove stale "b-prefix" Python exercises via raw SQL.
+            // Only target exercises whose LessonId belongs to Python lessons (f-prefix),
+            // so Java exercises that share the same b-prefix IDs are not affected.
+            await context.Database.ExecuteSqlRawAsync(@"
+                DELETE FROM ExerciseTestCases WHERE ExerciseId IN (
+                    SELECT Id FROM CodingExercises WHERE Id IN (
+                        'b2222222-2222-2222-2222-222222222221',
+                        'b3333333-3333-3333-3333-333333333331',
+                        'b4444444-4444-4444-4444-444444444441',
+                        'b5555555-5555-5555-5555-555555555551',
+                        'b6666666-6666-6666-6666-666666666661')
+                    AND LessonId IN (
+                        'f2222222-2222-2222-2222-222222222222',
+                        'f3333333-3333-3333-3333-333333333333',
+                        'f4444444-4444-4444-4444-444444444444',
+                        'f5555555-5555-5555-5555-555555555555',
+                        'f6666666-6666-6666-6666-666666666666'))");
+            await context.Database.ExecuteSqlRawAsync(@"
+                DELETE FROM ExerciseSubmissions WHERE ExerciseId IN (
+                    SELECT Id FROM CodingExercises WHERE Id IN (
+                        'b2222222-2222-2222-2222-222222222221',
+                        'b3333333-3333-3333-3333-333333333331',
+                        'b4444444-4444-4444-4444-444444444441',
+                        'b5555555-5555-5555-5555-555555555551',
+                        'b6666666-6666-6666-6666-666666666661')
+                    AND LessonId IN (
+                        'f2222222-2222-2222-2222-222222222222',
+                        'f3333333-3333-3333-3333-333333333333',
+                        'f4444444-4444-4444-4444-444444444444',
+                        'f5555555-5555-5555-5555-555555555555',
+                        'f6666666-6666-6666-6666-666666666666'))");
+            await context.Database.ExecuteSqlRawAsync(@"
+                DELETE FROM CodingExercises WHERE Id IN (
+                    'b2222222-2222-2222-2222-222222222221',
+                    'b3333333-3333-3333-3333-333333333331',
+                    'b4444444-4444-4444-4444-444444444441',
+                    'b5555555-5555-5555-5555-555555555551',
+                    'b6666666-6666-6666-6666-666666666661')
+                AND LessonId IN (
+                    'f2222222-2222-2222-2222-222222222222',
+                    'f3333333-3333-3333-3333-333333333333',
+                    'f4444444-4444-4444-4444-444444444444',
+                    'f5555555-5555-5555-5555-555555555555',
+                    'f6666666-6666-6666-6666-666666666666')");
+
+            var allTestCases = new[]
+            {
+                // ── Lesson 2: Hello World ────────────────────────────────
+                new ExerciseTestCase
+                {
+                    Id = Guid.Parse("e2222222-2222-2222-2222-222222222201"),
+                    ExerciseId = Guid.Parse("d2222222-2222-2222-2222-222222222221"),
+                    Input = "",
+                    ExpectedOutput = "Hello",
+                    Description = "Output must contain 'Hello'",
+                    OrderNumber = 1,
+                    CreatedAt = DateTime.UtcNow,
+                    IsDeleted = false
+                },
+                // ── Lesson 3: Variable Practice ──────────────────────────
+                new ExerciseTestCase
+                {
+                    Id = Guid.Parse("e3333333-3333-3333-3333-333333333301"),
+                    ExerciseId = Guid.Parse("d3333333-3333-3333-3333-333333333331"),
+                    Input = "",
+                    ExpectedOutput = "Alice",
+                    Description = "Output must contain the name 'Alice'",
+                    OrderNumber = 1,
+                    CreatedAt = DateTime.UtcNow,
+                    IsDeleted = false
+                },
+                new ExerciseTestCase
+                {
+                    Id = Guid.Parse("e3333333-3333-3333-3333-333333333302"),
+                    ExerciseId = Guid.Parse("d3333333-3333-3333-3333-333333333331"),
+                    Input = "",
+                    ExpectedOutput = "25",
+                    Description = "Output must contain the age '25'",
+                    OrderNumber = 2,
+                    CreatedAt = DateTime.UtcNow,
+                    IsDeleted = false
+                },
+                new ExerciseTestCase
+                {
+                    Id = Guid.Parse("e3333333-3333-3333-3333-333333333303"),
+                    ExerciseId = Guid.Parse("d3333333-3333-3333-3333-333333333331"),
+                    Input = "",
+                    ExpectedOutput = "New York",
+                    Description = "Output must contain the city 'New York'",
+                    OrderNumber = 3,
+                    CreatedAt = DateTime.UtcNow,
+                    IsDeleted = false
+                },
+                // ── Lesson 4: Grade Calculator ───────────────────────────
+                new ExerciseTestCase
+                {
+                    Id = Guid.Parse("e4444444-4444-4444-4444-444444444401"),
+                    ExerciseId = Guid.Parse("d4444444-4444-4444-4444-444444444441"),
+                    Input = "score=95",
+                    ExpectedOutput = "A grade",
+                    Description = "Score 95 should return 'A grade'",
+                    OrderNumber = 1,
+                    CreatedAt = DateTime.UtcNow,
+                    IsDeleted = false
+                },
+                new ExerciseTestCase
+                {
+                    Id = Guid.Parse("e4444444-4444-4444-4444-444444444402"),
+                    ExerciseId = Guid.Parse("d4444444-4444-4444-4444-444444444441"),
+                    Input = "score=85",
+                    ExpectedOutput = "B grade",
+                    Description = "Score 85 should return 'B grade'",
+                    OrderNumber = 2,
+                    CreatedAt = DateTime.UtcNow,
+                    IsDeleted = false
+                },
+                new ExerciseTestCase
+                {
+                    Id = Guid.Parse("e4444444-4444-4444-4444-444444444403"),
+                    ExerciseId = Guid.Parse("d4444444-4444-4444-4444-444444444441"),
+                    Input = "score=73",
+                    ExpectedOutput = "C grade",
+                    Description = "Score 73 should return 'C grade'",
+                    OrderNumber = 3,
+                    CreatedAt = DateTime.UtcNow,
+                    IsDeleted = false
+                },
+                new ExerciseTestCase
+                {
+                    Id = Guid.Parse("e4444444-4444-4444-4444-444444444404"),
+                    ExerciseId = Guid.Parse("d4444444-4444-4444-4444-444444444441"),
+                    Input = "score=50",
+                    ExpectedOutput = "F grade",
+                    Description = "Score 50 should return 'F grade'",
+                    OrderNumber = 4,
+                    CreatedAt = DateTime.UtcNow,
+                    IsDeleted = false
+                },
+                // ── Lesson 5: Sum of Numbers ─────────────────────────────
+                new ExerciseTestCase
+                {
+                    Id = Guid.Parse("e5555555-5555-5555-5555-555555555501"),
+                    ExerciseId = Guid.Parse("d5555555-5555-5555-5555-555555555551"),
+                    Input = "",
+                    ExpectedOutput = "55",
+                    Description = "Output must contain the correct sum '55'",
+                    OrderNumber = 1,
+                    CreatedAt = DateTime.UtcNow,
+                    IsDeleted = false
+                },
+                // ── Lesson 6: Area Calculator ────────────────────────────
+                new ExerciseTestCase
+                {
+                    Id = Guid.Parse("e6666666-6666-6666-6666-666666666601"),
+                    ExerciseId = Guid.Parse("d6666666-6666-6666-6666-666666666661"),
+                    Input = "length=5, width=4",
+                    ExpectedOutput = "20",
+                    Description = "calculate_area(5, 4) should return 20",
+                    OrderNumber = 1,
+                    CreatedAt = DateTime.UtcNow,
+                    IsDeleted = false
+                },
+                new ExerciseTestCase
+                {
+                    Id = Guid.Parse("e6666666-6666-6666-6666-666666666602"),
+                    ExerciseId = Guid.Parse("d6666666-6666-6666-6666-666666666661"),
+                    Input = "length=3, width=7",
+                    ExpectedOutput = "21",
+                    Description = "calculate_area(3, 7) should return 21",
+                    OrderNumber = 2,
+                    CreatedAt = DateTime.UtcNow,
+                    IsDeleted = false
+                },
+                new ExerciseTestCase
+                {
+                    Id = Guid.Parse("e6666666-6666-6666-6666-666666666603"),
+                    ExerciseId = Guid.Parse("d6666666-6666-6666-6666-666666666661"),
+                    Input = "length=6, width=6",
+                    ExpectedOutput = "36",
+                    Description = "calculate_area(6, 6) should return 36",
+                    OrderNumber = 3,
+                    CreatedAt = DateTime.UtcNow,
+                    IsDeleted = false
+                },
+                // ── Lesson 7: List Squares ────────────────────────────────
+                new ExerciseTestCase
+                {
+                    Id = Guid.Parse("e7777777-7777-7777-7777-777777777701"),
+                    ExerciseId = Guid.Parse("d7777777-7777-7777-7777-777777777771"),
+                    Input = "n=3",
+                    ExpectedOutput = "[1, 4, 9]",
+                    Description = "build_squares(3) should return [1, 4, 9]",
+                    OrderNumber = 1,
+                    CreatedAt = DateTime.UtcNow,
+                    IsDeleted = false
+                },
+                new ExerciseTestCase
+                {
+                    Id = Guid.Parse("e7777777-7777-7777-7777-777777777702"),
+                    ExerciseId = Guid.Parse("d7777777-7777-7777-7777-777777777771"),
+                    Input = "n=4",
+                    ExpectedOutput = "[1, 4, 9, 16]",
+                    Description = "build_squares(4) should return [1, 4, 9, 16]",
+                    OrderNumber = 2,
+                    CreatedAt = DateTime.UtcNow,
+                    IsDeleted = false
+                },
+                new ExerciseTestCase
+                {
+                    Id = Guid.Parse("e7777777-7777-7777-7777-777777777703"),
+                    ExerciseId = Guid.Parse("d7777777-7777-7777-7777-777777777771"),
+                    Input = "n=5",
+                    ExpectedOutput = "[1, 4, 9, 16, 25]",
+                    Description = "build_squares(5) should return [1, 4, 9, 16, 25]",
+                    OrderNumber = 3,
+                    CreatedAt = DateTime.UtcNow,
+                    IsDeleted = false
+                },
+                // ── Lesson 8: Day Name Lookup ────────────────────────────
+                new ExerciseTestCase
+                {
+                    Id = Guid.Parse("e8888888-8888-8888-8888-888888888801"),
+                    ExerciseId = Guid.Parse("d8888888-8888-8888-8888-888888888881"),
+                    Input = "day_number=1",
+                    ExpectedOutput = "Monday",
+                    Description = "get_day_name(1) should return 'Monday'",
+                    OrderNumber = 1,
+                    CreatedAt = DateTime.UtcNow,
+                    IsDeleted = false
+                },
+                new ExerciseTestCase
+                {
+                    Id = Guid.Parse("e8888888-8888-8888-8888-888888888802"),
+                    ExerciseId = Guid.Parse("d8888888-8888-8888-8888-888888888881"),
+                    Input = "day_number=3",
+                    ExpectedOutput = "Wednesday",
+                    Description = "get_day_name(3) should return 'Wednesday'",
+                    OrderNumber = 2,
+                    CreatedAt = DateTime.UtcNow,
+                    IsDeleted = false
+                },
+                new ExerciseTestCase
+                {
+                    Id = Guid.Parse("e8888888-8888-8888-8888-888888888803"),
+                    ExerciseId = Guid.Parse("d8888888-8888-8888-8888-888888888881"),
+                    Input = "day_number=5",
+                    ExpectedOutput = "Friday",
+                    Description = "get_day_name(5) should return 'Friday'",
+                    OrderNumber = 3,
+                    CreatedAt = DateTime.UtcNow,
+                    IsDeleted = false
+                },
+                // ── Lesson 9: Temperature Converter ──────────────────────
+                new ExerciseTestCase
+                {
+                    Id = Guid.Parse("e9999999-9999-9999-9999-999999999901"),
+                    ExerciseId = Guid.Parse("d9999999-9999-9999-9999-999999999991"),
+                    Input = "celsius=0",
+                    ExpectedOutput = "32.0",
+                    Description = "convert_temp(0) should return 32.0",
+                    OrderNumber = 1,
+                    CreatedAt = DateTime.UtcNow,
+                    IsDeleted = false
+                },
+                new ExerciseTestCase
+                {
+                    Id = Guid.Parse("e9999999-9999-9999-9999-999999999902"),
+                    ExerciseId = Guid.Parse("d9999999-9999-9999-9999-999999999991"),
+                    Input = "celsius=100",
+                    ExpectedOutput = "212.0",
+                    Description = "convert_temp(100) should return 212.0",
+                    OrderNumber = 2,
+                    CreatedAt = DateTime.UtcNow,
+                    IsDeleted = false
+                },
+                new ExerciseTestCase
+                {
+                    Id = Guid.Parse("e9999999-9999-9999-9999-999999999903"),
+                    ExerciseId = Guid.Parse("d9999999-9999-9999-9999-999999999991"),
+                    Input = "celsius=37",
+                    ExpectedOutput = "98.6",
+                    Description = "convert_temp(37) should return 98.6",
+                    OrderNumber = 3,
+                    CreatedAt = DateTime.UtcNow,
+                    IsDeleted = false
+                },
+            };
+
+            foreach (var tc in allTestCases)
+            {
+                await context.Database.ExecuteSqlRawAsync(@"
+                    IF NOT EXISTS (SELECT 1 FROM ExerciseTestCases WHERE Id = {0})
+                    BEGIN
+                        INSERT INTO ExerciseTestCases (Id, ExerciseId, Input, ExpectedOutput, Description, OrderNumber, CreatedAt, IsDeleted)
+                        VALUES ({0}, {1}, {2}, {3}, {4}, {5}, {6}, 0)
+                    END
+                    ELSE
+                    BEGIN
+                        UPDATE ExerciseTestCases
+                        SET ExerciseId = {1}, Input = {2}, ExpectedOutput = {3}, Description = {4}, OrderNumber = {5}, IsDeleted = 0
+                        WHERE Id = {0}
+                    END",
+                    tc.Id, tc.ExerciseId, tc.Input, tc.ExpectedOutput, tc.Description, tc.OrderNumber, tc.CreatedAt);
+            }
         }
 
         private static async Task SeedPythonQuizzesAsync(ApplicationDbContext context, Guid courseId)

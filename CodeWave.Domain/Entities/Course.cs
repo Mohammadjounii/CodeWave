@@ -29,7 +29,8 @@ namespace CodeWave.Domain.Entities
 
     public enum Language
     {
-        Python,
-        Java
+        Python,         // 0
+        Java,           // 1
+        WebDevelopment  // 2
     }
 }

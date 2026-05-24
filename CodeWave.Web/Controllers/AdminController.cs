@@ -276,17 +276,46 @@ namespace CodeWave.Web.Controllers
             var user = await _userManager.FindByIdAsync(userId.ToString());
             if (user == null)
             {
-                return NotFound();
+                TempData["Error"] = "User not found.";
+                return RedirectToAction(nameof(UserManagment));
             }
 
-            var result = await _userManager.DeleteAsync(user);
-            if (result.Succeeded)
+            try
             {
-                TempData["Success"] = "User deleted successfully";
+                // Delete UserAnswers before UserAssessments (Restrict FK)
+                var assessmentIds = _context.UserAssessments
+                    .Where(ua => ua.UserId == userId)
+                    .Select(ua => ua.Id);
+                _context.UserAnswers.RemoveRange(
+                    _context.UserAnswers.Where(ua => assessmentIds.Contains(ua.UserAssessmentId)));
+                _context.UserAssessments.RemoveRange(
+                    _context.UserAssessments.Where(ua => ua.UserId == userId));
+
+                // Delete remaining related data
+                _context.ExerciseSubmissions.RemoveRange(
+                    _context.ExerciseSubmissions.Where(es => es.UserId == userId));
+                _context.LessonCompletions.RemoveRange(
+                    _context.LessonCompletions.Where(lc => lc.UserId == userId));
+                _context.UserCourses.RemoveRange(
+                    _context.UserCourses.Where(uc => uc.UserId == userId));
+                _context.Projects.RemoveRange(
+                    _context.Projects.Where(p => p.UserId == userId));
+
+                var cv = await _context.CVs.FirstOrDefaultAsync(c => c.UserId == userId);
+                if (cv != null) _context.CVs.Remove(cv);
+
+                await _context.SaveChangesAsync();
+
+                // Identity handles AspNetUserLogins, AspNetUserClaims, AspNetUserRoles automatically
+                var result = await _userManager.DeleteAsync(user);
+                if (result.Succeeded)
+                    TempData["Success"] = "User deleted successfully.";
+                else
+                    TempData["Error"] = "Failed to delete user: " + string.Join(", ", result.Errors.Select(e => e.Description));
             }
-            else
+            catch (Exception ex)
             {
-                TempData["Error"] = "Failed to delete user";
+                TempData["Error"] = $"Error deleting user: {ex.Message}";
             }
 
             return RedirectToAction(nameof(UserManagment));
@@ -618,44 +647,41 @@ namespace CodeWave.Web.Controllers
         // ============================================
         public async Task<IActionResult> CRUDUser(Guid? id)
         {
-            ApplicationUser user;
             if (id.HasValue)
             {
-                user = await _context.Users.FindAsync(id.Value);
-                if (user == null)
-                {
-                    return NotFound();
-                }
-                ViewBag.IsEdit = true;
-            }
-            else
-            {
-                user = new ApplicationUser();
-                ViewBag.IsEdit = false;
+                var existingUser = await _context.Users.FindAsync(id.Value);
+                if (existingUser == null) return NotFound();
+                return View("EditUser", existingUser);
             }
 
-            return View(user);
+            return View(new ApplicationUser());
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CreateOrUpdateUser(ApplicationUser user, string password, string confirmPassword, bool isAdmin)
         {
-            if (!ModelState.IsValid)
+            var isEdit = user.Id != Guid.Empty;
+            var returnView = isEdit ? "EditUser" : "CRUDUser";
+
+            // Validate manually — ModelState.IsValid always fails for IdentityUser-derived models
+            if (string.IsNullOrWhiteSpace(user.FirstName))
             {
-                ViewBag.User = user;
-                ViewBag.IsEdit = user.Id != Guid.Empty;
-                return View("CRUDUser", user);
+                TempData["Error"] = "First name is required.";
+                return View(returnView, user);
+            }
+            if (string.IsNullOrWhiteSpace(user.Email))
+            {
+                TempData["Error"] = "Email is required.";
+                return View(returnView, user);
             }
 
-            if (user.Id == Guid.Empty)
+            if (!isEdit)
             {
-                // Create new user
+                // CREATE
                 if (string.IsNullOrWhiteSpace(password) || password != confirmPassword)
                 {
-                    TempData["Error"] = "Password and confirm password must match";
-                    ViewBag.User = user;
-                    ViewBag.IsEdit = false;
+                    TempData["Error"] = "Password is required and must match the confirmation.";
                     return View("CRUDUser", user);
                 }
 
@@ -663,31 +689,26 @@ namespace CodeWave.Web.Controllers
                 user.UserName = user.Email;
                 user.IsAdmin = isAdmin;
                 var result = await _userManager.CreateAsync(user, password);
-                
+
                 if (result.Succeeded)
                 {
                     if (isAdmin)
-                    {
                         await _userManager.AddClaimAsync(user, new Claim("IsAdmin", "true"));
-                    }
-                    TempData["Success"] = "User created successfully";
+
+                    TempData["Success"] = "User created successfully.";
                     return RedirectToAction(nameof(UserManagment));
                 }
-                else
-                {
-                    TempData["Error"] = string.Join(", ", result.Errors.Select(e => e.Description));
-                    ViewBag.User = user;
-                    ViewBag.IsEdit = false;
-                    return View("CRUDUser", user);
-                }
+
+                TempData["Error"] = string.Join(", ", result.Errors.Select(e => e.Description));
+                return View("CRUDUser", user);
             }
             else
             {
-                // Update existing user
+                // EDIT
                 var existingUser = await _userManager.FindByIdAsync(user.Id.ToString());
                 if (existingUser == null)
                 {
-                    TempData["Error"] = "User not found";
+                    TempData["Error"] = "User not found.";
                     return RedirectToAction(nameof(UserManagment));
                 }
 
@@ -700,39 +721,35 @@ namespace CodeWave.Web.Controllers
                 existingUser.IsAdmin = isAdmin;
 
                 var updateResult = await _userManager.UpdateAsync(existingUser);
-                
-                if (updateResult.Succeeded)
-                {
-                    // Update password if provided
-                    if (!string.IsNullOrWhiteSpace(password) && password == confirmPassword)
-                    {
-                        var token = await _userManager.GeneratePasswordResetTokenAsync(existingUser);
-                        await _userManager.ResetPasswordAsync(existingUser, token, password);
-                    }
 
-                    // Update admin claim
-                    var claims = await _userManager.GetClaimsAsync(existingUser);
-                    var adminClaim = claims.FirstOrDefault(c => c.Type == "IsAdmin");
-                    
-                    if (isAdmin && adminClaim == null)
-                    {
-                        await _userManager.AddClaimAsync(existingUser, new Claim("IsAdmin", "true"));
-                    }
-                    else if (!isAdmin && adminClaim != null)
-                    {
-                        await _userManager.RemoveClaimAsync(existingUser, adminClaim);
-                    }
-
-                    TempData["Success"] = "User updated successfully";
-                    return RedirectToAction(nameof(UserManagment));
-                }
-                else
+                if (!updateResult.Succeeded)
                 {
                     TempData["Error"] = string.Join(", ", updateResult.Errors.Select(e => e.Description));
-                    ViewBag.User = existingUser;
-                    ViewBag.IsEdit = true;
-                    return View("CRUDUser", existingUser);
+                    return View("EditUser", existingUser);
                 }
+
+                // Optional password change
+                if (!string.IsNullOrWhiteSpace(password))
+                {
+                    if (password != confirmPassword)
+                    {
+                        TempData["Error"] = "Passwords do not match. Other changes were saved.";
+                        return View("EditUser", existingUser);
+                    }
+                    var token = await _userManager.GeneratePasswordResetTokenAsync(existingUser);
+                    await _userManager.ResetPasswordAsync(existingUser, token, password);
+                }
+
+                // Sync IsAdmin claim
+                var claims = await _userManager.GetClaimsAsync(existingUser);
+                var adminClaim = claims.FirstOrDefault(c => c.Type == "IsAdmin");
+                if (isAdmin && adminClaim == null)
+                    await _userManager.AddClaimAsync(existingUser, new Claim("IsAdmin", "true"));
+                else if (!isAdmin && adminClaim != null)
+                    await _userManager.RemoveClaimAsync(existingUser, adminClaim);
+
+                TempData["Success"] = "User updated successfully.";
+                return RedirectToAction(nameof(UserManagment));
             }
         }
 

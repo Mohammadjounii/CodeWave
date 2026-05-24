@@ -38,5 +38,32 @@ public class UserCourseRepository : IUserCourseRepository
             .Select(uc => uc.CompletionDate!.Value)
             .FirstOrDefaultAsync();
     }
+
+    public async Task MarkCourseCompletedAsync(Guid userId, Guid courseId)
+    {
+        var userCourse = await _context.UserCourses
+            .FirstOrDefaultAsync(uc => uc.UserId == userId && uc.CourseId == courseId && !uc.isDeleted);
+
+        if (userCourse == null)
+        {
+            await _context.UserCourses.AddAsync(new UserCourse
+            {
+                Id = Guid.NewGuid(),
+                UserId = userId,
+                CourseId = courseId,
+                ProgressPercent = 100,
+                CompletionDate = DateTime.UtcNow,
+                CreatedAt = DateTime.UtcNow,
+                isDeleted = false
+            });
+        }
+        else if (!userCourse.CompletionDate.HasValue)
+        {
+            userCourse.CompletionDate = DateTime.UtcNow;
+            userCourse.ProgressPercent = 100;
+        }
+
+        await _context.SaveChangesAsync();
+    }
 }
 

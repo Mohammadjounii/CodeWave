@@ -52,6 +52,14 @@ namespace CodeWave.Web.Controllers
                 return View(model);
             }
 
+            if (!await _userManager.HasPasswordAsync(user))
+            {
+                var logins = await _userManager.GetLoginsAsync(user);
+                var provider = logins.FirstOrDefault()?.LoginProvider ?? "a social account";
+                ModelState.AddModelError(string.Empty, $"This account was created with {provider}. Please use the '{provider}' button to sign in.");
+                return View(model);
+            }
+
             var result = await _signInManager.PasswordSignInAsync(
                 user,
                 model.Password,
@@ -201,15 +209,35 @@ namespace CodeWave.Web.Controllers
                 return RedirectToAction("Login");
             }
 
-            // User doesn't have an account, create one
-            var firstName = info.Principal.FindFirstValue(ClaimTypes.GivenName) ?? info.Principal.FindFirstValue(ClaimTypes.Name)?.Split(' ')[0] ?? "User";
-            var lastName = info.Principal.FindFirstValue(ClaimTypes.Surname) ?? info.Principal.FindFirstValue(ClaimTypes.Name)?.Split(' ').LastOrDefault() ?? "";
-
             if (string.IsNullOrEmpty(email))
             {
                 TempData["Error"] = "Could not retrieve email from Google account.";
                 return RedirectToAction("Login");
             }
+
+            // Check if an account with this email already exists (e.g. registered via email/password)
+            // and link the Google login to it instead of failing
+            var existingUserByEmail = await _userManager.FindByEmailAsync(email);
+            if (existingUserByEmail != null)
+            {
+                await _userManager.AddLoginAsync(existingUserByEmail, info);
+                await _signInManager.SignInAsync(existingUserByEmail, isPersistent: false);
+
+                if (existingUserByEmail.IsAdmin)
+                    return RedirectToAction("Index", "Admin");
+
+                if (string.IsNullOrEmpty(existingUserByEmail.Level))
+                    return RedirectToAction("UserInterest", "Welcome");
+
+                if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
+                    return Redirect(returnUrl);
+
+                return RedirectToAction("Index", "Home");
+            }
+
+            // No account exists — create one
+            var firstName = info.Principal.FindFirstValue(ClaimTypes.GivenName) ?? info.Principal.FindFirstValue(ClaimTypes.Name)?.Split(' ')[0] ?? "User";
+            var lastName = info.Principal.FindFirstValue(ClaimTypes.Surname) ?? info.Principal.FindFirstValue(ClaimTypes.Name)?.Split(' ').LastOrDefault() ?? "";
 
             var user = new ApplicationUser
             {
@@ -224,19 +252,21 @@ namespace CodeWave.Web.Controllers
             };
 
             var createResult = await _userManager.CreateAsync(user);
-            if (createResult.Succeeded)
+            if (!createResult.Succeeded)
             {
-                var addLoginResult = await _userManager.AddLoginAsync(user, info);
-                if (addLoginResult.Succeeded)
-                {
-                    await _signInManager.SignInAsync(user, isPersistent: false);
-                    // New user from Google, redirect to onboarding
-                    return RedirectToAction("UserInterest", "Welcome");
-                }
+                TempData["Error"] = "Account creation failed: " + string.Join("; ", createResult.Errors.Select(e => e.Description));
+                return RedirectToAction("Login");
             }
 
-            TempData["Error"] = "Failed to create account. Please try again.";
-            return RedirectToAction("Login");
+            var addLoginResult = await _userManager.AddLoginAsync(user, info);
+            if (!addLoginResult.Succeeded)
+            {
+                TempData["Error"] = "Login link failed: " + string.Join("; ", addLoginResult.Errors.Select(e => e.Description));
+                return RedirectToAction("Login");
+            }
+
+            await _signInManager.SignInAsync(user, isPersistent: false);
+            return RedirectToAction("UserInterest", "Welcome");
         }
 
         [HttpGet]
@@ -276,22 +306,42 @@ namespace CodeWave.Web.Controllers
                 info.ProviderKey,
                 isPersistent: false);
 
-            // Get email first
             var email = info.Principal.FindFirstValue(ClaimTypes.Email)
-                ?? info.Principal.FindFirstValue("email")
-                ?? $"{Guid.NewGuid()}@github.local";
+                ?? info.Principal.FindFirstValue("email");
 
             if (signInResult.Succeeded)
             {
                 if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
                     return Redirect(returnUrl);
 
-                // Check if user is admin
-                var existingUser = await _userManager.FindByEmailAsync(email);
-                if (existingUser != null && existingUser.IsAdmin)
+                if (!string.IsNullOrEmpty(email))
                 {
-                    return RedirectToAction("Index", "Admin");
+                    var existingUser = await _userManager.FindByEmailAsync(email);
+                    if (existingUser != null && existingUser.IsAdmin)
+                        return RedirectToAction("Index", "Admin");
                 }
+
+                return RedirectToAction("Index", "Home");
+            }
+
+            if (string.IsNullOrEmpty(email))
+                return RedirectToAction("GitHubEnterEmail");
+
+            // Account with this email already exists — link GitHub to it and sign in
+            var existingUserByEmail = await _userManager.FindByEmailAsync(email);
+            if (existingUserByEmail != null)
+            {
+                await _userManager.AddLoginAsync(existingUserByEmail, info);
+                await _signInManager.SignInAsync(existingUserByEmail, isPersistent: false);
+
+                if (existingUserByEmail.IsAdmin)
+                    return RedirectToAction("Index", "Admin");
+
+                if (string.IsNullOrEmpty(existingUserByEmail.Level))
+                    return RedirectToAction("UserInterest", "Welcome");
+
+                if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
+                    return Redirect(returnUrl);
 
                 return RedirectToAction("Index", "Home");
             }
@@ -320,20 +370,87 @@ namespace CodeWave.Web.Controllers
             var createResult = await _userManager.CreateAsync(user);
             if (!createResult.Succeeded)
             {
-                TempData["Error"] = "Failed to create user from GitHub account.";
+                TempData["Error"] = "Account creation failed: " + string.Join("; ", createResult.Errors.Select(e => e.Description));
                 return RedirectToAction("Login");
             }
 
             var addLoginResult = await _userManager.AddLoginAsync(user, info);
             if (!addLoginResult.Succeeded)
             {
-                TempData["Error"] = "Failed to link GitHub login.";
+                TempData["Error"] = "Login link failed: " + string.Join("; ", addLoginResult.Errors.Select(e => e.Description));
                 return RedirectToAction("Login");
             }
 
             await _signInManager.SignInAsync(user, isPersistent: false);
+            return RedirectToAction("UserInterest", "Welcome");
+        }
 
-            // New user from GitHub, redirect to onboarding
+        [HttpGet]
+        [AllowAnonymous]
+        public IActionResult GitHubEnterEmail()
+        {
+            return View(new GitHubEnterEmailViewModel());
+        }
+
+        [HttpPost]
+        [AllowAnonymous]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> GitHubEnterEmail(GitHubEnterEmailViewModel model)
+        {
+            if (!ModelState.IsValid)
+                return View(model);
+
+            var info = await _signInManager.GetExternalLoginInfoAsync();
+            if (info == null)
+            {
+                TempData["Error"] = "Your GitHub session expired. Please sign in again.";
+                return RedirectToAction("Login");
+            }
+
+            var existing = await _userManager.FindByEmailAsync(model.Email);
+            if (existing != null)
+            {
+                ModelState.AddModelError("Email", "This email is already registered. Please log in instead.");
+                return View(model);
+            }
+
+            var name = info.Principal.FindFirstValue(ClaimTypes.Name)
+                ?? info.Principal.FindFirstValue("login")
+                ?? "GitHub User";
+
+            var firstName = name.Split(' ')[0];
+            var lastName = name.Split(' ').Length > 1
+                ? string.Join(" ", name.Split(' ').Skip(1))
+                : "";
+
+            var user = new ApplicationUser
+            {
+                UserName = model.Email,
+                Email = model.Email,
+                EmailConfirmed = true,
+                FirstName = firstName,
+                LastName = lastName,
+                Description = null,
+                Level = null,
+                LearningPath = null
+            };
+
+            var createResult = await _userManager.CreateAsync(user);
+            if (!createResult.Succeeded)
+            {
+                foreach (var error in createResult.Errors)
+                    ModelState.AddModelError(string.Empty, error.Description);
+                return View(model);
+            }
+
+            var addLoginResult = await _userManager.AddLoginAsync(user, info);
+            if (!addLoginResult.Succeeded)
+            {
+                TempData["Error"] = "Failed to link GitHub login. Please try again.";
+                return RedirectToAction("Login");
+            }
+
+            await _signInManager.SignInAsync(user, isPersistent: false);
             return RedirectToAction("UserInterest", "Welcome");
         }
 

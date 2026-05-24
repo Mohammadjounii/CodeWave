@@ -40,7 +40,8 @@ public class LearningPathService : ILearningPathService
 
         var lessons = await _lessonRepository.GetByCourseAsync(courseId);
         var completed = await _lessonCompletionRepository.GetCompletedLessonIdsAsync(userId);
-        var completedSet = completed.ToHashSet();
+        var courseLessonIds = lessons.Select(l => l.Id).ToHashSet();
+        var completedSet = completed.Where(id => courseLessonIds.Contains(id)).ToHashSet();
 
         // Resume at the first uncompleted lesson; fall back to the last if all done
         var nextLesson = lessons.FirstOrDefault(l => !completedSet.Contains(l.Id))
@@ -88,7 +89,7 @@ public class LearningPathService : ILearningPathService
         };
     }
 
-    public async Task<ServiceResult> CompleteLessonAsync(Guid lessonId, Guid userId, bool requireExercisesSolved = true)
+    public async Task<ServiceResult> CompleteLessonAsync(Guid lessonId, Guid userId, int timeSpentSeconds = 0, bool requireExercisesSolved = true)
     {
         var lesson = await _lessonRepository.GetWithExercisesAsync(lessonId);
         if (lesson == null)
@@ -126,6 +127,9 @@ public class LearningPathService : ILearningPathService
             }
         }
 
+        // Convert seconds to whole minutes (minimum 1 min if any time was tracked)
+        int newMinutes = timeSpentSeconds > 0 ? Math.Max(1, timeSpentSeconds / 60) : 0;
+
         var existing = await _lessonCompletionRepository.GetAsync(userId, lessonId);
         if (existing == null)
         {
@@ -136,6 +140,7 @@ public class LearningPathService : ILearningPathService
                 UserId = userId,
                 IsCompleted = true,
                 CompletionDate = DateTime.UtcNow,
+                TimeSpentMinutes = newMinutes,
                 CreatedAt = DateTime.UtcNow
             };
             await _lessonCompletionRepository.AddAsync(completion);
@@ -144,6 +149,7 @@ public class LearningPathService : ILearningPathService
         {
             existing.IsCompleted = true;
             existing.CompletionDate = DateTime.UtcNow;
+            existing.TimeSpentMinutes += newMinutes;
         }
 
         await _unitOfWork.SaveChangesAsync();

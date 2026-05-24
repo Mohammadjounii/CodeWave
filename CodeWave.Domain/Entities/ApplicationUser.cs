@@ -27,6 +27,7 @@ namespace CodeWave.Domain.Entities
         public ICollection<ExerciseSubmission> ExerciseSubmissions { get; set; } = new List<ExerciseSubmission>();
         public ICollection<Project> Projects { get; set; } = new List<Project>();
         public ICollection<UserQuizAttempt> UserQuizAttempts { get; set; } = new List<UserQuizAttempt>();
+        public CV? CV { get; set; }
 
     }
 }
