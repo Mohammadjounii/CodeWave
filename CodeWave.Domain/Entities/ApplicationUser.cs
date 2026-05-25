@@ -20,6 +20,7 @@ namespace CodeWave.Domain.Entities
         public string? PreferredLanguage { get; set; } // Python or Web Development
         public string? ProfilePictureUrl { get; set; } // Path to profile picture
         public bool IsAdmin { get; set; } = false; // Admin flag for authorization
+        public bool OnboardingCompleted { get; set; } = false;
 
         public ICollection<UserAssesment> UserAssessments { get; set; } = new List<UserAssesment>();
         public ICollection<UserCourse> UserCourses { get; set; } = new List<UserCourse>();

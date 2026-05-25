@@ -46,6 +46,11 @@ namespace CodeWave.Web.Controllers
                 return View();
             }
 
+            if (!user.OnboardingCompleted && !user.IsAdmin)
+            {
+                return RedirectToAction("UserInterest", "Welcome");
+            }
+
             // Build full name
             var fullName = user.FirstName;
             if (!string.IsNullOrEmpty(user.LastName))
@@ -62,6 +67,9 @@ namespace CodeWave.Web.Controllers
             ViewBag.LearningPath = user.LearningPath; // For Dashboard link redirection
             ViewBag.UserLevelRaw = user.Level; // Raw level for checking if Beginner
             ViewBag.ProfilePictureUrl = user.ProfilePictureUrl; // Profile picture URL
+            ViewBag.UserGoal = user.Goal;
+            ViewBag.UserMotivation = user.Motivation;
+            ViewBag.WeeklyHours = user.WeeklyHours;
 
             // Get personalized dashboard data based on learning path
             if (!string.IsNullOrEmpty(user.LearningPath))

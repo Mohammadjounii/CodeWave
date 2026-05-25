@@ -364,10 +364,45 @@
                 <div class="relative pb-8">
                     <div class="absolute inset-0 bg-gradient-to-r from-primary/20 via-purple-500/20 to-pink-500/20 blur-3xl opacity-50"></div>
                     <div class="relative">
+                        @{
+                            var userGoal      = ViewBag.UserGoal as string;
+                            var userMotivation = ViewBag.UserMotivation as string;
+                            var headerSubtitle = userGoal switch {
+                                "Get a Job"              => "You're building the skills employers look for — keep going!",
+                                "Start Freelancing"      => "Every lesson brings you closer to your first client.",
+                                "Build My Own App"       => "Your app starts with one lesson at a time.",
+                                "Prepare for University" => "You're getting ahead of your classmates. Keep it up!",
+                                "Personal Growth"        => "Curiosity is your superpower — let's keep exploring.",
+                                "Upskill at Work"        => "Invest in yourself — your career will thank you.",
+                                _                        => "Let's make some progress on your goals today."
+                            };
+                            var goalIcon = userGoal switch {
+                                "Get a Job"              => "work",
+                                "Start Freelancing"      => "groups",
+                                "Build My Own App"       => "developer_mode",
+                                "Prepare for University" => "school",
+                                "Personal Growth"        => "auto_awesome",
+                                "Upskill at Work"        => "trending_up",
+                                _                        => ""
+                            };
+                        }
                         <h1 class="text-black dark:text-white text-5xl font-black mb-2 dark:bg-gradient-to-r dark:from-white dark:via-primary dark:to-purple-400 dark:bg-clip-text dark:text-transparent">
                             Welcome back, @(ViewBag.UserFirstName ?? "User")! 👋
                         </h1>
-                        <p class="text-gray-900 dark:text-gray-400 text-lg">Let's make some progress on your goals today.</p>
+                        @if (!string.IsNullOrEmpty(goalIcon))
+                        {
+                            <div class="flex items-center gap-2 mb-2">
+                                <div class="flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 border border-primary/20">
+                                    <span class="material-symbols-outlined text-primary" style="font-size:15px">@goalIcon</span>
+                                    <span class="text-primary text-xs font-bold">@userGoal</span>
+                                </div>
+                            </div>
+                        }
+                        <p class="text-gray-900 dark:text-gray-400 text-lg">@headerSubtitle</p>
+                        @if (!string.IsNullOrEmpty(userMotivation))
+                        {
+                            <p class="text-gray-500 dark:text-gray-500 text-sm mt-1 italic max-w-xl">"@(userMotivation.Length > 120 ? userMotivation.Substring(0, 120) + "…" : userMotivation)"</p>
+                        }
                     </div>
                 </div>
 
@@ -618,6 +653,29 @@
                                                             <p class="text-gray-900 dark:text-white font-semibold">@(userProgress.TotalStudyTimeMinutes / 60)h @(userProgress.TotalStudyTimeMinutes % 60)m</p>
                                                         </div>
                                                     </div>
+                                                    @{
+                                                        var wkHours    = ViewBag.WeeklyHours as int?;
+                                                        var remLessons = userProgress.TotalLessons - userProgress.CompletedLessons;
+                                                        var weeksLeft  = (wkHours.HasValue && wkHours.Value > 0 && remLessons > 0)
+                                                            ? (int)Math.Ceiling(remLessons * 0.75 / wkHours.Value)
+                                                            : 0;
+                                                    }
+                                                    @if (wkHours.HasValue && wkHours.Value > 0 && remLessons > 0)
+                                                    {
+                                                        <div class="mt-3 flex items-center gap-2 px-3 py-2 rounded-lg bg-primary/5 dark:bg-primary/10 border border-primary/20">
+                                                            <span class="material-symbols-outlined text-primary" style="font-size:16px">schedule</span>
+                                                            <p class="text-xs text-gray-700 dark:text-slate-300">
+                                                                At your pace (<span class="font-semibold text-primary">@wkHours hrs/week</span>), finish in ~<span class="font-semibold text-primary">@weeksLeft week@(weeksLeft == 1 ? "" : "s")</span>
+                                                            </p>
+                                                        </div>
+                                                    }
+                                                    else if (wkHours.HasValue && wkHours.Value > 0 && remLessons == 0)
+                                                    {
+                                                        <div class="mt-3 flex items-center gap-2 px-3 py-2 rounded-lg bg-green-500/10 border border-green-500/20">
+                                                            <span class="material-symbols-outlined text-green-400" style="font-size:16px">verified</span>
+                                                            <p class="text-xs text-gray-700 dark:text-slate-300 font-semibold">Course complete — outstanding work!</p>
+                                                        </div>
+                                                    }
                                                 </div>
                                             }
                                         </div>

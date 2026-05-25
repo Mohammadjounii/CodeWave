@@ -186,7 +186,7 @@ else:
   <p class=""text-slate-200"">Write a program that checks if a number is positive, negative, or zero.</p>
 </div>",
                     ImageUrl = "https://images.unsplash.com/photo-1551650975-87deedd944c3?auto=format&fit=crop&w=800&q=80",
-                    VideoUrl = "https://www.youtube.com/embed/2W_4M9r4Jk0",
+                    VideoUrl = "https://www.youtube.com/embed/Zp5MuPOtsSY",
                     CreatedAt = DateTime.UtcNow,
                     isDeleted = false
                 },
@@ -367,7 +367,7 @@ with open(""output.txt"", ""w"") as f:
     f.write(""Hello, World!"")</code></pre>
 </div>",
                     ImageUrl = "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=800&q=80",
-                    VideoUrl = "https://www.youtube.com/embed/Uh2eb1L6sEs",
+                    VideoUrl = "https://www.youtube.com/embed/azn6S7iM_lc",
                     CreatedAt = DateTime.UtcNow,
                     isDeleted = false
                 }

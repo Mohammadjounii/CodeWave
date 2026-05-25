@@ -284,7 +284,7 @@ do {
   <p class=""text-slate-200"">Try these two exercises: (1) Given an array of integers, use a <code class=""bg-slate-900/70 px-1 rounded text-xs"">for</code> loop to compute the sum and average. (2) Use nested <code class=""bg-slate-900/70 px-1 rounded text-xs"">for</code> loops to print a right triangle of stars — row 1 prints 1 star, row 2 prints 2 stars, and so on up to 5 rows.</p>
 </div>",
                     ImageUrl = "https://images.unsplash.com/photo-1523475472560-d2df97ec485c?auto=format&fit=crop&w=800&q=80",
-                    VideoUrl = "https://www.youtube.com/embed/1uChuWUUH6I",
+                    VideoUrl = "https://www.youtube.com/embed/ne0VPVy05xU",
                     CreatedAt = DateTime.UtcNow,
                     isDeleted = false
                 },
@@ -322,7 +322,7 @@ public static void main(String[] args) {
   <p class=""text-slate-200"">Create a method <code class=""bg-slate-900/70 px-1 rounded text-xs"">greet(String name)</code> that prints a personalized greeting. Overload it with a version that takes both <code class=""bg-slate-900/70 px-1 rounded text-xs"">name</code> and <code class=""bg-slate-900/70 px-1 rounded text-xs"">timeOfDay</code>.</p>
 </div>",
                     ImageUrl = "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=800&q=80",
-                    VideoUrl = "https://www.youtube.com/embed/kz6bqG2gQzY",
+                    VideoUrl = "https://www.youtube.com/embed/xgCLwJzF9-c",
                     CreatedAt = DateTime.UtcNow,
                     isDeleted = false
                 },
@@ -363,7 +363,7 @@ public class Main {
   <p class=""text-slate-200"">Create a <code class=""bg-slate-900/70 px-1 rounded text-xs"">Book</code> class with fields <code class=""bg-slate-900/70 px-1 rounded text-xs"">title</code>, <code class=""bg-slate-900/70 px-1 rounded text-xs"">author</code> and <code class=""bg-slate-900/70 px-1 rounded text-xs"">price</code>, and a method <code class=""bg-slate-900/70 px-1 rounded text-xs"">printInfo()</code> that prints all details.</p>
 </div>",
                     ImageUrl = "https://images.unsplash.com/photo-1515879218367-8466d910aaa4?auto=format&fit=crop&w=800&q=80",
-                    VideoUrl = "https://www.youtube.com/embed/HhQ8ZlQ4C1w",
+                    VideoUrl = "https://www.youtube.com/embed/BSVKUk58K6U",
                     CreatedAt = DateTime.UtcNow,
                     isDeleted = false
                 },
@@ -484,7 +484,7 @@ class Rectangle extends Shape {
   <p class=""text-slate-200"">Create an abstract class <code class=""bg-slate-900/70 px-1 rounded text-xs"">Employee</code> with abstract method <code class=""bg-slate-900/70 px-1 rounded text-xs"">calculatePay()</code>. Implement <code class=""bg-slate-900/70 px-1 rounded text-xs"">HourlyEmployee</code> and <code class=""bg-slate-900/70 px-1 rounded text-xs"">SalariedEmployee</code>.</p>
 </div>",
                     ImageUrl = "https://images.unsplash.com/photo-1509228468518-180dd4864904?auto=format&fit=crop&w=800&q=80",
-                    VideoUrl = "https://www.youtube.com/embed/7psHffSdf1U",
+                    VideoUrl = "https://www.youtube.com/embed/jhDUxynEQRI",
                     CreatedAt = DateTime.UtcNow,
                     isDeleted = false
                 },
@@ -517,7 +517,7 @@ public class EmailNotifier implements Notifier {
   <p class=""text-slate-200"">Create a <code class=""bg-slate-900/70 px-1 rounded text-xs"">Logger</code> interface and implement <code class=""bg-slate-900/70 px-1 rounded text-xs"">ConsoleLogger</code> and <code class=""bg-slate-900/70 px-1 rounded text-xs"">FileLogger</code> (just simulate file logging with <code class=""bg-slate-900/70 px-1 rounded text-xs"">System.out</code>).</p>
 </div>",
                     ImageUrl = "https://images.unsplash.com/photo-1523475472560-d2df97ec485c?auto=format&fit=crop&w=800&q=80",
-                    VideoUrl = "https://www.youtube.com/embed/TH8qWSkudWY",
+                    VideoUrl = "https://www.youtube.com/embed/HoLDNS3zu5Q",
                     CreatedAt = DateTime.UtcNow,
                     isDeleted = false
                 },
@@ -552,7 +552,7 @@ names.add(""Nour"");
   <p class=""text-slate-200"">Use a <code class=""bg-slate-900/70 px-1 rounded text-xs"">Map&lt;String, Integer&gt;</code> to store programming languages and years of experience, then print them sorted by value.</p>
 </div>",
                     ImageUrl = "https://images.unsplash.com/photo-1518933165971-611dbc9c412d?auto=format&fit=crop&w=800&q=80",
-                    VideoUrl = "https://www.youtube.com/embed/qQJ4U8mStDQ",
+                    VideoUrl = "https://www.youtube.com/embed/Byb0sw9dFzc",
                     CreatedAt = DateTime.UtcNow,
                     isDeleted = false
                 },
@@ -611,7 +611,7 @@ names.add(""Nour"");
   <p class=""text-slate-200"">Write a method that parses a <code class=""bg-slate-900/70 px-1 rounded text-xs"">String</code> to <code class=""bg-slate-900/70 px-1 rounded text-xs"">int</code>, catching <code class=""bg-slate-900/70 px-1 rounded text-xs"">NumberFormatException</code> and returning a default value if parsing fails.</p>
 </div>",
                     ImageUrl = "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=800&q=80",
-                    VideoUrl = "https://www.youtube.com/embed/uvT9sOZo6o0",
+                    VideoUrl = "https://www.youtube.com/embed/1XAfapkBQjk",
                     CreatedAt = DateTime.UtcNow,
                     isDeleted = false
                 },
@@ -639,7 +639,7 @@ for (String line : lines) {
   <p class=""text-slate-200"">Write a program that appends a timestamped log line to a <code class=""bg-slate-900/70 px-1 rounded text-xs"">log.txt</code> file each time it runs.</p>
 </div>",
                     ImageUrl = "https://images.unsplash.com/photo-1515879218367-8466d910aaa4?auto=format&fit=crop&w=800&q=80",
-                    VideoUrl = "https://www.youtube.com/embed/Sz6qDxzPdeo",
+                    VideoUrl = "https://www.youtube.com/embed/ScUJx4aWRi0",
                     CreatedAt = DateTime.UtcNow,
                     isDeleted = false
                 },
@@ -701,7 +701,7 @@ for (String line : lines) {
   <p class=""text-slate-200"">Create a small demo where two threads print messages interleaved. Observe the non-deterministic order.</p>
 </div>",
                     ImageUrl = "https://images.unsplash.com/photo-1553877522-43269d4ea984?auto=format&fit=crop&w=800&q=80",
-                    VideoUrl = "https://www.youtube.com/embed/QlK7-t2pE5Y",
+                    VideoUrl = "https://www.youtube.com/embed/r_MbozD32eo",
                     CreatedAt = DateTime.UtcNow,
                     isDeleted = false
                 },
@@ -733,7 +733,7 @@ executor.shutdown();</code></pre>
   <p class=""text-slate-200"">Create 5 tasks that simulate downloading files by printing messages and sleeping for 500 ms.</p>
 </div>",
                     ImageUrl = "https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=800&q=80",
-                    VideoUrl = "https://www.youtube.com/embed/EglTzE7pG8M",
+                    VideoUrl = "https://www.youtube.com/embed/6Oo-9Can3H8",
                     CreatedAt = DateTime.UtcNow,
                     isDeleted = false
                 },

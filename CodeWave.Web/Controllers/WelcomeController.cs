@@ -205,6 +205,7 @@ namespace CodeWave.Web.Controllers
             if (user != null)
             {
                 user.PreferredLanguage = preferredLanguage;
+                user.OnboardingCompleted = true;
                 var result = await _userManager.UpdateAsync(user);
                 if (!result.Succeeded)
                 {

@@ -79,6 +79,11 @@ namespace CodeWave.Web.Controllers
                     return RedirectToAction("Index", "Admin");
                 }
 
+                if (!user.OnboardingCompleted)
+                {
+                    return RedirectToAction("UserInterest", "Welcome");
+                }
+
                 return RedirectToAction("Index", "Home");
             }
 
@@ -187,10 +192,9 @@ namespace CodeWave.Web.Controllers
                         {
                             return RedirectToAction("Index", "Admin");
                         }
-                        
-                        if (string.IsNullOrEmpty(existingUser.Level))
+
+                        if (!existingUser.OnboardingCompleted)
                         {
-                            // New user, redirect to onboarding
                             return RedirectToAction("UserInterest", "Welcome");
                         }
                     }
@@ -226,7 +230,7 @@ namespace CodeWave.Web.Controllers
                 if (existingUserByEmail.IsAdmin)
                     return RedirectToAction("Index", "Admin");
 
-                if (string.IsNullOrEmpty(existingUserByEmail.Level))
+                if (!existingUserByEmail.OnboardingCompleted)
                     return RedirectToAction("UserInterest", "Welcome");
 
                 if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
@@ -337,7 +341,7 @@ namespace CodeWave.Web.Controllers
                 if (existingUserByEmail.IsAdmin)
                     return RedirectToAction("Index", "Admin");
 
-                if (string.IsNullOrEmpty(existingUserByEmail.Level))
+                if (!existingUserByEmail.OnboardingCompleted)
                     return RedirectToAction("UserInterest", "Welcome");
 
                 if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))

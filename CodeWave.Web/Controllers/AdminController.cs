@@ -688,6 +688,7 @@ namespace CodeWave.Web.Controllers
                 user.Id = Guid.NewGuid();
                 user.UserName = user.Email;
                 user.IsAdmin = isAdmin;
+                user.OnboardingCompleted = true;
                 var result = await _userManager.CreateAsync(user, password);
 
                 if (result.Succeeded)
