@@ -1,0 +1,50 @@
+@model CodeWave.Application.DTOs.SkillProgressDto
+@{
+    var iconBgClass = ViewData["iconBgClass"] as string ?? "bg-gray-300 dark:bg-slate-700/50";
+    var iconTextClass = ViewData["iconTextClass"] as string ?? "text-gray-900 dark:text-slate-400";
+    var progressBarClass = ViewData["progressBarClass"] as string ?? "bg-gradient-to-r from-gray-400 to-gray-500";
+
+    var skillLower = Model.SkillName.ToLower();
+    string skillIcon = "code";
+    if (skillLower.Contains("variable") || skillLower.Contains("data type")) skillIcon = "data_object";
+    else if (skillLower.Contains("control") || skillLower.Contains("flow")) skillIcon = "account_tree";
+    else if (skillLower.Contains("function")) skillIcon = "functions";
+    else if (skillLower.Contains("oop") || skillLower.Contains("object")) skillIcon = "category";
+    else if (skillLower.Contains("data structure") || skillLower.Contains("collection")) skillIcon = "storage";
+    else if (skillLower.Contains("file") || skillLower.Contains("i/o")) skillIcon = "folder";
+    else if (skillLower.Contains("error") || skillLower.Contains("exception")) skillIcon = "error";
+    else if (skillLower.Contains("thread") || skillLower.Contains("concurrent")) skillIcon = "sync";
+    else if (skillLower.Contains("algorithm")) skillIcon = "psychology";
+
+    string skillPercentClass = Model.IsMastered ? "text-green-400" :
+                               Model.MasteryLevel > 0 ? iconTextClass :
+                               "text-gray-900 dark:text-slate-400";
+
+    string skillBarClass = Model.IsMastered ? "bg-gradient-to-r from-green-500 to-emerald-500" :
+                           Model.MasteryLevel > 0 ? progressBarClass :
+                           "bg-gradient-to-r from-gray-400 to-gray-500 dark:from-slate-600 dark:to-slate-500";
+}
+
+<div class="relative z-10 glass-effect p-5 rounded-xl hover:bg-gray-100 dark:hover:bg-white/5 transition-all card-hover border border-gray-300 dark:border-white/8 skill-item">
+    <div class="flex justify-between items-center mb-3">
+        <div class="flex items-center gap-3">
+            <div class="p-2 rounded-lg @(Model.IsMastered ? "bg-green-500/20" : Model.MasteryLevel > 0 ? iconBgClass : "bg-gray-300 dark:bg-slate-700/50")">
+                <span class="material-symbols-outlined @(Model.IsMastered ? "text-green-400" : Model.MasteryLevel > 0 ? iconTextClass : "text-gray-900 dark:text-slate-400") text-lg">@skillIcon</span>
+            </div>
+            <div class="flex flex-col">
+                <p class="text-gray-900 dark:text-white font-medium">@Model.SkillName</p>
+                <p class="text-xs text-gray-900 dark:text-slate-400">@Model.LessonsCompleted lessons, @Model.ExercisesCompleted exercises</p>
+            </div>
+        </div>
+        <div class="flex flex-col items-end">
+            <p class="@skillPercentClass text-sm font-semibold">@Model.MasteryLevel%</p>
+            @if (Model.IsMastered)
+            {
+                <span class="material-symbols-outlined text-green-400 text-sm">verified</span>
+            }
+        </div>
+    </div>
+    <div class="w-full h-2 bg-gray-200 dark:bg-white/5 rounded-full overflow-hidden">
+        <div class="h-full @skillBarClass rounded-full transition-all duration-500" style="width:@Model.MasteryLevel%"></div>
+    </div>
+</div>

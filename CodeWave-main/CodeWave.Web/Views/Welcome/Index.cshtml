@@ -1,0 +1,706 @@
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CodeWave — Learn to Code</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+    <style>
+        :root {
+            --green: #b887e3;
+            --green-glow: rgba(184,135,227,0.35);
+            --purple: #9d6fd9;
+            --purple-glow: rgba(157,111,217,0.35);
+            --blue: #60a5fa;
+            --orange: #fb923c;
+            --bg: #0a0a0f;
+            --card: rgba(10,10,20,0.85);
+            --border: rgba(255,255,255,0.06);
+        }
+        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+        html{scroll-behavior:smooth}
+        body{background:var(--bg);color:#e2e8f0;font-family:'Inter',sans-serif;overflow-x:hidden;cursor:none}
+        a{text-decoration:none;color:inherit}
+
+        /* CURSOR */
+        #cdot{position:fixed;width:8px;height:8px;border-radius:50%;background:var(--green);pointer-events:none;z-index:9999;transform:translate(-50%,-50%);box-shadow:0 0 10px var(--green),0 0 20px var(--green-glow);transition:transform .1s}
+        #cring{position:fixed;width:36px;height:36px;border-radius:50%;border:1.5px solid rgba(184,135,227,.45);pointer-events:none;z-index:9998;transform:translate(-50%,-50%);transition:width .18s,height .18s,border-color .18s}
+
+        /* CANVAS */
+        #bgc{position:fixed;inset:0;z-index:0;pointer-events:none}
+        #aurora{position:fixed;inset:-50%;width:200%;height:200%;z-index:0;pointer-events:none;
+            background:radial-gradient(ellipse at 20% 30%,rgba(184,135,227,.08) 0%,transparent 50%),
+                        radial-gradient(ellipse at 80% 70%,rgba(157,111,217,.08) 0%,transparent 50%),
+                        radial-gradient(ellipse at 50% 10%,rgba(184,135,227,.05) 0%,transparent 40%);
+            animation:adrift 22s ease-in-out infinite alternate}
+        @@keyframes adrift{0%{transform:translate(0,0) rotate(0)}50%{transform:translate(2%,3%) rotate(1deg)}100%{transform:translate(-1%,-2%) rotate(-.5deg)}}
+
+        /* NAV */
+        nav{position:fixed;inset:0 0 auto;z-index:100;height:64px;display:flex;align-items:center;justify-content:space-between;padding:0 40px;backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);background:rgba(5,8,15,.6);border-bottom:1px solid var(--border);transition:background .3s}
+        nav.scrolled{background:rgba(5,8,15,.95)}
+        .nlogo{display:flex;align-items:center;gap:10px;color:#fff;font-weight:800;font-size:18px;letter-spacing:-.5px}
+        .nlogo img{width:34px;height:34px;object-fit:contain}
+        .nlinks{display:flex;align-items:center;gap:4px;list-style:none}
+        .nlinks>li>a,.ndrop>button{color:#9ca3af;font-size:14px;font-weight:500;padding:6px 12px;border-radius:8px;background:none;border:none;font-family:'Inter',sans-serif;cursor:pointer;display:flex;align-items:center;gap:3px;transition:color .2s,background .2s}
+        .nlinks>li>a:hover,.ndrop:hover>button,.ndrop:focus-within>button{color:#fff;background:rgba(255,255,255,.06)}
+        .ndrop{position:relative}
+        .dpanel{display:none;position:absolute;top:calc(100% + 8px);left:50%;transform:translateX(-50%);min-width:178px;background:rgba(8,10,22,.98);border:1px solid var(--border);border-radius:12px;padding:6px;z-index:200;backdrop-filter:blur(24px);box-shadow:0 20px 60px rgba(0,0,0,.65)}
+        .ndrop:hover .dpanel,.ndrop:focus-within .dpanel{display:block}
+        .dpanel a{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;font-size:13px;color:#9ca3af;transition:background .15s,color .15s}
+        .dpanel a:hover{background:rgba(255,255,255,.06);color:#fff}
+        .dlabel{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:#374151;padding:6px 10px 2px}
+        .ddiv{height:1px;background:var(--border);margin:4px 0}
+        .ncta{display:flex;align-items:center;gap:10px}
+        .btng{color:#9ca3af;font-size:14px;font-weight:500;padding:7px 14px;border-radius:8px;transition:color .2s}
+        .btng:hover{color:#fff}
+        .btnp{display:inline-flex;align-items:center;gap:6px;background:var(--green);color:#05080f;font-weight:700;font-size:13px;padding:8px 18px;border-radius:999px;transition:box-shadow .2s,transform .2s}
+        .btnp:hover{box-shadow:0 0 22px var(--green-glow),0 0 44px rgba(184,135,227,.18);transform:translateY(-1px)}
+
+        /* HERO */
+        #hero{position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:80px 24px 70px;overflow:hidden}
+        .hbadge{display:inline-flex;align-items:center;gap:8px;background:rgba(184,135,227,.08);border:1px solid rgba(184,135,227,.2);border-radius:999px;padding:6px 16px;font-size:13px;color:var(--green);font-weight:500;margin-bottom:28px;animation:fup .8s ease both}
+        .hbadge span{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pdot 1.5s ease-in-out infinite}
+        @@keyframes pdot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.75)}}
+        .htitle{font-size:clamp(50px,8vw,94px);font-weight:900;line-height:1;letter-spacing:-3px;color:#fff;margin-bottom:22px;animation:fup .8s .1s ease both}
+        .htitle .gline{display:block;background:linear-gradient(130deg,var(--green) 0%,var(--blue) 45%,var(--purple) 100%);background-size:200% auto;-webkit-background-clip:text;-webkit-text-fill-color:transparent;animation:gflow 4s linear infinite,fup .8s .2s ease both}
+        @@keyframes gflow{0%{background-position:0 center}100%{background-position:200% center}}
+        .hsub{font-size:clamp(15px,2vw,19px);color:#6b7280;max-width:580px;margin:0 auto 38px;line-height:1.65;animation:fup .8s .3s ease both}
+        .hacts{display:flex;align-items:center;gap:14px;flex-wrap:wrap;justify-content:center;animation:fup .8s .4s ease both}
+        .btnhp{display:inline-flex;align-items:center;gap:8px;background:var(--green);color:#05080f;font-weight:700;font-size:16px;padding:14px 32px;border-radius:999px;position:relative;overflow:hidden;transition:box-shadow .3s,transform .2s}
+        .btnhp::before{content:'';position:absolute;inset:0;background:linear-gradient(130deg,transparent 0%,rgba(255,255,255,.18) 50%,transparent 100%);transform:translateX(-100%);transition:transform .5s}
+        .btnhp:hover::before{transform:translateX(100%)}
+        .btnhp:hover{box-shadow:0 0 32px var(--green-glow),0 0 64px rgba(184,135,227,.14);transform:translateY(-2px)}
+        .btnhs{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.04);color:#e2e8f0;font-weight:600;font-size:16px;padding:13px 26px;border-radius:999px;border:1px solid rgba(255,255,255,.1);transition:background .2s,border-color .2s,transform .2s}
+        .btnhs:hover{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.2);transform:translateY(-2px)}
+
+        /* FLOATING CODE CARDS */
+        .fcards{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+        .fc{position:absolute;background:rgba(10,13,26,.88);border:1px solid rgba(184,135,227,.13);border-radius:12px;padding:13px 17px;font-family:'JetBrains Mono',monospace;font-size:11.5px;color:#6b7280;line-height:1.65;backdrop-filter:blur(12px);box-shadow:0 8px 32px rgba(0,0,0,.45)}
+        .fc .kw{color:#c084fc}.fc .fn{color:var(--blue)}.fc .st{color:var(--green)}.fc .nm{color:var(--orange)}.fc .cm{color:#2d3748}
+        .fc1{top:16%;left:3.5%;animation:fl1 7s ease-in-out infinite;opacity:.72}
+        .fc2{top:22%;right:3%;animation:fl2 8.5s ease-in-out infinite;opacity:.68}
+        .fc3{bottom:24%;left:5%;animation:fl3 9s ease-in-out infinite;opacity:.62}
+        .fc4{bottom:28%;right:4.5%;animation:fl1 6.5s ease-in-out infinite reverse;opacity:.58}
+        @@keyframes fl1{0%,100%{transform:translateY(0) rotate(-1deg)}50%{transform:translateY(-18px) rotate(1deg)}}
+        @@keyframes fl2{0%,100%{transform:translateY(0) rotate(1deg)}50%{transform:translateY(-14px) rotate(-1deg)}}
+        @@keyframes fl3{0%,100%{transform:translateY(0) rotate(-.5deg)}50%{transform:translateY(-22px) rotate(.5deg)}}
+
+        /* SCROLL LINE */
+        .scrollind{position:absolute;bottom:28px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:7px;color:#374151;font-size:10px;letter-spacing:.15em;text-transform:uppercase;animation:fup 1s 1.2s ease both}
+        .scrollline{width:1px;height:46px;background:linear-gradient(to bottom,transparent,var(--green));animation:sline 2.2s ease-in-out infinite}
+        @@keyframes sline{0%{transform:scaleY(0);transform-origin:top;opacity:0}50%{transform:scaleY(1);transform-origin:top;opacity:1}51%{transform:scaleY(1);transform-origin:bottom;opacity:1}100%{transform:scaleY(0);transform-origin:bottom;opacity:0}}
+
+        /* STATS BAR */
+        .sbar{position:relative;z-index:1;background:rgba(10,13,24,.6);border-top:1px solid var(--border);border-bottom:1px solid var(--border);backdrop-filter:blur(14px);padding:36px 0;overflow:hidden}
+        .sbar::before{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(184,135,227,.025),transparent);animation:shimmer 5s linear infinite}
+        @@keyframes shimmer{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
+        .sgrid{display:flex;justify-content:center;gap:64px;flex-wrap:wrap;padding:0 40px}
+        .sitem{text-align:center}
+        .snum{font-size:42px;font-weight:900;color:#fff;letter-spacing:-2px;line-height:1}
+        .snum .unit{color:var(--green)}
+        .slbl{font-size:13px;color:#4b5563;margin-top:5px;font-weight:500}
+
+        /* SHARED SECTION */
+        section{position:relative;z-index:1}
+        .slabel{display:inline-flex;align-items:center;gap:8px;color:var(--green);font-size:11.5px;font-weight:600;letter-spacing:.15em;text-transform:uppercase;margin-bottom:13px}
+        .slabel::before{content:'';width:18px;height:1px;background:var(--green)}
+        .stitle{font-size:clamp(30px,4vw,50px);font-weight:900;color:#fff;letter-spacing:-2px;line-height:1.1}
+        .ssub{color:#6b7280;font-size:16px;margin-top:11px;line-height:1.65}
+        .gline-sep{height:1px;background:linear-gradient(90deg,transparent,rgba(184,135,227,.28),transparent);position:relative;z-index:1}
+
+        /* REVEAL */
+        .rv{opacity:0;transform:translateY(28px);transition:opacity .7s ease,transform .7s ease}
+        .rv.on{opacity:1;transform:translateY(0)}
+        .rvl{opacity:0;transform:translateX(-38px);transition:opacity .7s ease,transform .7s ease}
+        .rvl.on{opacity:1;transform:translateX(0)}
+        .rvr{opacity:0;transform:translateX(38px);transition:opacity .7s ease,transform .7s ease}
+        .rvr.on{opacity:1;transform:translateX(0)}
+
+        /* FEATURES */
+        #features{padding:100px 0}
+        .fgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:15px;margin-top:56px}
+        .fcard{position:relative;background:var(--card);border:1px solid var(--border);border-radius:16px;padding:26px;text-decoration:none;color:inherit;overflow:hidden;transition:transform .3s,border-color .3s,box-shadow .3s}
+        .fcard::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at var(--mx,50%) var(--my,50%),rgba(184,135,227,.08),transparent 60%);opacity:0;transition:opacity .3s}
+        .fcard:hover::before{opacity:1}
+        .fcard:hover{border-color:rgba(184,135,227,.28);transform:translateY(-5px);box-shadow:0 0 28px rgba(184,135,227,.06),0 16px 40px rgba(0,0,0,.4)}
+        .macos{display:flex;gap:5px;margin-bottom:18px}
+        .macos span{width:10px;height:10px;border-radius:50%}
+        .dr{background:#ef4444}.dy{background:#eab308}.dg{background:#22c55e}
+        .fico{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:15px}
+        .fct{font-size:15px;font-weight:700;color:#fff;margin-bottom:7px}
+        .fcd{font-size:13px;color:#6b7280;line-height:1.6}
+        .fca{display:inline-flex;align-items:center;gap:4px;font-size:12px;color:var(--green);font-weight:600;margin-top:18px;transition:gap .2s}
+        .fcard:hover .fca{gap:8px}
+
+        /* PATHS */
+        #paths{padding:100px 0}
+        .pgrid{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-top:56px}
+        @@media(max-width:768px){.pgrid{grid-template-columns:1fr}}
+        .pcard{position:relative;border-radius:20px;border:1px solid var(--border);overflow:hidden;display:block;transition:transform .3s,box-shadow .3s;color:inherit}
+        .pcard:hover{transform:translateY(-6px);box-shadow:0 22px 60px rgba(0,0,0,.45)}
+        .pcinner{padding:30px;background:var(--card);position:relative}
+        .pcglow{position:absolute;top:-60px;right:-60px;width:200px;height:200px;border-radius:50%;filter:blur(80px);opacity:.28;transition:opacity .3s;pointer-events:none}
+        .pcard:hover .pcglow{opacity:.48}
+        .plang{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px}
+        .pname{font-size:26px;font-weight:900;color:#fff;letter-spacing:-1px;margin-bottom:10px}
+        .pdesc{font-size:13px;color:#6b7280;line-height:1.65;margin-bottom:20px}
+        .ptag{display:inline-block;font-size:11px;font-weight:600;padding:4px 10px;border-radius:999px;margin-right:6px;margin-bottom:6px}
+        .pcta{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;padding:9px 18px;border-radius:999px;margin-top:18px;transition:transform .2s}
+        .pcard:hover .pcta{transform:translateX(4px)}
+        .pcode{background:rgba(3,5,12,.8);border-radius:10px;padding:14px;font-family:'JetBrains Mono',monospace;font-size:11.5px;line-height:1.85;color:#6b7280;margin-top:18px;border:1px solid rgba(255,255,255,.04)}
+        .pcode .kw{color:#c084fc}.pcode .fn{color:var(--blue)}.pcode .st{color:var(--green)}.pcode .nm{color:var(--orange)}
+
+        /* IDE SECTION */
+        #idex{padding:100px 0}
+        .idewrap{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center}
+        @@media(max-width:900px){.idewrap{grid-template-columns:1fr}}
+        .idemock{background:rgba(8,10,22,.95);border-radius:16px;border:1px solid var(--border);overflow:hidden;box-shadow:0 32px 80px rgba(0,0,0,.55),0 0 1px rgba(255,255,255,.05)}
+        .idehdr{display:flex;align-items:center;gap:8px;padding:11px 16px;border-bottom:1px solid var(--border);background:rgba(3,5,12,.5)}
+        .idebody{padding:18px 20px}
+        .ideline{display:flex;gap:12px;font-family:'JetBrains Mono',monospace;font-size:12.5px;line-height:1.95}
+        .iln{color:#1f2937;width:18px;text-align:right;flex-shrink:0;user-select:none}
+        .icursor{display:inline-block;width:2px;height:.95em;background:var(--green);vertical-align:middle;animation:blink 1s step-end infinite}
+        @@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+        .tl{overflow:hidden;white-space:nowrap}
+        .tl1{animation:tin .45s steps(35) both}
+        .tl2{animation:tin .45s .28s steps(35) both}
+        .tl3{animation:tin .45s .56s steps(35) both}
+        .tl4{animation:tin .45s .84s steps(35) both}
+        .tl5{animation:tin .45s 1.12s steps(35) both}
+        .tl6{animation:tin .45s 1.4s steps(35) both}
+        @@keyframes tin{from{max-width:0}to{max-width:100%}}
+        .ideout{background:rgba(3,5,12,.7);border-top:1px solid var(--border);padding:11px 20px}
+        .idelbl{font-size:10px;color:#374151;font-family:'JetBrains Mono',monospace;letter-spacing:.1em;margin-bottom:5px}
+
+        /* TESTIMONIALS */
+        #testimonials{padding:100px 0}
+        .ttrack{overflow:hidden;margin-top:48px}
+        .tscroll{display:flex;gap:18px;width:max-content;animation:scrolll 38s linear infinite}
+        .tscroll:hover{animation-play-state:paused}
+        @@keyframes scrolll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+        .tcard{flex-shrink:0;width:300px;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:22px}
+        .tst{color:#fbbf24;font-size:13px;margin-bottom:10px}
+        .ttxt{font-size:13px;color:#9ca3af;line-height:1.7;margin-bottom:18px}
+        .tau{display:flex;align-items:center;gap:10px}
+        .tav{width:34px;height:34px;border-radius:50%;object-fit:cover;border:2px solid rgba(184,135,227,.2)}
+        .tname{font-size:13px;font-weight:600;color:#fff}
+        .trole{font-size:11px;color:#4b5563}
+
+        /* CTA */
+        #cta{padding:110px 0}
+        .ctabox{position:relative;border-radius:24px;overflow:hidden;padding:76px 56px;text-align:center}
+        .ctabg{position:absolute;inset:0;background:linear-gradient(135deg,rgba(184,135,227,.08),rgba(157,111,217,.07),rgba(96,165,250,.05));border:1px solid rgba(184,135,227,.14)}
+        .ctabg::before{content:'';position:absolute;inset:1px;border-radius:23px;background:rgba(5,8,15,.82)}
+        .ctacont{position:relative;z-index:1}
+        .ctaorb{position:absolute;border-radius:50%;filter:blur(70px);pointer-events:none}
+        .ctao1{width:280px;height:280px;background:rgba(184,135,227,.06);top:-100px;left:-100px;animation:omv 13s ease-in-out infinite alternate}
+        .ctao2{width:200px;height:200px;background:rgba(157,111,217,.06);bottom:-80px;right:-80px;animation:omv 16s ease-in-out infinite alternate-reverse}
+        @@keyframes omv{0%{transform:translate(0,0)}100%{transform:translate(40px,30px)}}
+        .ctatitle{font-size:clamp(34px,5vw,58px);font-weight:900;color:#fff;letter-spacing:-2px;margin-bottom:14px}
+        .ctasub{font-size:17px;color:#6b7280;margin-bottom:38px}
+        .ctabtns{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+
+        /* FOOTER */
+        footer{position:relative;z-index:1;background:rgba(3,5,12,.97);border-top:1px solid var(--border);padding:58px 0 28px}
+        .fgridf{display:grid;grid-template-columns:1.6fr 1fr 1fr 1fr 1fr;gap:36px;max-width:1200px;margin:0 auto;padding:0 56px 44px}
+        @@media(max-width:900px){.fgridf{grid-template-columns:1fr 1fr;padding:0 24px}}
+        .flogo{display:flex;align-items:center;gap:8px;margin-bottom:11px}
+        .flogo img{width:28px;height:28px;object-fit:contain}
+        .flogo span{font-size:15px;font-weight:800;color:#fff}
+        .ftag{font-size:13px;color:#374151;line-height:1.6;margin-bottom:18px}
+        .fcol h5{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.12em;color:#2d3748;margin-bottom:14px}
+        .fcol ul{list-style:none}
+        .fcol li{margin-bottom:9px}
+        .fcol a{font-size:13px;color:#374151;display:flex;align-items:center;gap:5px;transition:color .2s}
+        .fcol a:hover{color:var(--green)}
+        .fbot{border-top:1px solid var(--border);padding:22px 56px 0;display:flex;justify-content:space-between;align-items:center;font-size:12px;color:#2d3748;flex-wrap:wrap;gap:10px;max-width:1200px;margin:0 auto}
+        .fbot a{color:#2d3748;transition:color .2s}
+        .fbot a:hover{color:var(--green)}
+
+        /* HELPERS */
+        @@keyframes fup{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+        .container{max-width:1200px;margin:0 auto;padding:0 24px}
+        ::-webkit-scrollbar{width:6px}
+        ::-webkit-scrollbar-track{background:transparent}
+        ::-webkit-scrollbar-thumb{background:rgba(184,135,227,.3);border-radius:999px}
+        ::-webkit-scrollbar-thumb:hover{background:rgba(184,135,227,.5)}
+        @@media(max-width:768px){.fc,.nlinks{display:none}body{cursor:auto}#cdot,#cring{display:none}.fgridf{grid-template-columns:1fr 1fr}}
+        @@media(max-width:480px){.pgrid{grid-template-columns:1fr}.fgridf{grid-template-columns:1fr}}
+    </style>
+</head>
+<body>
+    <div id="cdot"></div>
+    <div id="cring"></div>
+    <canvas id="bgc"></canvas>
+    <div id="aurora"></div>
+
+    <!-- NAV -->
+    <nav id="nav">
+        <a href="/" class="nlogo">
+            <img src="/CodeWavelogo.PNG" alt="CodeWave" />
+            <span>CodeWave</span>
+        </a>
+        <ul class="nlinks">
+            <li class="ndrop">
+                <button>Products <span class="material-icons" style="font-size:15px;vertical-align:middle">keyboard_arrow_down</span></button>
+                <div class="dpanel">
+                    <div class="dlabel">Products</div>
+                    <a href="/User/Login"><span class="material-icons" style="font-size:14px">school</span>Coding LMS</a>
+                    <a href="/User/Login"><span class="material-icons" style="font-size:14px">code</span>Online IDE</a>
+                    <a href="/User/SignUp"><span class="material-icons" style="font-size:14px">workspace_premium</span>CodeWave Pro</a>
+                    <div class="ddiv"></div>
+                    <a href="/User/SignUp"><span class="material-icons" style="font-size:14px">verified</span>Certifications</a>
+                </div>
+            </li>
+            <li class="ndrop">
+                <button>Platform <span class="material-icons" style="font-size:15px;vertical-align:middle">keyboard_arrow_down</span></button>
+                <div class="dpanel">
+                    <div class="dlabel">Platform</div>
+                    <a href="/User/Login"><span class="material-icons" style="font-size:14px">assignment</span>Assignments</a>
+                    <a href="/User/Login"><span class="material-icons" style="font-size:14px">groups</span>Classroom Mgmt</a>
+                    <div class="ddiv"></div>
+                    <a href="/AboutUs"><span class="material-icons" style="font-size:14px">extension</span>Integrations</a>
+                </div>
+            </li>
+            <li class="ndrop">
+                <button>Curriculum <span class="material-icons" style="font-size:15px;vertical-align:middle">keyboard_arrow_down</span></button>
+                <div class="dpanel">
+                    <div class="dlabel">Learning Paths</div>
+                    <a href="/User/Login"><span class="material-icons" style="font-size:14px">terminal</span>Python</a>
+                    <a href="/User/Login"><span class="material-icons" style="font-size:14px">terminal</span>Java</a>
+                    <a href="/User/Login"><span class="material-icons" style="font-size:14px">language</span>Web Dev</a>
+                    <div class="ddiv"></div>
+                    <a href="/User/Login"><span class="material-icons" style="font-size:14px">menu_book</span>AP CS</a>
+                </div>
+            </li>
+            <li><a href="/AboutUs">About</a></li>
+        </ul>
+        <div class="ncta">
+            <a href="/User/Login" class="btng">Login</a>
+            <a href="/User/SignUp" class="btnp">
+                Get Started <span class="material-icons" style="font-size:14px">arrow_forward</span>
+            </a>
+        </div>
+    </nav>
+
+    <!-- HERO -->
+    <section id="hero">
+        <div class="fcards">
+            <div class="fc fc1">
+                <div><span class="kw">def</span> <span class="fn">fibonacci</span>(n):</div>
+                <div>&nbsp;&nbsp;<span class="kw">if</span> n &lt;= 1: <span class="kw">return</span> n</div>
+                <div>&nbsp;&nbsp;<span class="kw">return</span> <span class="fn">fib</span>(n-<span class="nm">1</span>) + <span class="fn">fib</span>(n-<span class="nm">2</span>)</div>
+                <div><span class="cm"># output: 55</span></div>
+            </div>
+            <div class="fc fc2">
+                <div><span class="kw">class</span> <span class="fn">WaveStudent</span> {</div>
+                <div>&nbsp;&nbsp;<span class="kw">int</span> xp = <span class="nm">0</span>;</div>
+                <div>&nbsp;&nbsp;<span class="kw">void</span> <span class="fn">learn</span>() { xp += <span class="nm">100</span>; }</div>
+                <div>} <span class="cm">// level up!</span></div>
+            </div>
+            <div class="fc fc3">
+                <div><span class="kw">const</span> <span class="fn">wave</span> = <span class="kw">async</span> () =&gt; {</div>
+                <div>&nbsp;&nbsp;<span class="kw">await</span> <span class="fn">learn</span>(<span class="st">'python'</span>);</div>
+                <div>&nbsp;&nbsp;<span class="fn">console</span>.<span class="fn">log</span>(<span class="st">'🌊 Done!'</span>);</div>
+                <div>};</div>
+            </div>
+            <div class="fc fc4">
+                <div><span class="st">SELECT</span> * <span class="st">FROM</span> skills</div>
+                <div><span class="st">WHERE</span> mastery &gt; <span class="nm">80</span></div>
+                <div><span class="st">ORDER BY</span> xp <span class="st">DESC</span>;</div>
+                <div><span class="cm">-- 12 rows ✓</span></div>
+            </div>
+        </div>
+
+        <div class="hbadge"><span></span>Now with AI-powered learning</div>
+        <h1 class="htitle">
+            Master Code.<br>
+            <span class="gline">Ride the Wave.</span>
+        </h1>
+        <p class="hsub">
+            The interactive coding platform that takes you from zero to job-ready.
+            Learn Python, Java &amp; Web Dev with AI guidance and real coding challenges.
+        </p>
+        <div class="hacts">
+            <a href="/Welcome/UserInterest" class="btnhp">
+                <span class="material-icons" style="font-size:18px">rocket_launch</span>
+                Start Learning Free
+            </a>
+            <a href="/User/Login" class="btnhs">
+                <span class="material-icons" style="font-size:18px">login</span>
+                Sign In
+            </a>
+        </div>
+        <div class="scrollind">
+            <div class="scrollline"></div>
+            <span>scroll</span>
+        </div>
+    </section>
+
+    <!-- STATS BAR -->
+    <div class="sbar">
+        <div class="sgrid">
+            <div class="sitem rv"><div class="snum"><span class="counter" data-to="12">0</span><span class="unit">K+</span></div><div class="slbl">Active Students</div></div>
+            <div class="sitem rv" style="transition-delay:.1s"><div class="snum"><span class="counter" data-to="60">0</span><span class="unit">+</span></div><div class="slbl">Free Courses</div></div>
+            <div class="sitem rv" style="transition-delay:.2s"><div class="snum"><span class="counter" data-to="99">0</span><span class="unit">%</span></div><div class="slbl">Completion Rate</div></div>
+            <div class="sitem rv" style="transition-delay:.3s"><div class="snum"><span class="counter" data-to="3">0</span><span class="unit">+</span></div><div class="slbl">Learning Paths</div></div>
+        </div>
+    </div>
+    <div class="gline-sep"></div>
+
+    <!-- FEATURES -->
+    <section id="features">
+        <div class="container">
+            <div class="text-center rv" style="text-align:center">
+                <div class="slabel">Everything You Need</div>
+                <h2 class="stitle">All In One Platform</h2>
+                <p class="ssub">Trusted by students and educators worldwide.</p>
+            </div>
+            <div class="fgrid">
+                <a href="/User/Login" class="fcard rv" style="transition-delay:.00s">
+                    <div class="macos"><span class="dr"></span><span class="dy"></span><span class="dg"></span></div>
+                    <div class="fico" style="background:linear-gradient(135deg,#6366f1,#8b5cf6)"><span class="material-icons" style="color:#fff;font-size:20px">menu_book</span></div>
+                    <div class="fct">Curriculum</div><div class="fcd">60+ free intro to AP computer science courses</div>
+                    <div class="fca">Explore <span class="material-icons" style="font-size:13px">arrow_forward</span></div>
+                </a>
+                <a href="/User/Login" class="fcard rv" style="transition-delay:.07s">
+                    <div class="macos"><span class="dr"></span><span class="dy"></span><span class="dg"></span></div>
+                    <div class="fico" style="background:linear-gradient(135deg,#0891b2,#06b6d4)"><span class="material-icons" style="color:#fff;font-size:20px">dashboard</span></div>
+                    <div class="fct">LMS</div><div class="fcd">Classroom management tools and integrations</div>
+                    <div class="fca">Explore <span class="material-icons" style="font-size:13px">arrow_forward</span></div>
+                </a>
+                <a href="/User/Login" class="fcard rv" style="transition-delay:.14s">
+                    <div class="macos"><span class="dr"></span><span class="dy"></span><span class="dg"></span></div>
+                    <div class="fico" style="background:linear-gradient(135deg,#1d4ed8,#3b82f6)"><span class="material-icons" style="color:#fff;font-size:20px">terminal</span></div>
+                    <div class="fct">Interactive IDE</div><div class="fcd">Write, run, and debug code in 10+ languages</div>
+                    <div class="fca">Explore <span class="material-icons" style="font-size:13px">arrow_forward</span></div>
+                </a>
+                <a href="/User/SignUp" class="fcard rv" style="transition-delay:.21s">
+                    <div class="macos"><span class="dr"></span><span class="dy"></span><span class="dg"></span></div>
+                    <div class="fico" style="background:linear-gradient(135deg,#d97706,#f59e0b)"><span class="material-icons" style="color:#fff;font-size:20px">workspace_premium</span></div>
+                    <div class="fct">CodeWave Pro</div><div class="fcd">All the tools, resources, and support for schools</div>
+                    <div class="fca">Explore <span class="material-icons" style="font-size:13px">arrow_forward</span></div>
+                </a>
+                <a href="/User/SignUp" class="fcard rv" style="transition-delay:.28s">
+                    <div class="macos"><span class="dr"></span><span class="dy"></span><span class="dg"></span></div>
+                    <div class="fico" style="background:linear-gradient(135deg,#7c3aed,#b887e3)"><span class="material-icons" style="color:#fff;font-size:20px">verified</span></div>
+                    <div class="fct">Certifications</div><div class="fcd">Industry-relevant certification programs</div>
+                    <div class="fca">Explore <span class="material-icons" style="font-size:13px">arrow_forward</span></div>
+                </a>
+            </div>
+        </div>
+    </section>
+    <div class="gline-sep"></div>
+
+    <!-- LEARNING PATHS -->
+    <section id="paths">
+        <div class="container">
+            <div class="rv">
+                <div class="slabel">Learning Paths</div>
+                <h2 class="stitle">Pick Your Language.<br>Start Your Journey.</h2>
+                <p class="ssub">Structured paths from beginner to job-ready.</p>
+            </div>
+            <div class="pgrid">
+                <a href="/User/Login" class="pcard rvl">
+                    <div class="pcinner">
+                        <div class="pcglow" style="background:rgba(184,135,227,.45)"></div>
+                        <div class="plang" style="color:var(--green)">🐍 Python</div>
+                        <div class="pname">Python<br>Development</div>
+                        <div class="pdesc">From variables to algorithms. Master Python from the ground up with hands-on exercises.</div>
+                        <div>
+                            <span class="ptag" style="background:rgba(184,135,227,.1);color:var(--green);border:1px solid rgba(184,135,227,.2)">Beginner</span>
+                            <span class="ptag" style="background:rgba(184,135,227,.1);color:var(--green);border:1px solid rgba(184,135,227,.2)">Data Science</span>
+                            <span class="ptag" style="background:rgba(184,135,227,.1);color:var(--green);border:1px solid rgba(184,135,227,.2)">AI Ready</span>
+                        </div>
+                        <div class="pcode">
+                            <span class="kw">def</span> <span class="fn">greet</span>(name: str) -&gt; str:<br>
+                            &nbsp;&nbsp;<span class="kw">return</span> <span class="st">f"Hello, {name}! 🌊"</span><br><br>
+                            <span class="fn">print</span>(<span class="fn">greet</span>(<span class="st">"CodeWave"</span>))
+                        </div>
+                        <div class="pcta" style="background:rgba(184,135,227,.1);color:var(--green)">Start Python <span class="material-icons" style="font-size:15px">arrow_forward</span></div>
+                    </div>
+                </a>
+                <a href="/User/Login" class="pcard rvr">
+                    <div class="pcinner">
+                        <div class="pcglow" style="background:rgba(251,146,60,.45)"></div>
+                        <div class="plang" style="color:var(--orange)">☕ Java</div>
+                        <div class="pname">Java<br>Engineering</div>
+                        <div class="pdesc">Build enterprise-grade apps. Learn OOP, design patterns, and backend development.</div>
+                        <div>
+                            <span class="ptag" style="background:rgba(251,146,60,.1);color:var(--orange);border:1px solid rgba(251,146,60,.2)">OOP</span>
+                            <span class="ptag" style="background:rgba(251,146,60,.1);color:var(--orange);border:1px solid rgba(251,146,60,.2)">Backend</span>
+                            <span class="ptag" style="background:rgba(251,146,60,.1);color:var(--orange);border:1px solid rgba(251,146,60,.2)">Enterprise</span>
+                        </div>
+                        <div class="pcode">
+                            <span class="kw">public class</span> <span class="fn">WaveRunner</span> {<br>
+                            &nbsp;&nbsp;<span class="kw">public static void</span> <span class="fn">main</span>(String[] args) {<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;System.out.<span class="fn">println</span>(<span class="st">"Ride the wave!"</span>);<br>
+                            &nbsp;&nbsp;}<br>}
+                        </div>
+                        <div class="pcta" style="background:rgba(251,146,60,.1);color:var(--orange)">Start Java <span class="material-icons" style="font-size:15px">arrow_forward</span></div>
+                    </div>
+                </a>
+                <a href="/User/Login" class="pcard rv" style="grid-column:1/-1">
+                    <div class="pcinner" style="display:grid;grid-template-columns:1fr 1fr;gap:36px;align-items:center">
+                        <div>
+                            <div class="pcglow" style="background:rgba(96,165,250,.45)"></div>
+                            <div class="plang" style="color:var(--blue)">🌐 Web Development</div>
+                            <div class="pname">Full-Stack<br>Web Dev</div>
+                            <div class="pdesc">HTML, CSS, JavaScript and beyond. Build real websites and web apps from scratch.</div>
+                            <div>
+                                <span class="ptag" style="background:rgba(96,165,250,.1);color:var(--blue);border:1px solid rgba(96,165,250,.2)">HTML/CSS</span>
+                                <span class="ptag" style="background:rgba(96,165,250,.1);color:var(--blue);border:1px solid rgba(96,165,250,.2)">JavaScript</span>
+                                <span class="ptag" style="background:rgba(96,165,250,.1);color:var(--blue);border:1px solid rgba(96,165,250,.2)">Full-Stack</span>
+                            </div>
+                            <div class="pcta" style="background:rgba(96,165,250,.1);color:var(--blue)">Start Web Dev <span class="material-icons" style="font-size:15px">arrow_forward</span></div>
+                        </div>
+                        <div class="pcode" style="font-size:12px;line-height:1.85">
+                            &lt;<span class="kw">div</span> <span class="fn">class</span>=<span class="st">"wave-app"</span>&gt;<br>
+                            &nbsp;&nbsp;&lt;<span class="kw">h1</span>&gt;Hello, World!&lt;/<span class="kw">h1</span>&gt;<br>
+                            &nbsp;&nbsp;&lt;<span class="kw">script</span>&gt;<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">const</span> <span class="fn">wave</span> = () =&gt; <span class="fn">console</span>.<span class="fn">log</span>(<span class="st">'🌊'</span>);<br>
+                            &nbsp;&nbsp;&lt;/<span class="kw">script</span>&gt;<br>
+                            &lt;/<span class="kw">div</span>&gt;
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </section>
+    <div class="gline-sep"></div>
+
+    <!-- IDE SECTION -->
+    <section id="idex">
+        <div class="container">
+            <div class="idewrap">
+                <div class="rvl">
+                    <div class="slabel">Online IDE</div>
+                    <h2 class="stitle">Code in Your<br>Browser.</h2>
+                    <p class="ssub" style="margin-bottom:28px">No setup, no downloads. Write, run, and debug instantly with AI-powered feedback.</p>
+                    <div style="display:flex;flex-direction:column;gap:13px;margin-bottom:32px">
+                        <div style="display:flex;align-items:center;gap:12px">
+                            <div style="width:32px;height:32px;border-radius:8px;background:rgba(184,135,227,.1);border:1px solid rgba(184,135,227,.2);display:flex;align-items:center;justify-content:center;flex-shrink:0"><span class="material-icons" style="font-size:16px;color:var(--green)">bolt</span></div>
+                            <span style="font-size:14px;color:#9ca3af">Instant execution — results in milliseconds</span>
+                        </div>
+                        <div style="display:flex;align-items:center;gap:12px">
+                            <div style="width:32px;height:32px;border-radius:8px;background:rgba(184,135,227,.1);border:1px solid rgba(184,135,227,.2);display:flex;align-items:center;justify-content:center;flex-shrink:0"><span class="material-icons" style="font-size:16px;color:var(--green)">psychology</span></div>
+                            <span style="font-size:14px;color:#9ca3af">AI assistant explains errors and suggests fixes</span>
+                        </div>
+                        <div style="display:flex;align-items:center;gap:12px">
+                            <div style="width:32px;height:32px;border-radius:8px;background:rgba(184,135,227,.1);border:1px solid rgba(184,135,227,.2);display:flex;align-items:center;justify-content:center;flex-shrink:0"><span class="material-icons" style="font-size:16px;color:var(--green)">check_circle</span></div>
+                            <span style="font-size:14px;color:#9ca3af">Automatic test cases validate your solutions</span>
+                        </div>
+                    </div>
+                    <a href="/User/SignUp" class="btnhp" style="font-size:15px;padding:12px 26px">
+                        <span class="material-icons" style="font-size:17px">code</span> Try the IDE Free
+                    </a>
+                </div>
+                <div class="idemock rvr">
+                    <div class="idehdr">
+                        <div style="display:flex;gap:5px"><div style="width:10px;height:10px;border-radius:50%;background:#ef4444"></div><div style="width:10px;height:10px;border-radius:50%;background:#eab308"></div><div style="width:10px;height:10px;border-radius:50%;background:#22c55e"></div></div>
+                        <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#374151;margin-left:10px">fibonacci.py</span>
+                        <span style="margin-left:auto;font-size:11px;color:#374151;font-family:'JetBrains Mono',monospace">Python 3.11</span>
+                    </div>
+                    <div class="idebody">
+                        <div class="ideline tl tl1"><span class="iln">1</span><span style="color:#4b5563"># Fibonacci sequence generator</span></div>
+                        <div class="ideline tl tl2"><span class="iln">2</span><span style="color:#c084fc">def </span><span style="color:var(--blue)">fibonacci</span><span style="color:#e2e8f0">(n):</span></div>
+                        <div class="ideline tl tl3"><span class="iln">3</span><span style="color:#c084fc">&nbsp;&nbsp;if </span><span style="color:#e2e8f0">n &lt;= 1:</span></div>
+                        <div class="ideline tl tl4"><span class="iln">4</span><span style="color:#c084fc">&nbsp;&nbsp;&nbsp;&nbsp;return </span><span style="color:#e2e8f0">n</span></div>
+                        <div class="ideline tl tl5"><span class="iln">5</span><span style="color:#c084fc">&nbsp;&nbsp;return </span><span style="color:var(--blue)">fibonacci</span><span style="color:#e2e8f0">(n-1) + </span><span style="color:var(--blue)">fibonacci</span><span style="color:#e2e8f0">(n-2)</span></div>
+                        <div class="ideline tl tl6"><span class="iln">6</span><span class="icursor"></span></div>
+                    </div>
+                    <div class="ideout">
+                        <div class="idelbl">▶ OUTPUT</div>
+                        <div style="font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--green)">55</div>
+                        <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#374151;margin-top:4px">✓ All test cases passed (3/3)</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <div class="gline-sep"></div>
+
+    <!-- TESTIMONIALS -->
+    <section id="testimonials">
+        <div class="container">
+            <div class="rv" style="text-align:center">
+                <div class="slabel">Community</div>
+                <h2 class="stitle">Loved by Learners</h2>
+                <p class="ssub">Join thousands of students already on their coding journey.</p>
+            </div>
+        </div>
+        <div class="ttrack">
+            <div class="tscroll">
+                <div class="tcard"><div class="tst">★★★★★</div><div class="ttxt">"CodeWave completely changed how I think about programming. The AI assistant helped me understand concepts I was stuck on for weeks."</div><div class="tau"><img class="tav" src="https://i.pravatar.cc/64?img=1" alt=""/><div><div class="tname">Sarah M.</div><div class="trole">Python Learner</div></div></div></div>
+                <div class="tcard"><div class="tst">★★★★★</div><div class="ttxt">"The Focus Mode is incredible. No distractions, just you and the code. I finished my Java certification in 3 weeks!"</div><div class="tau"><img class="tav" src="https://i.pravatar.cc/64?img=3" alt=""/><div><div class="tname">James K.</div><div class="trole">Java Developer</div></div></div></div>
+                <div class="tcard"><div class="tst">★★★★★</div><div class="ttxt">"Real-time feedback and test cases make learning so much more engaging than watching videos. Best platform I've used."</div><div class="tau"><img class="tav" src="https://i.pravatar.cc/64?img=5" alt=""/><div><div class="tname">Maya R.</div><div class="trole">Web Dev Student</div></div></div></div>
+                <div class="tcard"><div class="tst">★★★★★</div><div class="ttxt">"As a teacher, CodeWave gives me everything I need. Students are more motivated than ever with the XP and progress system."</div><div class="tau"><img class="tav" src="https://i.pravatar.cc/64?img=7" alt=""/><div><div class="tname">Prof. Chen</div><div class="trole">CS Teacher</div></div></div></div>
+                <div class="tcard"><div class="tst">★★★★★</div><div class="ttxt">"I went from knowing nothing about Java to landing my first internship in 6 months! The structured paths are perfect."</div><div class="tau"><img class="tav" src="https://i.pravatar.cc/64?img=9" alt=""/><div><div class="tname">Alex T.</div><div class="trole">Junior Developer</div></div></div></div>
+                <div class="tcard"><div class="tst">★★★★★</div><div class="ttxt">"CodeWave's quiz system and progress tracking kept me accountable. 200+ exercises and I never felt bored once."</div><div class="tau"><img class="tav" src="https://i.pravatar.cc/64?img=11" alt=""/><div><div class="tname">Nina S.</div><div class="trole">Full-Stack Dev</div></div></div></div>
+                <!-- duplicate set for infinite scroll -->
+                <div class="tcard"><div class="tst">★★★★★</div><div class="ttxt">"CodeWave completely changed how I think about programming. The AI assistant helped me understand concepts I was stuck on for weeks."</div><div class="tau"><img class="tav" src="https://i.pravatar.cc/64?img=1" alt=""/><div><div class="tname">Sarah M.</div><div class="trole">Python Learner</div></div></div></div>
+                <div class="tcard"><div class="tst">★★★★★</div><div class="ttxt">"The Focus Mode is incredible. No distractions, just you and the code. I finished my Java certification in 3 weeks!"</div><div class="tau"><img class="tav" src="https://i.pravatar.cc/64?img=3" alt=""/><div><div class="tname">James K.</div><div class="trole">Java Developer</div></div></div></div>
+                <div class="tcard"><div class="tst">★★★★★</div><div class="ttxt">"Real-time feedback and test cases make learning so much more engaging than watching videos. Best platform I've used."</div><div class="tau"><img class="tav" src="https://i.pravatar.cc/64?img=5" alt=""/><div><div class="tname">Maya R.</div><div class="trole">Web Dev Student</div></div></div></div>
+                <div class="tcard"><div class="tst">★★★★★</div><div class="ttxt">"As a teacher, CodeWave gives me everything I need. Students are more motivated than ever with the XP and progress system."</div><div class="tau"><img class="tav" src="https://i.pravatar.cc/64?img=7" alt=""/><div><div class="tname">Prof. Chen</div><div class="trole">CS Teacher</div></div></div></div>
+                <div class="tcard"><div class="tst">★★★★★</div><div class="ttxt">"I went from knowing nothing about Java to landing my first internship in 6 months! The structured paths are perfect."</div><div class="tau"><img class="tav" src="https://i.pravatar.cc/64?img=9" alt=""/><div><div class="tname">Alex T.</div><div class="trole">Junior Developer</div></div></div></div>
+                <div class="tcard"><div class="tst">★★★★★</div><div class="ttxt">"CodeWave's quiz system and progress tracking kept me accountable. 200+ exercises and I never felt bored once."</div><div class="tau"><img class="tav" src="https://i.pravatar.cc/64?img=11" alt=""/><div><div class="tname">Nina S.</div><div class="trole">Full-Stack Dev</div></div></div></div>
+            </div>
+        </div>
+    </section>
+    <div class="gline-sep"></div>
+
+    <!-- CTA -->
+    <section id="cta">
+        <div class="container">
+            <div class="ctabox rv">
+                <div class="ctabg"></div>
+                <div class="ctaorb ctao1"></div>
+                <div class="ctaorb ctao2"></div>
+                <div class="ctacont">
+                    <div class="slabel" style="justify-content:center">Join Today</div>
+                    <div class="ctatitle">Ready to Ride<br>the Wave?</div>
+                    <div class="ctasub">Join 12,000+ students already learning to code on CodeWave.</div>
+                    <div class="ctabtns">
+                        <a href="/Welcome/UserInterest" class="btnhp"><span class="material-icons" style="font-size:18px">rocket_launch</span>Start Free Today</a>
+                        <a href="/User/Login" class="btnhs">I have an account</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer>
+        <div class="fgridf">
+            <div>
+                <div class="flogo"><img src="/CodeWavelogo.PNG" alt="CodeWave"/><span>CodeWave</span></div>
+                <div class="ftag">Sign up free and start coding today!</div>
+                <a href="/User/SignUp" class="btnp" style="font-size:13px">Sign Up Free</a>
+            </div>
+            <div class="fcol"><h5>Use Cases</h5><ul><li><a href="/AboutUs"><span class="material-icons" style="font-size:12px">chevron_right</span>District</a></li><li><a href="/AboutUs"><span class="material-icons" style="font-size:12px">chevron_right</span>Schools</a></li><li><a href="/AboutUs"><span class="material-icons" style="font-size:12px">chevron_right</span>Teachers</a></li></ul></div>
+            <div class="fcol"><h5>Products</h5><ul><li><a href="/User/Login"><span class="material-icons" style="font-size:12px">chevron_right</span>Coding LMS</a></li><li><a href="/User/Login"><span class="material-icons" style="font-size:12px">chevron_right</span>Online IDE</a></li><li><a href="/User/SignUp"><span class="material-icons" style="font-size:12px">chevron_right</span>CodeWave Pro</a></li><li><a href="/User/SignUp"><span class="material-icons" style="font-size:12px">chevron_right</span>Certifications</a></li></ul></div>
+            <div class="fcol"><h5>Resources</h5><ul><li><a href="/User/Login"><span class="material-icons" style="font-size:12px">chevron_right</span>Online Courses</a></li><li><a href="/AboutUs"><span class="material-icons" style="font-size:12px">chevron_right</span>Workshops</a></li><li><a href="/AboutUs"><span class="material-icons" style="font-size:12px">chevron_right</span>Blog & Guides</a></li></ul></div>
+            <div class="fcol"><h5>Platform</h5><ul><li><a href="/User/Login"><span class="material-icons" style="font-size:12px">chevron_right</span>Assignments</a></li><li><a href="/User/Login"><span class="material-icons" style="font-size:12px">chevron_right</span>Classroom Mgmt</a></li><li><a href="/User/Login"><span class="material-icons" style="font-size:12px">chevron_right</span>Grading</a></li><li><a href="/AboutUs"><span class="material-icons" style="font-size:12px">chevron_right</span>Integrations</a></li></ul></div>
+        </div>
+        <div class="fbot">
+            <span>© 2025 CodeWave. All rights reserved.</span>
+            <div style="display:flex;gap:22px"><a href="/Home/Privacy">Privacy Policy</a><a href="/AboutUs">Terms of Service</a><a href="/AboutUs">Contact</a></div>
+        </div>
+    </footer>
+
+    <script>
+    // ── 1. PARTICLE CANVAS ──────────────────────────────────────────
+    (function(){
+        const cv = document.getElementById('bgc'), cx = cv.getContext('2d');
+        let W, H, P, mouse = {x:-9999,y:-9999};
+        function resize(){ W=cv.width=window.innerWidth; H=cv.height=window.innerHeight; }
+        resize(); window.addEventListener('resize', resize);
+        window.addEventListener('mousemove', e=>{ mouse.x=e.clientX; mouse.y=e.clientY; });
+        const N = Math.min(110, Math.floor(window.innerWidth*window.innerHeight/9500));
+        P = Array.from({length:N}, ()=>({
+            x:Math.random()*window.innerWidth, y:Math.random()*window.innerHeight,
+            vx:(Math.random()-.5)*.38, vy:(Math.random()-.5)*.38,
+            r:Math.random()*1.4+.4, op:Math.random()*.45+.18,
+            hue:Math.random()>.65?280:(Math.random()>.5?270:260)
+        }));
+        function frame(){
+            cx.clearRect(0,0,W,H);
+            for(let i=0;i<P.length;i++){
+                const p=P[i];
+                const dx=p.x-mouse.x, dy=p.y-mouse.y, d=Math.sqrt(dx*dx+dy*dy);
+                if(d<130){ const f=(130-d)/130; p.vx+=(dx/d)*f*.28; p.vy+=(dy/d)*f*.28; }
+                p.vx*=.99; p.vy*=.99;
+                const sp=Math.sqrt(p.vx*p.vx+p.vy*p.vy);
+                if(sp>1.4){p.vx=p.vx/sp*1.4;p.vy=p.vy/sp*1.4;}
+                p.x+=p.vx; p.y+=p.vy;
+                if(p.x<0)p.x=W; if(p.x>W)p.x=0;
+                if(p.y<0)p.y=H; if(p.y>H)p.y=0;
+                cx.beginPath(); cx.arc(p.x,p.y,p.r,0,Math.PI*2);
+                cx.fillStyle=`hsla(${p.hue},68%,68%,${p.op})`; cx.fill();
+                for(let j=i+1;j<P.length;j++){
+                    const q=P[j], ex=p.x-q.x, ey=p.y-q.y, ed=Math.sqrt(ex*ex+ey*ey);
+                    if(ed<95){ cx.beginPath(); cx.moveTo(p.x,p.y); cx.lineTo(q.x,q.y);
+                        cx.strokeStyle=`hsla(280,68%,75%,${(1-ed/95)*.13})`; cx.lineWidth=.5; cx.stroke(); }
+                }
+            }
+            requestAnimationFrame(frame);
+        }
+        frame();
+    })();
+
+    // ── 2. CUSTOM CURSOR ────────────────────────────────────────────
+    (function(){
+        const dot=document.getElementById('cdot'), ring=document.getElementById('cring');
+        let mx=0,my=0,rx=0,ry=0;
+        document.addEventListener('mousemove', e=>{ mx=e.clientX; my=e.clientY; dot.style.left=mx+'px'; dot.style.top=my+'px'; });
+        (function anim(){ rx+=(mx-rx)*.12; ry+=(my-ry)*.12; ring.style.left=rx+'px'; ring.style.top=ry+'px'; requestAnimationFrame(anim); })();
+        document.querySelectorAll('a,button').forEach(el=>{
+            el.addEventListener('mouseenter',()=>{ ring.style.width='52px'; ring.style.height='52px'; ring.style.borderColor='rgba(184,135,227,.7)'; dot.style.transform='translate(-50%,-50%) scale(1.5)'; });
+            el.addEventListener('mouseleave',()=>{ ring.style.width='36px'; ring.style.height='36px'; ring.style.borderColor='rgba(184,135,227,.45)'; dot.style.transform='translate(-50%,-50%) scale(1)'; });
+        });
+    })();
+
+    // ── 3. SCROLL REVEAL ────────────────────────────────────────────
+    (function(){
+        const io = new IntersectionObserver(entries=>{
+            entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('on'); io.unobserve(e.target); } });
+        },{threshold:.1,rootMargin:'0px 0px -40px 0px'});
+        document.querySelectorAll('.rv,.rvl,.rvr').forEach(el=>io.observe(el));
+    })();
+
+    // ── 4. ANIMATED COUNTERS ────────────────────────────────────────
+    (function(){
+        const io = new IntersectionObserver(entries=>{
+            entries.forEach(e=>{
+                if(!e.isIntersecting) return;
+                io.unobserve(e.target);
+                const el = e.target;
+                const target = +el.dataset.to;
+                el.textContent = '0';
+                // delay slightly so the reveal fade-in finishes first
+                setTimeout(()=>{
+                    let start = null;
+                    const duration = 1800;
+                    const step = ts => {
+                        if(!start) start = ts;
+                        const p = Math.min((ts - start) / duration, 1);
+                        // ease-out expo for snappy start, graceful end
+                        const ease = p === 1 ? 1 : 1 - Math.pow(2, -10 * p);
+                        el.textContent = Math.floor(ease * target);
+                        if(p < 1) requestAnimationFrame(step);
+                        else el.textContent = target;
+                    };
+                    requestAnimationFrame(step);
+                }, 400);
+            });
+        }, { threshold: 0.15 });
+        document.querySelectorAll('.counter').forEach(c => io.observe(c));
+    })();
+
+    // ── 5. NAVBAR SCROLL ────────────────────────────────────────────
+    window.addEventListener('scroll',()=>document.getElementById('nav').classList.toggle('scrolled',scrollY>50));
+
+    // ── 6. 3D TILT ON FEATURE CARDS ─────────────────────────────────
+    document.querySelectorAll('.fcard').forEach(card=>{
+        card.addEventListener('mousemove',e=>{
+            const r=card.getBoundingClientRect(), x=(e.clientX-r.left)/r.width, y=(e.clientY-r.top)/r.height;
+            card.style.transform=`perspective(900px) rotateX(${(y-.5)*9}deg) rotateY(${(.5-x)*9}deg) translateY(-5px)`;
+            card.style.setProperty('--mx',`${x*100}%`); card.style.setProperty('--my',`${y*100}%`);
+        });
+        card.addEventListener('mouseleave',()=>{ card.style.transform=''; });
+    });
+
+    // ── 7. PATH CARD GLOW FOLLOW ─────────────────────────────────────
+    document.querySelectorAll('.pcard').forEach(card=>{
+        card.addEventListener('mousemove',e=>{
+            const r=card.getBoundingClientRect(), g=card.querySelector('.pcglow');
+            if(g){ g.style.left=(e.clientX-r.left-100)+'px'; g.style.top=(e.clientY-r.top-100)+'px'; }
+        });
+    });
+    </script>
+</body>
+</html>

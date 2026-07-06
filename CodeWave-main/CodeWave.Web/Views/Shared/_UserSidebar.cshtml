@@ -1,0 +1,31 @@
+<aside class="sticky top-0 self-stretch w-64 flex-shrink-0 bg-white dark:bg-[#111318] border-r-[0.5px] border-gray-200 dark:border-gray-800 user-sidebar">
+    @await Html.PartialAsync("_UserSidebarContent")
+</aside>
+
+<style>
+    /* Protect sidebar from page-specific CSS overrides - ensure unified appearance */
+    .user-sidebar,
+    aside.user-sidebar {
+        background-color: white !important;
+        border-right: 0.5px solid rgb(229, 231, 235) !important;
+    }
+
+    html.dark .user-sidebar,
+    html.dark aside.user-sidebar {
+        background-color: #111318 !important;
+        border-right: 0.5px solid rgb(31, 41, 55) !important;
+    }
+
+    /* Prevent any page-specific CSS from overriding sidebar */
+    .user-sidebar * {
+        box-sizing: border-box;
+    }
+
+    /* Universal scrollbar */
+    ::-webkit-scrollbar { width: 10px; height: 10px; }
+    ::-webkit-scrollbar-track { background: rgba(155,89,245,0.08); border-radius: 999px; }
+    ::-webkit-scrollbar-thumb { background: #9b59f5; border-radius: 999px; box-shadow: 0 0 10px rgba(155,89,245,0.9), 0 0 20px rgba(155,89,245,0.5), 0 0 35px rgba(155,89,245,0.2); }
+    ::-webkit-scrollbar-thumb:hover { background: #b07eff; box-shadow: 0 0 14px rgba(176,126,255,1), 0 0 28px rgba(176,126,255,0.6), 0 0 45px rgba(155,89,245,0.3); }
+    ::-webkit-scrollbar-corner { background: transparent; }
+    * { scrollbar-width: thin; scrollbar-color: #9b59f5 rgba(155,89,245,0.08); }
+</style>

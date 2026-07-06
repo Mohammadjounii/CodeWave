@@ -1,0 +1,406 @@
+@{
+    Layout = null;
+    var query        = ViewBag.Query        as string ?? "";
+    var courses      = ViewBag.Courses      as List<CodeWave.Application.DTOs.SearchResultDto> ?? new();
+    var lessons      = ViewBag.Lessons      as List<CodeWave.Application.DTOs.SearchResultDto> ?? new();
+    var quizzes      = ViewBag.Quizzes      as List<CodeWave.Application.DTOs.SearchResultDto> ?? new();
+    var achievements = ViewBag.Achievements as List<CodeWave.Application.DTOs.SearchResultDto> ?? new();
+    var interviews   = ViewBag.Interviews   as List<CodeWave.Application.DTOs.SearchResultDto> ?? new();
+    var jobs         = ViewBag.Jobs         as List<CodeWave.Application.DTOs.SearchResultDto> ?? new();
+    var exercises    = ViewBag.Exercises    as List<CodeWave.Application.DTOs.SearchResultDto> ?? new();
+    var projects     = ViewBag.Projects     as List<CodeWave.Application.DTOs.SearchResultDto> ?? new();
+    var totalCount   = (int)(ViewBag.TotalCount ?? 0);
+
+    // All non-empty groups ordered by priority
+    var features = ViewBag.Features as List<CodeWave.Application.DTOs.SearchResultDto> ?? new();
+
+    var groups = new (string Label, string Type, string Icon, string Color, string BgClass, string TextClass, string BadgeClass, List<CodeWave.Application.DTOs.SearchResultDto> Items)[]
+    {
+        ("Courses",          "course",      "school",            "purple", "bg-purple-500/10",  "text-purple-500 dark:text-purple-400",  "text-purple-600 bg-purple-500/10",   courses),
+        ("Lessons",          "lesson",      "menu_book",         "blue",   "bg-blue-500/10",    "text-blue-500 dark:text-blue-400",      "text-blue-600 bg-blue-500/10",       lessons),
+        ("Quizzes",          "quiz",        "quiz",              "amber",  "bg-amber-500/10",   "text-amber-500 dark:text-amber-400",    "text-amber-600 bg-amber-500/10",     quizzes),
+        ("Achievements",     "achievement", "military_tech",     "orange", "bg-orange-500/10",  "text-orange-500 dark:text-orange-400",  "text-orange-600 bg-orange-500/10",   achievements),
+        ("Interview Prep",   "interview",   "record_voice_over", "green",  "bg-green-500/10",   "text-green-500 dark:text-green-400",    "text-green-600 bg-green-500/10",     interviews),
+        ("Jobs",             "job",         "work",              "rose",   "bg-rose-500/10",    "text-rose-500 dark:text-rose-400",      "text-rose-600 bg-rose-500/10",       jobs),
+        ("Exercises",        "exercise",    "code",              "indigo", "bg-indigo-500/10",  "text-indigo-500 dark:text-indigo-400",  "text-indigo-600 bg-indigo-500/10",   exercises),
+        ("My Projects",      "project",     "folder_code",       "cyan",   "bg-cyan-500/10",    "text-cyan-500 dark:text-cyan-400",      "text-cyan-600 bg-cyan-500/10",       projects),
+        ("Pages & Features", "feature",     "apps",              "purple", "bg-purple-500/10",  "text-purple-500 dark:text-purple-400",  "text-purple-600 bg-purple-500/10",   features),
+    };
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Search — CodeWave</title>
+
+    @await Html.PartialAsync("_ThemeScript")
+
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#b887e3",
+                        "primary-dark": "#9d6fd9",
+                        "background-light": "#f5efff",
+                        "background-dark": "#0f0f1a"
+                    },
+                    fontFamily: { display: "Space Grotesk" }
+                }
+            }
+        };
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" rel="stylesheet" />
+
+    <style>
+        .material-symbols-outlined { font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24; font-display:swap; }
+
+        /* ── backgrounds ── */
+        html:not(.dark) body  { background-color:#f5efff !important; }
+        html:not(.dark) main  { background-color:#f5efff !important; }
+        html.dark  body { background-color:#0a0a0f !important; }
+        html.dark  main { background:linear-gradient(135deg,#0a0a0f,#0f0f1a,#0a0a0f) !important; }
+
+        /* ── sidebar ── */
+        html:not(.dark) .user-sidebar,html:not(.dark) aside.user-sidebar { background-color:white !important;border-right:.5px solid rgb(229,231,235) !important; }
+        html.dark  .user-sidebar,html.dark  aside.user-sidebar { background-color:#111318 !important;border-right:.5px solid rgb(31,41,55) !important; }
+
+        /* ── glass card ── */
+        .glass-card {
+            background:rgba(255,255,255,0.72);
+            backdrop-filter:blur(12px);
+            -webkit-backdrop-filter:blur(12px);
+            border:1px solid rgba(184,135,227,0.18);
+        }
+        html.dark .glass-card {
+            background:rgba(22,22,34,0.7);
+            border:1px solid rgba(255,255,255,0.07);
+        }
+
+        /* ── result card ── */
+        .result-card {
+            transition: transform .22s ease, box-shadow .22s ease, border-color .22s ease;
+        }
+        .result-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 14px 28px -6px rgba(0,0,0,0.18), 0 6px 12px -4px rgba(184,135,227,0.12);
+            border-color: rgba(184,135,227,0.35) !important;
+        }
+        html.dark .result-card:hover {
+            box-shadow: 0 14px 28px -6px rgba(0,0,0,0.45);
+        }
+
+        /* ── entry animation ── */
+        @@keyframes fadeUp {
+            from { opacity:0; transform:translateY(14px); }
+            to   { opacity:1; transform:translateY(0); }
+        }
+        .anim-card { animation: fadeUp .35s ease both; }
+
+        /* ── filter pill ── */
+        .filter-pill {
+            background:rgba(229,231,235,0.8);
+            color:#374151;
+            transition: background .18s, color .18s, transform .12s;
+        }
+        html.dark .filter-pill {
+            background:rgba(255,255,255,0.07);
+            color:#94a3b8;
+        }
+        .filter-pill:hover { transform:scale(1.04); }
+        .filter-pill.active-pill {
+            background:rgba(184,135,227,0.2) !important;
+            color:#b887e3 !important;
+            font-weight:600;
+        }
+
+        /* ── line clamp ── */
+        .line-clamp-1 { display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden; }
+        .line-clamp-2 { display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden; }
+
+        /* ── search bar glow ── */
+        .search-bar-wrap:focus-within {
+            box-shadow: 0 0 0 3px rgba(184,135,227,0.25);
+        }
+
+        /* ── scrollbar ── */
+        ::-webkit-scrollbar { width:8px; }
+        ::-webkit-scrollbar-track { background:rgba(155,89,245,0.06);border-radius:999px; }
+        ::-webkit-scrollbar-thumb { background:#9b59f5;border-radius:999px; }
+        ::-webkit-scrollbar-thumb:hover { background:#b07eff; }
+        * { scrollbar-width:thin;scrollbar-color:#9b59f5 rgba(155,89,245,0.06); }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-gray-900 dark:text-gray-100 min-h-screen">
+
+<div class="flex min-h-screen">
+
+    @await Html.PartialAsync("_UserSidebar")
+
+    <main class="flex-1 overflow-y-auto">
+
+        <!-- Sticky search header -->
+        <div class="sticky top-0 z-30 bg-white/80 dark:bg-[#0a0a0f]/80 backdrop-blur-md border-b border-gray-100 dark:border-white/5 px-6 lg:px-10 py-4">
+            <form method="get" asp-controller="Search" asp-action="Index" class="flex items-center gap-3 max-w-3xl">
+                <div class="search-bar-wrap flex-1 flex items-center gap-3 px-4 py-2.5 rounded-xl glass-card border border-primary/20 transition-all duration-200">
+                    <span class="material-symbols-outlined text-primary text-xl flex-shrink-0">search</span>
+                    <input
+                        id="searchPageInput"
+                        name="q"
+                        type="text"
+                        value="@query"
+                        placeholder="Search everything in CodeWave…"
+                        autocomplete="off"
+                        class="flex-1 bg-transparent text-gray-900 dark:text-white text-sm placeholder-gray-400 dark:placeholder-slate-500 outline-none min-w-0"
+                    />
+                    @if (!string.IsNullOrEmpty(query))
+                    {
+                        <button type="button" onclick="document.getElementById('searchPageInput').value=''; this.closest('form').submit();"
+                            class="text-gray-400 hover:text-gray-600 dark:hover:text-slate-300 transition-colors flex-shrink-0 rounded-full hover:bg-gray-100 dark:hover:bg-white/10 p-0.5">
+                            <span class="material-symbols-outlined text-[18px]">close</span>
+                        </button>
+                    }
+                </div>
+                <button type="submit"
+                    class="bg-primary hover:bg-primary/90 active:scale-95 text-white px-5 py-2.5 rounded-xl text-sm font-semibold transition-all shadow-md shadow-primary/25 flex-shrink-0 whitespace-nowrap">
+                    Search
+                </button>
+            </form>
+        </div>
+
+        <div class="max-w-5xl mx-auto px-6 py-7 lg:px-10">
+
+            @if (!string.IsNullOrEmpty(query))
+            {
+                <!-- Summary row + filter pills -->
+                <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
+                    <p class="text-sm text-gray-500 dark:text-slate-400">
+                        @if (totalCount > 0)
+                        {
+                            <span><span class="font-bold text-gray-900 dark:text-white">@totalCount</span> result@(totalCount == 1 ? "" : "s") for <span class="text-primary font-semibold">"@query"</span></span>
+                        }
+                        else
+                        {
+                            <span>No results for <span class="text-primary font-semibold">"@query"</span></span>
+                        }
+                    </p>
+
+                    @if (totalCount > 0)
+                    {
+                        <div class="flex items-center gap-1.5 flex-wrap">
+                            <button onclick="filterResults('all')" id="filter-all" class="filter-pill active-pill px-3 py-1 rounded-full text-xs">All (@totalCount)</button>
+                            @foreach (var g in groups.Where(x => x.Items.Any()))
+                            {
+                                <button onclick="filterResults('@g.Type')" id="filter-@g.Type" class="filter-pill px-3 py-1 rounded-full text-xs">@g.Label (@g.Items.Count)</button>
+                            }
+                        </div>
+                    }
+                </div>
+
+                @if (totalCount == 0)
+                {
+                    <!-- Empty state -->
+                    <div class="flex flex-col items-center justify-center py-24 glass-card rounded-2xl text-center anim-card">
+                        <div class="p-5 rounded-2xl bg-primary/10 mb-5">
+                            <span class="material-symbols-outlined text-primary" style="font-size:48px">search_off</span>
+                        </div>
+                        <h3 class="text-black dark:text-white text-xl font-bold mb-1.5">Nothing found</h3>
+                        <p class="text-gray-400 dark:text-slate-500 text-sm max-w-xs">Try different keywords or check your spelling.</p>
+                        <div class="mt-5 flex flex-wrap gap-2 justify-center">
+                            <span class="text-xs text-gray-400 dark:text-slate-500 self-center">Try:</span>
+                            @foreach (var kw in new[]{"Python","Java","OOP","Functions","Variables","Quiz"})
+                            {
+                                <a href="?q=@kw" class="text-xs text-primary hover:underline font-medium bg-primary/10 px-2.5 py-1 rounded-full transition-colors hover:bg-primary/20">@kw</a>
+                            }
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="flex flex-col gap-10" id="resultsContainer">
+
+                        @foreach (var g in groups.Where(x => x.Items.Any()))
+                        {
+                            <section class="result-section" data-type="@g.Type">
+
+                                <!-- Section header -->
+                                <div class="flex items-center gap-3 mb-4">
+                                    <div class="p-2 rounded-xl @g.BgClass">
+                                        <span class="material-symbols-outlined @g.TextClass text-xl">@g.Icon</span>
+                                    </div>
+                                    <h2 class="text-black dark:text-white text-lg font-bold">@g.Label</h2>
+                                    <span class="text-xs font-bold px-2.5 py-1 rounded-full @g.BadgeClass">@g.Items.Count</span>
+                                </div>
+
+                                <!-- Cards — list layout for Lessons & Interviews, grid for rest -->
+                                @if (g.Type == "lesson" || g.Type == "interview" || g.Type == "exercise")
+                                {
+                                    <div class="flex flex-col gap-2.5">
+                                        @{ int idx = 0; }
+                                        @foreach (var r in g.Items)
+                                        {
+                                            <a href="@r.Url"
+                                               data-res-type="@g.Type"
+                                               data-res-path="@(r.LearningPath ?? "")"
+                                               class="result-card anim-card glass-card rounded-xl px-5 py-3.5 flex items-center gap-4 group"
+                                               style="animation-delay:@(idx * 40)ms">
+                                                <div class="p-2.5 rounded-xl @g.BgClass flex-shrink-0">
+                                                    <span class="material-symbols-outlined @g.TextClass text-[20px]">@g.Icon</span>
+                                                </div>
+                                                <div class="flex-1 min-w-0">
+                                                    <p class="text-black dark:text-white font-semibold text-sm group-hover:text-primary transition-colors truncate">@r.Title</p>
+                                                    @if (!string.IsNullOrEmpty(r.Excerpt))
+                                                    {
+                                                        <p class="text-gray-500 dark:text-slate-500 text-xs mt-0.5 line-clamp-1">@r.Excerpt</p>
+                                                    }
+                                                </div>
+                                                <div class="flex items-center gap-2 flex-shrink-0">
+                                                    @if (!string.IsNullOrEmpty(r.LearningPath))
+                                                    {
+                                                        <span class="hidden sm:inline-block px-2.5 py-1 bg-primary/10 text-primary text-xs font-medium rounded-full">@r.LearningPath</span>
+                                                    }
+                                                    @if (!string.IsNullOrEmpty(r.DifficultyLevel))
+                                                    {
+                                                        var dc = r.DifficultyLevel switch { "Beginner" => "bg-green-500/10 text-green-600 dark:text-green-400", "Intermediate" => "bg-amber-500/10 text-amber-600 dark:text-amber-400", "Advanced" => "bg-red-500/10 text-red-600 dark:text-red-400", _ => "bg-gray-100 dark:bg-white/5 text-gray-500" };
+                                                        <span class="hidden sm:inline-block px-2.5 py-1 @dc text-xs font-medium rounded-full">@r.DifficultyLevel</span>
+                                                    }
+                                                    <span class="material-symbols-outlined text-gray-300 dark:text-slate-600 group-hover:text-primary group-hover:translate-x-1 transition-all text-[20px]">arrow_forward</span>
+                                                </div>
+                                            </a>
+                                            idx++;
+                                        }
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                                        @{ int idx2 = 0; }
+                                        @foreach (var r in g.Items)
+                                        {
+                                            <a href="@r.Url"
+                                               data-res-type="@g.Type"
+                                               data-res-path="@(r.LearningPath ?? "")"
+                                               class="result-card anim-card glass-card rounded-2xl p-5 flex flex-col gap-3 group"
+                                               style="animation-delay:@(idx2 * 45)ms">
+                                                <div class="flex items-start justify-between gap-2">
+                                                    <div class="flex items-center gap-3 min-w-0">
+                                                        <div class="p-2.5 rounded-xl @g.BgClass flex-shrink-0">
+                                                            <span class="material-symbols-outlined @g.TextClass">@g.Icon</span>
+                                                        </div>
+                                                        <h3 class="text-black dark:text-white font-bold text-sm leading-snug group-hover:text-primary transition-colors line-clamp-2">@r.Title</h3>
+                                                    </div>
+                                                    <span class="material-symbols-outlined text-gray-300 dark:text-slate-600 group-hover:text-primary group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all flex-shrink-0 mt-1 text-[20px]">arrow_outward</span>
+                                                </div>
+                                                @if (!string.IsNullOrEmpty(r.Excerpt))
+                                                {
+                                                    <p class="text-gray-500 dark:text-slate-400 text-xs leading-relaxed line-clamp-2">@r.Excerpt</p>
+                                                }
+                                                <div class="flex items-center gap-2 flex-wrap mt-auto pt-0.5">
+                                                    @if (!string.IsNullOrEmpty(r.LearningPath))
+                                                    {
+                                                        <span class="px-2.5 py-1 bg-primary/10 text-primary text-xs font-medium rounded-full">@r.LearningPath</span>
+                                                    }
+                                                    @if (!string.IsNullOrEmpty(r.DifficultyLevel))
+                                                    {
+                                                        var dc2 = r.DifficultyLevel switch { "Beginner" => "bg-green-500/10 text-green-600 dark:text-green-400", "Intermediate" => "bg-amber-500/10 text-amber-600 dark:text-amber-400", "Advanced" => "bg-red-500/10 text-red-600 dark:text-red-400", _ => "bg-gray-100 dark:bg-white/5 text-gray-500" };
+                                                        <span class="px-2.5 py-1 @dc2 text-xs font-medium rounded-full">@r.DifficultyLevel</span>
+                                                    }
+                                                </div>
+                                            </a>
+                                            idx2++;
+                                        }
+                                    </div>
+                                }
+                            </section>
+                        }
+                    </div>
+                }
+            }
+            else
+            {
+                <!-- Landing state -->
+                <div class="flex flex-col items-center justify-center py-20 anim-card">
+                    <div class="relative mb-8">
+                        <div class="absolute inset-0 bg-primary/20 rounded-full blur-3xl scale-150"></div>
+                        <div class="relative p-6 rounded-2xl bg-primary/10 border border-primary/20">
+                            <span class="material-symbols-outlined text-primary" style="font-size:56px;font-variation-settings:'FILL' 0,'wght' 300,'GRAD' 0,'opsz' 48">search</span>
+                        </div>
+                    </div>
+                    <h2 class="text-black dark:text-white text-2xl font-black mb-2 text-center">Find anything in CodeWave</h2>
+                    <p class="text-gray-400 dark:text-slate-500 text-sm text-center max-w-sm mb-8">
+                        Search across courses, lessons, quizzes, achievements, interview questions, job offers, exercises and your projects — all in one place.
+                    </p>
+                    <!-- What you can search -->
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 w-full max-w-2xl mb-8">
+                        @foreach (var g in groups)
+                        {
+                            <div class="glass-card rounded-xl p-3.5 flex items-center gap-2.5">
+                                <div class="p-1.5 rounded-lg @g.BgClass flex-shrink-0">
+                                    <span class="material-symbols-outlined @g.TextClass text-[18px]">@g.Icon</span>
+                                </div>
+                                <span class="text-xs font-medium text-gray-700 dark:text-slate-300">@g.Label</span>
+                            </div>
+                        }
+                    </div>
+                    <div class="flex flex-wrap gap-2 justify-center">
+                        <span class="text-xs text-gray-400 dark:text-slate-500 self-center">Try:</span>
+                        @foreach (var kw in new[]{"Python","Java","OOP","Functions","Variables","Interview","Quiz","Job"})
+                        {
+                            <a href="?q=@kw" class="text-xs text-primary font-medium bg-primary/10 hover:bg-primary/20 px-3 py-1.5 rounded-full transition-colors">@kw</a>
+                        }
+                    </div>
+                </div>
+            }
+
+        </div>
+    </main>
+</div>
+
+<script>
+    function filterResults(type) {
+        document.querySelectorAll('.filter-pill').forEach(b => b.classList.remove('active-pill'));
+        document.getElementById('filter-' + type)?.classList.add('active-pill');
+        document.querySelectorAll('.result-section').forEach(s => {
+            s.style.display = (type === 'all' || s.dataset.type === type) ? '' : 'none';
+        });
+    }
+
+    // Keyboard shortcut: / to focus search
+    document.addEventListener('keydown', e => {
+        if (e.key === '/' && document.activeElement.tagName !== 'INPUT') {
+            e.preventDefault();
+            document.getElementById('searchPageInput')?.focus();
+        }
+    });
+
+    // ── Path restriction: intercept result card clicks ──────────────
+    document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('a[data-res-type]').forEach(card => {
+            card.addEventListener('click', function(e) {
+                try {
+                    const type = card.dataset.resType;
+                    const path = card.dataset.resPath;
+                    if (!path || !type) return; // no path data → allow navigation
+                    if (!window.cwShouldBlock) return; // guard not loaded → allow
+                    if (!window.cwShouldBlock(type, path)) return; // same path → allow
+                    e.preventDefault();
+                    window.cwShowPathToast && window.cwShowPathToast(path);
+                    // Shake for visual feedback
+                    card.style.transition = 'transform .08s ease';
+                    const steps = ['-6px','6px','-3px','0'];
+                    steps.forEach((v, i) => setTimeout(() => { card.style.transform = `translateX(${v})`; }, i * 80));
+                } catch(_) {} // never break navigation on error
+            });
+        });
+    });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,170 @@
+@{
+    Layout = null;
+    bool passed = (bool)ViewBag.Passed;
+    string score = ViewBag.Score;
+    string level = ViewBag.Level;
+    string learningPath = ViewBag.LearningPath;
+}
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CodeWave | Assessment Results</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <style>
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        ::-webkit-scrollbar { width: 10px; height: 10px; }
+        ::-webkit-scrollbar-track { background: rgba(155,89,245,0.08); border-radius: 999px; }
+        ::-webkit-scrollbar-thumb { background: #9b59f5; border-radius: 999px; box-shadow: 0 0 10px rgba(155,89,245,0.9), 0 0 20px rgba(155,89,245,0.5), 0 0 35px rgba(155,89,245,0.2); }
+        ::-webkit-scrollbar-thumb:hover { background: #b07eff; }
+        * { scrollbar-width: thin; scrollbar-color: #9b59f5 rgba(155,89,245,0.08); }
+
+        @@keyframes pop-in {
+            0%   { opacity: 0; transform: scale(0.7); }
+            70%  { transform: scale(1.05); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+        @@keyframes fade-up {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .animate-pop  { animation: pop-in  0.5s cubic-bezier(.34,1.56,.64,1) both; }
+        .animate-fade { animation: fade-up 0.5s ease both; }
+        .delay-1 { animation-delay: 0.15s; }
+        .delay-2 { animation-delay: 0.30s; }
+        .delay-3 { animation-delay: 0.45s; }
+        .delay-4 { animation-delay: 0.60s; }
+    </style>
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#b887e3",
+                        "background-dark": "#19131f"
+                    },
+                    fontFamily: { display: "Space Grotesk" }
+                }
+            }
+        };
+    </script>
+</head>
+<body class="bg-background-dark font-display text-white min-h-screen flex items-center justify-center p-4">
+
+    <!-- background blobs -->
+    <div class="fixed inset-0 pointer-events-none overflow-hidden">
+        @if (passed)
+        {
+            <div class="absolute -top-32 -right-32 w-[600px] h-[600px] bg-emerald-500/15 rounded-full blur-[120px]"></div>
+            <div class="absolute -bottom-32 -left-32 w-[600px] h-[600px] bg-primary/15 rounded-full blur-[120px]"></div>
+        }
+        else
+        {
+            <div class="absolute -top-32 -right-32 w-[600px] h-[600px] bg-rose-500/15 rounded-full blur-[120px]"></div>
+            <div class="absolute -bottom-32 -left-32 w-[600px] h-[600px] bg-orange-500/10 rounded-full blur-[120px]"></div>
+        }
+    </div>
+
+    <div class="relative z-10 w-full max-w-lg">
+        <div class="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-8 sm:p-12 shadow-2xl text-center space-y-8">
+
+            <!-- icon -->
+            <div class="flex justify-center animate-pop">
+                @if (passed)
+                {
+                    <div class="w-24 h-24 rounded-full bg-emerald-500/20 border-2 border-emerald-400 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-emerald-400" style="font-size:3rem;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 48;">
+                            verified
+                        </span>
+                    </div>
+                }
+                else
+                {
+                    <div class="w-24 h-24 rounded-full bg-rose-500/20 border-2 border-rose-400 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-rose-400" style="font-size:3rem;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 48;">
+                            close
+                        </span>
+                    </div>
+                }
+            </div>
+
+            <!-- headline -->
+            <div class="space-y-2 animate-fade delay-1">
+                @if (passed)
+                {
+                    <h1 class="text-3xl sm:text-4xl font-bold text-white">You Passed!</h1>
+                    <p class="text-slate-400 text-base">Great job — you've demonstrated strong fundamentals.</p>
+                }
+                else
+                {
+                    <h1 class="text-3xl sm:text-4xl font-bold text-white">Not Quite Yet</h1>
+                    <p class="text-slate-400 text-base">Keep practicing — you'll get there. Give it another shot!</p>
+                }
+            </div>
+
+            <!-- score card -->
+            <div class="animate-fade delay-2 bg-white/5 border border-white/10 rounded-xl p-6 flex items-center justify-between gap-4">
+                <div class="text-left">
+                    <p class="text-xs text-slate-400 uppercase tracking-widest mb-1">Your Score</p>
+                    <p class="text-5xl font-bold @(passed ? "text-emerald-400" : "text-rose-400")">@score<span class="text-2xl text-slate-400">%</span></p>
+                </div>
+                <div class="text-right">
+                    <p class="text-xs text-slate-400 uppercase tracking-widest mb-1">Level Assigned</p>
+                    @if (passed)
+                    {
+                        <span class="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-emerald-500/20 text-emerald-300 text-sm font-bold border border-emerald-400/30">
+                            <span class="material-symbols-outlined text-base" style="font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24;">star</span>
+                            @level
+                        </span>
+                    }
+                    else
+                    {
+                        <span class="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-rose-500/20 text-rose-300 text-sm font-bold border border-rose-400/30">
+                            <span class="material-symbols-outlined text-base">school</span>
+                            @level
+                        </span>
+                    }
+                </div>
+            </div>
+
+            <!-- pass threshold hint -->
+            <p class="text-slate-500 text-xs animate-fade delay-3">Passing score: 70% &nbsp;·&nbsp; Your score: @score%</p>
+
+            <!-- actions -->
+            <div class="animate-fade delay-4 flex flex-col gap-3">
+                @if (passed)
+                {
+                    <a href="@Url.Action("LearningPaths", "Home")"
+                       class="flex items-center justify-center gap-2 h-13 px-6 py-3.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-white font-bold text-base transition-colors shadow-lg shadow-emerald-500/30">
+                        <span class="material-symbols-outlined text-xl">arrow_forward</span>
+                        Start Learning
+                    </a>
+                }
+                else
+                {
+                    <a href="@Url.Action("Start", "Assessment")"
+                       class="flex items-center justify-center gap-2 h-13 px-6 py-3.5 rounded-xl bg-primary hover:bg-primary/80 text-white font-bold text-base transition-colors shadow-lg shadow-primary/30">
+                        <span class="material-symbols-outlined text-xl">refresh</span>
+                        Try Again
+                    </a>
+                    <a href="@Url.Action("LearningPaths", "Home")"
+                       class="flex items-center justify-center gap-2 h-13 px-6 py-3.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 font-semibold text-base transition-colors">
+                        <span class="material-symbols-outlined text-xl">arrow_forward</span>
+                        Continue as Beginner
+                    </a>
+                    <p class="text-xs text-slate-500 leading-relaxed">
+                        Continuing as Beginner gives you access to all learning content.<br/>
+                        Job Opportunities and CV sections will be unlocked as you progress.
+                    </p>
+                }
+            </div>
+
+        </div>
+    </div>
+
+</body>
+</html>

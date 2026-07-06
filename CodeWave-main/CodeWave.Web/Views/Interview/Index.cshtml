@@ -1,0 +1,607 @@
+@using CodeWave.Domain.Entities
+@using System.Text.Json
+@{
+    Layout = null;
+    var questions = ViewBag.Questions as List<InterviewQuestion> ?? new();
+    var practices = ViewBag.Practices as List<UserInterviewPractice> ?? new();
+    var practiceMap = practices.ToDictionary(p => p.QuestionId);
+    var categories  = questions.Select(q => q.Category).Distinct().OrderBy(c => c).ToList();
+    int totalPracticed = practices.Count;
+    int totalQ = questions.Count;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script>
+        (function(){
+            try{var t=localStorage.getItem('theme')||'dark';if(t==='dark')document.documentElement.classList.add('dark');else document.documentElement.classList.remove('dark');}
+            catch(e){document.documentElement.classList.add('dark');}
+        })();
+    </script>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+    <title>Interview Prep — CodeWave</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com"/>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+    <script>
+        tailwind.config={darkMode:"class",theme:{extend:{
+            colors:{primary:"#b887e3","bg-dark":"#0a0a0f","surface-dark":"#111118","panel-dark":"#16161f"},
+            fontFamily:{display:"Space Grotesk"}
+        }}};
+    </script>
+    <style>
+        .material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;}
+        ::-webkit-scrollbar{width:8px;height:8px;}
+        ::-webkit-scrollbar-track{background:rgba(155,89,245,.06);border-radius:999px;}
+        ::-webkit-scrollbar-thumb{background:#9b59f5;border-radius:999px;}
+        *{scrollbar-width:thin;scrollbar-color:#9b59f5 rgba(155,89,245,.06);}
+
+        /* question card */
+        .q-card{transition:all .2s cubic-bezier(.4,0,.2,1);}
+        .q-card:hover{transform:translateY(-2px);}
+        .q-card.active{border-color:rgba(184,135,227,.5)!important;box-shadow:0 0 0 1px rgba(184,135,227,.25);}
+
+        /* answer reveal */
+        .answer-panel{max-height:0;overflow:hidden;transition:max-height .4s ease;}
+        .answer-panel.open{max-height:2000px;}
+
+        /* star rating */
+        .star{font-size:24px;cursor:pointer;color:#374151;transition:color .15s,transform .15s;}
+        .star:hover,.star.lit{color:#f59e0b;transform:scale(1.15);}
+
+        /* practiced badge */
+        @@keyframes checkPop{0%{transform:scale(0)}70%{transform:scale(1.2)}100%{transform:scale(1)}}
+        .check-pop{animation:checkPop .3s ease both;}
+
+        /* filter pill */
+        .diff-pill{transition:all .18s;}
+        .diff-pill.active{background:rgba(184,135,227,.2);color:#b887e3;border-color:rgba(184,135,227,.4);}
+
+        /* cat tab */
+        .cat-tab{transition:all .2s;}
+        .cat-tab.active{color:#fff;border-right:3px solid var(--cat-color, #b887e3);}
+
+        /* progress bar */
+        .prog-bar{height:3px;border-radius:999px;background:rgba(255,255,255,.08);overflow:hidden;}
+        .prog-fill{height:100%;border-radius:999px;transition:width .6s ease;}
+
+        /* answer text formatting */
+        .answer-text{white-space:pre-wrap;font-family:'Fira Code','Cascadia Code','Consolas',monospace;font-size:.82rem;line-height:1.7;}
+
+        /* logo */
+        html:not(.dark) .logo-white{display:none!important;}
+        html:not(.dark) .logo-black{display:block!important;}
+        html.dark .logo-black{display:none!important;}
+        html.dark .logo-white{display:block!important;}
+
+        /* shimmer on practiced cards */
+        @@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+        .practiced-glow{background:linear-gradient(90deg,transparent,rgba(16,185,129,.05),transparent);background-size:200% 100%;animation:shimmer 3s ease infinite;}
+    </style>
+</head>
+<body class="bg-gray-50 dark:bg-bg-dark font-display text-slate-800 dark:text-slate-200 min-h-screen">
+<div class="flex min-h-screen">
+
+    @await Html.PartialAsync("_UserSidebar")
+
+    <div class="flex flex-col flex-1 min-w-0 overflow-hidden h-screen">
+
+        <!-- ── Top bar ──────────────────────────────────────────── -->
+        <header class="shrink-0 border-b border-gray-200 dark:border-white/[.07] bg-white dark:bg-surface-dark px-6 py-4">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                    <h1 class="text-2xl font-black text-gray-900 dark:text-white flex items-center gap-2">
+                        <span class="material-symbols-outlined text-primary text-2xl">record_voice_over</span>
+                        Interview Prep
+                    </h1>
+                    <p class="text-gray-500 dark:text-slate-400 text-sm mt-0.5">Practice common questions · reveal model answers · track your readiness</p>
+                </div>
+                <!-- Global stats -->
+                <div class="flex items-center gap-4 shrink-0">
+                    <div class="text-right">
+                        <p class="text-xs text-gray-400 dark:text-slate-500">Practiced</p>
+                        <p class="font-black text-gray-900 dark:text-white text-lg leading-tight">
+                            <span id="g-practiced">@totalPracticed</span>
+                            <span class="text-gray-400 dark:text-slate-500 font-normal text-sm">/ @totalQ</span>
+                        </p>
+                    </div>
+                    <div class="w-20">
+                        <div class="prog-bar">
+                            <div id="g-bar" class="prog-fill bg-gradient-to-r from-primary to-purple-500"
+                                 style="width:@(totalQ>0?(int)Math.Round((double)totalPracticed/totalQ*100):0)%"></div>
+                        </div>
+                    </div>
+                    <!-- Difficulty filter -->
+                    <div class="flex gap-1.5">
+                        @foreach (var diff in new[]{"All","Beginner","Intermediate","Advanced"})
+                        {
+                            <button onclick="filterDiff('@diff')" id="diff-@diff.ToLower()"
+                                    class="diff-pill @(diff=="All"?"active":"") px-2.5 py-1 rounded-full border border-gray-200 dark:border-white/10 text-xs font-semibold text-gray-600 dark:text-slate-400 hover:border-primary/40 hover:text-primary">
+                                @diff
+                            </button>
+                        }
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- ── Main split ─────────────────────────────────────────── -->
+        <div class="flex flex-1 min-h-0 overflow-hidden">
+
+            <!-- LEFT: category sidebar -->
+            <aside class="w-52 shrink-0 border-r border-gray-200 dark:border-white/[.07] bg-white dark:bg-surface-dark overflow-y-auto hidden md:flex flex-col py-4 gap-1">
+                <button onclick="filterCat('All')" id="cat-All"
+                        class="cat-tab active flex items-center justify-between px-4 py-2.5 text-sm font-semibold text-gray-700 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-white/5 text-left transition-all"
+                        style="--cat-color:#b887e3">
+                    <span class="flex items-center gap-2">
+                        <span class="w-2.5 h-2.5 rounded-full bg-primary/60 shrink-0"></span>
+                        All questions
+                    </span>
+                    <span class="text-xs text-gray-400 dark:text-slate-500">@totalQ</span>
+                </button>
+                @{
+                    var catColors = new Dictionary<string,string>{
+                        {"Python","#3b82f6"},{"Java","#f59e0b"},{"Web Development","#10b981"},
+                        {"General CS","#8b5cf6"},{"Algorithms","#ef4444"},{"Behavioral","#ec4899"}
+                    };
+                }
+                @foreach (var cat in categories)
+                {
+                    var catCount = questions.Count(q => q.Category == cat);
+                    var catPracticed = practices.Count(p => questions.Any(q => q.Id == p.QuestionId && q.Category == cat));
+                    var color = catColors.GetValueOrDefault(cat, "#b887e3");
+                    var pct   = catCount > 0 ? (int)Math.Round((double)catPracticed/catCount*100) : 0;
+                    <button onclick="filterCat('@cat')" id="cat-@cat.Replace(" ","_")"
+                            class="cat-tab flex flex-col px-4 py-2.5 text-sm font-semibold text-gray-600 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-white/5 text-left transition-all"
+                            style="--cat-color:@color">
+                        <div class="flex items-center justify-between w-full">
+                            <span class="flex items-center gap-2">
+                                <span class="w-2.5 h-2.5 rounded-full shrink-0" style="background:@color"></span>
+                                @cat
+                            </span>
+                            <span class="text-xs text-gray-400 dark:text-slate-500">@catPracticed/@catCount</span>
+                        </div>
+                        <div class="prog-bar mt-1.5 ml-4">
+                            <div class="prog-fill" style="width:@pct%;background:@color"></div>
+                        </div>
+                    </button>
+                }
+            </aside>
+
+            <!-- RIGHT: questions + detail panel -->
+            <div class="flex flex-1 min-w-0 overflow-hidden">
+
+                <!-- Question list -->
+                <div id="q-list" class="w-full lg:w-80 xl:w-96 shrink-0 overflow-y-auto border-r border-gray-200 dark:border-white/[.07] bg-gray-50 dark:bg-[#0e0e18] p-3 flex flex-col gap-2">
+                    <p class="text-[10px] uppercase tracking-widest text-gray-400 dark:text-slate-500 font-bold px-1 py-1" id="q-count-label">@totalQ questions</p>
+                    @foreach (var q in questions)
+                    {
+                        var isPracticed = practiceMap.ContainsKey(q.Id);
+                        var pr = isPracticed ? practiceMap[q.Id] : null;
+                        var diffColor = q.Difficulty switch {
+                            "Beginner"     => "text-green-500 bg-green-500/10",
+                            "Intermediate" => "text-amber-500 bg-amber-500/10",
+                            "Advanced"     => "text-red-500 bg-red-500/10",
+                            _ => "text-gray-400 bg-gray-400/10"
+                        };
+                        var catColor = catColors.GetValueOrDefault(q.Category, "#b887e3");
+                        <button type="button"
+                                onclick="selectQuestion('@q.Id')"
+                                id="qcard-@q.Id"
+                                data-cat="@q.Category"
+                                data-diff="@q.Difficulty"
+                                data-practiced="@isPracticed.ToString().ToLower()"
+                                class="q-card @(isPracticed?"practiced-glow":"") w-full text-left rounded-xl border border-gray-200 dark:border-white/[.07]
+                                       bg-white dark:bg-[#13131e] p-3.5 flex flex-col gap-2 hover:border-primary/40">
+                            <div class="flex items-start justify-between gap-2">
+                                <p class="text-sm font-semibold text-gray-900 dark:text-white leading-snug line-clamp-2 flex-1">@q.Question</p>
+                                @if (isPracticed)
+                                {
+                                    <span class="material-symbols-outlined text-green-400 text-lg shrink-0 check-pop" style="font-variation-settings:'FILL' 1">check_circle</span>
+                                }
+                            </div>
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <span class="text-[10px] font-bold px-2 py-0.5 rounded-full @diffColor">@q.Difficulty</span>
+                                <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full" style="color:@catColor;background-color:@(catColor)22;">@q.Category</span>
+                                @if (isPracticed && pr?.SelfRating > 0)
+                                {
+                                    <span class="text-[10px] text-amber-400">@(new string('★', pr.SelfRating))@(new string('☆', 5 - pr.SelfRating))</span>
+                                }
+                            </div>
+                        </button>
+                    }
+                </div>
+
+                <!-- Detail panel -->
+                <div id="detail-panel" class="hidden lg:flex flex-1 flex-col overflow-hidden bg-white dark:bg-[#0e0e18]">
+
+                    <!-- Empty state -->
+                    <div id="empty-state" class="flex-1 flex flex-col items-center justify-center text-center p-12 text-gray-400 dark:text-slate-500">
+                        <span class="material-symbols-outlined text-6xl mb-4 opacity-30">chat_bubble_outline</span>
+                        <p class="text-lg font-semibold">Select a question</p>
+                        <p class="text-sm mt-1">Click any question on the left to begin practising</p>
+                    </div>
+
+                    <!-- Question content (hidden until selected) -->
+                    <div id="detail-content" class="hidden flex-1 flex flex-col overflow-hidden">
+
+                        <!-- Question header -->
+                        <div class="shrink-0 border-b border-gray-200 dark:border-white/[.07] p-6">
+                            <div class="flex items-start justify-between gap-4">
+                                <div class="flex-1">
+                                    <div class="flex items-center gap-2 mb-3 flex-wrap">
+                                        <span id="d-diff" class="text-xs font-bold px-2.5 py-1 rounded-full"></span>
+                                        <span id="d-cat"  class="text-xs font-semibold px-2.5 py-1 rounded-full"></span>
+                                    </div>
+                                    <h2 id="d-question" class="text-lg font-bold text-gray-900 dark:text-white leading-snug"></h2>
+                                </div>
+                                <button id="d-practiced-btn" onclick="togglePracticed()"
+                                        class="shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-xl border text-xs font-bold transition-all">
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Scrollable body -->
+                        <div class="flex-1 overflow-y-auto p-6 space-y-6">
+
+                            <!-- Your attempt box -->
+                            <div>
+                                <label class="block text-xs font-bold uppercase tracking-widest text-gray-400 dark:text-slate-500 mb-2">
+                                    Your Answer (optional — for self-practice)
+                                </label>
+                                <textarea id="d-attempt"
+                                          placeholder="Type your answer here before revealing the model answer..."
+                                          rows="5"
+                                          class="w-full px-4 py-3 bg-gray-50 dark:bg-white/[.04] border border-gray-200 dark:border-white/10 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-slate-500 focus:outline-none focus:border-primary text-sm resize-none transition-colors"></textarea>
+                            </div>
+
+                            <!-- Reveal answer -->
+                            <div>
+                                <button onclick="toggleAnswer()"
+                                        id="reveal-btn"
+                                        class="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-primary/10 border border-primary/30 text-primary font-semibold text-sm hover:bg-primary/20 transition-all">
+                                    <span class="material-symbols-outlined text-lg">visibility</span>
+                                    Reveal Model Answer
+                                </button>
+
+                                <div id="answer-panel" class="answer-panel">
+                                    <div class="mt-4 rounded-xl border border-gray-200 dark:border-white/10 overflow-hidden">
+                                        <div class="flex items-center gap-2 px-4 py-2.5 bg-gray-50 dark:bg-white/[.04] border-b border-gray-200 dark:border-white/10">
+                                            <span class="material-symbols-outlined text-primary text-base">lightbulb</span>
+                                            <span class="text-xs font-bold uppercase tracking-widest text-gray-500 dark:text-slate-400">Model Answer</span>
+                                        </div>
+                                        <div class="p-5">
+                                            <pre id="d-answer" class="answer-text text-gray-700 dark:text-slate-200"></pre>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Rate yourself -->
+                            <div id="rate-section" class="hidden">
+                                <label class="block text-xs font-bold uppercase tracking-widest text-gray-400 dark:text-slate-500 mb-3">
+                                    Rate Your Answer
+                                </label>
+                                <div class="flex items-center gap-1" id="stars-row">
+                                    @for (int s = 1; s <= 5; s++)
+                                    {
+                                        <span class="star" data-val="@s" onclick="setRating(@s)">★</span>
+                                    }
+                                    <span class="ml-3 text-sm text-gray-400 dark:text-slate-500" id="rating-label"></span>
+                                </div>
+                            </div>
+
+                            <!-- Personal notes -->
+                            <div id="notes-section" class="hidden">
+                                <label class="block text-xs font-bold uppercase tracking-widest text-gray-400 dark:text-slate-500 mb-2">
+                                    Personal Notes (saved)
+                                </label>
+                                <textarea id="d-notes"
+                                          placeholder="Add notes to help you remember key points..."
+                                          rows="3"
+                                          class="w-full px-4 py-3 bg-gray-50 dark:bg-white/[.04] border border-gray-200 dark:border-white/10 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-slate-500 focus:outline-none focus:border-primary text-sm resize-none transition-colors"></textarea>
+                            </div>
+                        </div>
+
+                        <!-- Action bar -->
+                        <div class="shrink-0 border-t border-gray-200 dark:border-white/[.07] px-6 py-4 flex items-center justify-between gap-4 bg-gray-50 dark:bg-white/[.02]">
+                            <p id="save-status" class="text-xs text-gray-400 dark:text-slate-500"></p>
+                            <div class="flex items-center gap-3">
+                                <button onclick="savePractice()"
+                                        id="save-btn"
+                                        class="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-primary to-purple-600 text-white font-bold text-sm hover:shadow-lg hover:shadow-primary/30 transition-all">
+                                    <span class="material-symbols-outlined text-base">save</span>
+                                    Save Practice
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ══════════ DATA + LOGIC ══════════ -->
+<script>
+// ── Embed server data ────────────────────────────────────
+const QUESTIONS = @Html.Raw(JsonSerializer.Serialize(
+    questions.Select(q => new {
+        id       = q.Id,
+        question = q.Question,
+        answer   = q.ModelAnswer,
+        category = q.Category,
+        diff     = q.Difficulty,
+        tags     = q.Tags
+    })
+));
+
+const PRACTICES = @Html.Raw(JsonSerializer.Serialize(
+    practiceMap.ToDictionary(
+        kv => kv.Key.ToString(),
+        kv => new { rating = kv.Value.SelfRating, notes = kv.Value.Notes ?? "" }
+    )
+));
+
+const CAT_COLORS = {
+    "Python": "#3b82f6", "Java": "#f59e0b", "Web Development": "#10b981",
+    "General CS": "#8b5cf6", "Algorithms": "#ef4444", "Behavioral": "#ec4899"
+};
+const DIFF_CLASSES = {
+    "Beginner":     "text-green-500 bg-green-500/10",
+    "Intermediate": "text-amber-500 bg-amber-500/10",
+    "Advanced":     "text-red-500 bg-red-500/10"
+};
+const RATING_LABELS = ["","Needs work","Getting there","Good","Very good","Excellent!"];
+
+// ── State ────────────────────────────────────────────────
+let activeId    = null;
+let currentRating = 0;
+let answerOpen  = false;
+let activeCat   = 'All';
+let activeDiff  = 'All';
+
+// ── Category filter ──────────────────────────────────────
+function filterCat(cat) {
+    activeCat = cat;
+    document.querySelectorAll('.cat-tab').forEach(b => b.classList.remove('active'));
+    const btn = document.getElementById('cat-' + cat.replace(/ /g,'_'));
+    if (btn) btn.classList.add('active');
+    applyFilters();
+}
+
+function filterDiff(diff) {
+    activeDiff = diff;
+    document.querySelectorAll('.diff-pill').forEach(b => b.classList.remove('active'));
+    document.getElementById('diff-' + diff.toLowerCase())?.classList.add('active');
+    applyFilters();
+}
+
+function applyFilters() {
+    let visible = 0;
+    document.querySelectorAll('#q-list [data-cat]').forEach(card => {
+        const matchCat  = activeCat  === 'All' || card.dataset.cat  === activeCat;
+        const matchDiff = activeDiff === 'All' || card.dataset.diff === activeDiff;
+        card.style.display = (matchCat && matchDiff) ? '' : 'none';
+        if (matchCat && matchDiff) visible++;
+    });
+    document.getElementById('q-count-label').textContent =
+        visible + (visible===1?' question':' questions');
+}
+
+// ── Select a question ────────────────────────────────────
+function selectQuestion(id) {
+    activeId = id;
+    const q  = QUESTIONS.find(q => q.id === id);
+    if (!q) return;
+
+    // Highlight card
+    document.querySelectorAll('.q-card').forEach(c => c.classList.remove('active'));
+    document.getElementById('qcard-' + id)?.classList.add('active');
+
+    // Show panel
+    document.getElementById('empty-state').classList.add('hidden');
+    document.getElementById('detail-content').classList.remove('hidden');
+
+    // Populate question
+    document.getElementById('d-question').textContent = q.question;
+    document.getElementById('d-answer').textContent   = q.answer;
+
+    // Difficulty & category badges
+    const diffEl = document.getElementById('d-diff');
+    diffEl.className = 'text-xs font-bold px-2.5 py-1 rounded-full ' + (DIFF_CLASSES[q.diff] || '');
+    diffEl.textContent = q.diff;
+
+    const catEl = document.getElementById('d-cat');
+    const cc = CAT_COLORS[q.category] || '#b887e3';
+    catEl.style.cssText = `color:${cc};background-color:${cc}22;`;
+    catEl.textContent = q.category;
+
+    // Restore practice state
+    const pr = PRACTICES[id];
+    currentRating = pr?.rating ?? 0;
+    document.getElementById('d-notes').value = pr?.notes ?? '';
+    document.getElementById('d-attempt').value = '';
+    renderStars(currentRating);
+    updatePracticedBtn(!!pr);
+
+    // Reset answer reveal
+    answerOpen = false;
+    document.getElementById('answer-panel').classList.remove('open');
+    document.getElementById('reveal-btn').innerHTML =
+        '<span class="material-symbols-outlined text-lg">visibility</span> Reveal Model Answer';
+
+    // Show/hide rate + notes sections based on whether already practiced
+    const showExtra = !!pr;
+    document.getElementById('rate-section').classList.toggle('hidden', !showExtra);
+    document.getElementById('notes-section').classList.toggle('hidden', !showExtra);
+
+    // Status
+    document.getElementById('save-status').textContent =
+        pr ? 'Last practiced: ' + new Date(pr.practicedAt || Date.now()).toLocaleDateString() : '';
+}
+
+// ── Toggle answer reveal ─────────────────────────────────
+function toggleAnswer() {
+    answerOpen = !answerOpen;
+    document.getElementById('answer-panel').classList.toggle('open', answerOpen);
+    document.getElementById('reveal-btn').innerHTML = answerOpen
+        ? '<span class="material-symbols-outlined text-lg">visibility_off</span> Hide Answer'
+        : '<span class="material-symbols-outlined text-lg">visibility</span> Reveal Model Answer';
+
+    if (answerOpen) {
+        // Show rating and notes sections when answer is revealed
+        document.getElementById('rate-section').classList.remove('hidden');
+        document.getElementById('notes-section').classList.remove('hidden');
+    }
+}
+
+// ── Star rating ──────────────────────────────────────────
+function setRating(val) {
+    currentRating = val;
+    renderStars(val);
+}
+
+function renderStars(val) {
+    document.querySelectorAll('.star').forEach(s => {
+        const sv = parseInt(s.dataset.val);
+        s.classList.toggle('lit', sv <= val);
+    });
+    const lbl = document.getElementById('rating-label');
+    lbl.textContent = val > 0 ? RATING_LABELS[val] : '';
+}
+
+// ── Practiced button ─────────────────────────────────────
+function updatePracticedBtn(isPracticed) {
+    const btn = document.getElementById('d-practiced-btn');
+    if (isPracticed) {
+        btn.className = 'shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-xl border text-xs font-bold transition-all bg-green-500/10 border-green-500/40 text-green-400 hover:bg-red-500/10 hover:border-red-500/40 hover:text-red-400';
+        btn.innerHTML = '<span class="material-symbols-outlined text-base" style="font-variation-settings:\'FILL\' 1">check_circle</span> Practiced';
+    } else {
+        btn.className = 'shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-xl border text-xs font-bold transition-all border-gray-200 dark:border-white/10 text-gray-600 dark:text-slate-400 hover:border-primary/40 hover:text-primary';
+        btn.innerHTML = '<span class="material-symbols-outlined text-base">radio_button_unchecked</span> Mark practiced';
+    }
+}
+
+async function togglePracticed() {
+    if (!activeId) return;
+    if (PRACTICES[activeId]) {
+        await removePractice();
+    } else {
+        await savePractice();
+    }
+}
+
+// ── Save practice (AJAX) ─────────────────────────────────
+async function savePractice() {
+    if (!activeId) return;
+    const notes = document.getElementById('d-notes').value;
+    const status = document.getElementById('save-status');
+    status.textContent = 'Saving…';
+
+    try {
+        const res = await fetch('/Interview/SavePractice', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ questionId: activeId, selfRating: currentRating, notes })
+        });
+        if (!res.ok) throw new Error();
+
+        PRACTICES[activeId] = { rating: currentRating, notes, practicedAt: new Date().toISOString() };
+        updatePracticedBtn(true);
+        updateCardUI(activeId, true);
+        updateGlobalProgress();
+        status.textContent = '✓ Saved ' + new Date().toLocaleTimeString();
+    } catch {
+        status.textContent = '✗ Save failed. Try again.';
+    }
+}
+
+async function removePractice() {
+    if (!activeId) return;
+    const status = document.getElementById('save-status');
+    status.textContent = 'Removing…';
+
+    try {
+        const res = await fetch('/Interview/RemovePractice', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ questionId: activeId })
+        });
+        if (!res.ok) throw new Error();
+
+        delete PRACTICES[activeId];
+        currentRating = 0;
+        renderStars(0);
+        document.getElementById('d-notes').value = '';
+        updatePracticedBtn(false);
+        updateCardUI(activeId, false);
+        updateGlobalProgress();
+        status.textContent = 'Removed from practiced.';
+        document.getElementById('rate-section').classList.add('hidden');
+        document.getElementById('notes-section').classList.add('hidden');
+    } catch {
+        status.textContent = '✗ Remove failed.';
+    }
+}
+
+// ── Update card visual after save/remove ─────────────────
+function updateCardUI(id, isPracticed) {
+    const card = document.getElementById('qcard-' + id);
+    if (!card) return;
+
+    card.dataset.practiced = isPracticed.toString();
+
+    // Green check icon
+    const existingCheck = card.querySelector('.material-symbols-outlined');
+    if (isPracticed && !existingCheck) {
+        const icon = document.createElement('span');
+        icon.className = 'material-symbols-outlined text-green-400 text-lg shrink-0 check-pop';
+        icon.style.fontVariationSettings = "'FILL' 1";
+        icon.textContent = 'check_circle';
+        card.querySelector('.flex').appendChild(icon);
+    } else if (!isPracticed && existingCheck) {
+        existingCheck.remove();
+    }
+
+    // Shimmer class
+    card.classList.toggle('practiced-glow', isPracticed);
+
+    // Update star display in card
+    const starsEl = card.querySelector('.text-amber-400');
+    const pr = PRACTICES[id];
+    if (starsEl) starsEl.remove();
+    if (isPracticed && pr?.rating > 0) {
+        const div = card.querySelector('.flex.items-center.gap-2');
+        if (div) {
+            const s = document.createElement('span');
+            s.className = 'text-[10px] text-amber-400';
+            s.textContent = '★'.repeat(pr.rating) + '☆'.repeat(5 - pr.rating);
+            div.appendChild(s);
+        }
+    }
+}
+
+// ── Global progress bar ───────────────────────────────────
+function updateGlobalProgress() {
+    const total    = QUESTIONS.length;
+    const practiced = Object.keys(PRACTICES).length;
+    const pct = total > 0 ? Math.round(practiced / total * 100) : 0;
+    document.getElementById('g-practiced').textContent = practiced;
+    document.getElementById('g-bar').style.width = pct + '%';
+}
+
+// ── Hover stars ───────────────────────────────────────────
+document.querySelectorAll('.star').forEach(s => {
+    s.addEventListener('mouseenter', () => {
+        const v = parseInt(s.dataset.val);
+        document.querySelectorAll('.star').forEach(st =>
+            st.classList.toggle('lit', parseInt(st.dataset.val) <= v));
+    });
+    s.addEventListener('mouseleave', () => renderStars(currentRating));
+});
+</script>
+</body>
+</html>

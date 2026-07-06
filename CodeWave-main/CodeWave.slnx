@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="CodeWave.Application/CodeWave.Application.csproj" />
+  <Project Path="CodeWave.Domain/CodeWave.Domain.csproj" />
+  <Project Path="CodeWave.Infrastructure/CodeWave.Infrastructure.csproj" />
+  <Project Path="CodeWave.Web/CodeWave.Web.csproj" />
+</Solution>
+
