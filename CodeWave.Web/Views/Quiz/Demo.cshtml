@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+
+<html class="light dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>CodeWave - Coding Quizzes</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">tailwind.config = {darkMode: "class", theme: {extend: {colors: {primary: "#9d64cf", "background-light": "#f7f6f8", "background-dark": "#19141e"}, fontFamily: {display: "Inter"}, borderRadius: {DEFAULT: "0.25rem", lg: "0.5rem", xl: "0.75rem", full: "9999px"}}}};</script>
+<style>.code-syntax-keyword {
+    color: #d73a49
+    }
+.code-syntax-string {
+    color: #032f62
+    }
+.code-syntax-function {
+    color: #6f42c1
+    }
+.code-syntax-number {
+    color: #005cc5
+    }
+.form-radio:checked {
+    background-image: url(https://lh3.googleusercontent.com/aida-public/AB6AXuBMVHLjrGP_M9labWnHKDHNq26LtiCaIWfGw__WSTWgMadnrbWi1LUJxzMJjLc5KU7sQLjqyn8tO007xGhe-QhdBuoX4lgqrKvzbS0LmH-PS9wZeWRzBonEFU_SH6f_7tZ5IRBM0_TZcKzK7H6Ey2it-31QzImnBW-Y0FeSaEkmrrPyfUIKowkD8PZzFliGHz7OKsAi_4JAyMyE7AAT09jMpmES7WgsdDsRI2kaOnMk5ULnB06xHWUKRxTybRgCOP4_cMaZ_iepUjY);
+    border-color: transparent;
+    background-color: currentColor;
+    background-size: 100% 100%;
+    background-position: center;
+    background-repeat: no-repeat
+    }</style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-[#151118] dark:text-white transition-colors duration-200">
+
+<!-- Main Content Layout -->
+<main class="flex min-h-[calc(100vh-73px)] flex-col items-center py-8 px-4 sm:px-6 lg:px-8">
+<div class="w-full max-w-5xl space-y-8">
+<!-- Breadcrumbs -->
+<nav class="flex flex-wrap items-center text-sm text-[#776189] dark:text-gray-400">
+<a class="hover:text-primary transition-colors" href="/Home">Courses</a>
+<span class="mx-2 text-gray-400">/</span>
+<a class="hover:text-primary transition-colors" href="/LearningPath/Course?courseId=22222222-2222-2222-2222-222222222222">Python Basics</a>
+<span class="mx-2 text-gray-400">/</span>
+<span class="font-medium text-[#151118] dark:text-white">List Comprehensions</span>
+</nav>
+<!-- Quiz Header & Progress -->
+<div class="bg-white dark:bg-[#1e1427] rounded-xl p-6 shadow-sm border border-[#e5e7eb] dark:border-gray-800">
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+<div>
+<h1 class="text-2xl font-bold text-[#151118] dark:text-white">Python Logic Challenge</h1>
+<p class="text-[#776189] dark:text-gray-400 text-sm mt-1">Master list comprehensions and loops.</p>
+</div>
+<div class="flex items-center gap-3">
+<div class="flex items-center gap-1 text-[#776189] dark:text-gray-400 bg-background-light dark:bg-[#2a2035] px-3 py-1.5 rounded-lg">
+<span class="material-symbols-outlined text-[20px]">timer</span>
+<span class="text-sm font-medium">14:20</span>
+</div>
+<button class="text-sm font-medium text-[#776189] dark:text-gray-400 hover:text-red-500 transition-colors px-3 py-1.5">
+                            Quit Quiz
+                        </button>
+</div>
+</div>
+<!-- Progress Bar Component -->
+<div class="flex flex-col gap-2">
+<div class="flex justify-between items-end">
+<span class="text-primary font-bold text-sm">Question 3 of 10</span>
+<span class="text-[#776189] dark:text-gray-400 text-xs font-medium">30% Completed</span>
+</div>
+<div class="h-2.5 w-full bg-[#f2f0f4] dark:bg-[#2a2035] rounded-full overflow-hidden">
+<div class="h-full bg-primary rounded-full transition-all duration-500 ease-out" style="width: 30%"></div>
+</div>
+</div>
+</div>
+<!-- Two Column Layout for Question -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+<!-- Left Column: Problem Statement & Code -->
+<div class="flex flex-col gap-6">
+<!-- Question Card -->
+<div class="bg-white dark:bg-[#1e1427] rounded-xl shadow-sm border border-[#e5e7eb] dark:border-gray-800 overflow-hidden h-full flex flex-col">
+<div class="p-6 border-b border-[#f2f0f4] dark:border-gray-800 bg-background-light/50 dark:bg-[#251b2e]">
+<h3 class="text-lg font-bold text-[#151118] dark:text-white leading-tight">
+                                What is the output of the following code snippet?
+                            </h3>
+<p class="mt-2 text-[#776189] dark:text-gray-400 text-sm">
+                                Analyze the list comprehension logic carefully.
+                            </p>
+</div>
+<!-- Code Snippet Display -->
+<div class="p-6 bg-[#282c34] dark:bg-[#0d0912] flex-grow font-mono text-sm leading-relaxed overflow-x-auto">
+<pre><code class="language-python block text-[#abb2bf]"><span class="text-[#c678dd]">numbers</span> = [<span class="text-[#d19a66]">1</span>, <span class="text-[#d19a66]">2</span>, <span class="text-[#d19a66]">3</span>]
+<span class="text-[#776189] italic"># Create a new list with squares</span>
+<span class="text-[#e06c75]">squares</span> = [n**<span class="text-[#d19a66]">2</span> <span class="text-[#c678dd]">for</span> n <span class="text-[#c678dd]">in</span> numbers]
+
+<span class="text-[#e5c07b]">print</span>(squares)</code></pre>
+</div>
+<!-- Hint Section -->
+<div class="p-4 bg-primary/5 dark:bg-primary/10 border-t border-primary/10 flex items-start gap-3">
+<span class="material-symbols-outlined text-primary mt-0.5">lightbulb</span>
+<div>
+<p class="text-sm font-medium text-primary">Need a hint?</p>
+<p class="text-xs text-[#776189] dark:text-gray-400 mt-1">Remember that <code class="bg-white dark:bg-[#2a2035] px-1 py-0.5 rounded text-primary">**</code> is the exponentiation operator in Python.</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Right Column: Interactive Answers -->
+<div class="flex flex-col gap-6">
+<div class="bg-white dark:bg-[#1e1427] rounded-xl shadow-sm border border-[#e5e7eb] dark:border-gray-800 p-6 h-full flex flex-col justify-between">
+<div>
+<div class="flex justify-between items-center mb-6">
+<h4 class="text-base font-semibold text-[#151118] dark:text-white">Select your answer</h4>
+<span class="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-xs font-bold px-2 py-1 rounded uppercase tracking-wide">Single Choice</span>
+</div>
+<!-- Options List -->
+<div class="space-y-3">
+<!-- Option 1 -->
+<label class="group relative flex items-center p-4 rounded-lg border-2 border-[#e5e7eb] dark:border-[#2a2035] cursor-pointer hover:border-primary/50 dark:hover:border-primary/50 hover:bg-primary/5 dark:hover:bg-primary/10 transition-all duration-200">
+<input class="size-5 text-primary border-gray-300 dark:border-gray-600 focus:ring-primary dark:focus:ring-offset-[#1e1427]" name="quiz-answer" type="radio" value="A"/>
+<span class="ml-3 flex-1 font-mono text-sm text-[#151118] dark:text-gray-200">[1, 4, 9]</span>
+<span class="absolute right-4 hidden group-hover:block text-primary text-xs font-medium">Select</span>
+</label>
+<!-- Option 2 -->
+<label class="group relative flex items-center p-4 rounded-lg border-2 border-[#e5e7eb] dark:border-[#2a2035] cursor-pointer hover:border-primary/50 dark:hover:border-primary/50 hover:bg-primary/5 dark:hover:bg-primary/10 transition-all duration-200">
+<input class="size-5 text-primary border-gray-300 dark:border-gray-600 focus:ring-primary dark:focus:ring-offset-[#1e1427]" name="quiz-answer" type="radio" value="B"/>
+<span class="ml-3 flex-1 font-mono text-sm text-[#151118] dark:text-gray-200">[1, 2, 3]</span>
+</label>
+<!-- Option 3 -->
+<label class="group relative flex items-center p-4 rounded-lg border-2 border-[#e5e7eb] dark:border-[#2a2035] cursor-pointer hover:border-primary/50 dark:hover:border-primary/50 hover:bg-primary/5 dark:hover:bg-primary/10 transition-all duration-200">
+<input class="size-5 text-primary border-gray-300 dark:border-gray-600 focus:ring-primary dark:focus:ring-offset-[#1e1427]" name="quiz-answer" type="radio" value="C"/>
+<span class="ml-3 flex-1 font-mono text-sm text-[#151118] dark:text-gray-200">Syntax Error</span>
+</label>
+<!-- Option 4 -->
+<label class="group relative flex items-center p-4 rounded-lg border-2 border-[#e5e7eb] dark:border-[#2a2035] cursor-pointer hover:border-primary/50 dark:hover:border-primary/50 hover:bg-primary/5 dark:hover:bg-primary/10 transition-all duration-200">
+<input class="size-5 text-primary border-gray-300 dark:border-gray-600 focus:ring-primary dark:focus:ring-offset-[#1e1427]" name="quiz-answer" type="radio" value="D"/>
+<span class="ml-3 flex-1 font-mono text-sm text-[#151118] dark:text-gray-200">[1, 4, 6]</span>
+</label>
+</div>
+</div>
+<!-- Action Buttons -->
+<div class="mt-8 pt-6 border-t border-[#f2f0f4] dark:border-gray-800 flex items-center justify-between">
+<button class="px-6 py-2.5 rounded-lg text-sm font-medium text-[#776189] dark:text-gray-400 hover:bg-[#f2f0f4] dark:hover:bg-[#2a2035] transition-colors flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">arrow_back</span>
+                                Previous
+                            </button>
+<div class="flex gap-3">
+<button class="px-6 py-2.5 rounded-lg text-sm font-medium text-[#776189] dark:text-gray-400 hover:text-[#151118] dark:hover:text-white transition-colors">
+                                    Skip
+                                </button>
+<button class="bg-primary hover:bg-primary/90 text-white px-8 py-2.5 rounded-lg text-sm font-semibold shadow-lg shadow-primary/30 transition-all active:scale-95 flex items-center gap-2">
+                                    Submit
+                                    <span class="material-symbols-outlined text-[18px]">check</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Additional Learning Resource / Footer Context -->
+<div class="mt-8 flex justify-center">
+<div class="inline-flex items-center gap-2 text-sm text-[#776189] dark:text-gray-500 bg-white dark:bg-[#1e1427] px-4 py-2 rounded-full shadow-sm border border-[#e5e7eb] dark:border-gray-800">
+<span class="material-symbols-outlined text-[18px]">school</span>
+<span>This question is from the <a class="text-primary hover:underline" href="/LearningPath/Course?courseId=22222222-2222-2222-2222-222222222222">Python Intermediate Course</a></span>
+</div>
+</div>
+</div>
+</main>
+</body>
+</html>

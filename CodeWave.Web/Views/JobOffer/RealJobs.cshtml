@@ -1,0 +1,685 @@
+@using CodeWave.Application.DTOs
+@using CodeWave.Domain.Entities
+@{
+    Layout = null;
+    var jobs = ViewBag.RealJobs as List<ExternalJobDto> ?? new List<ExternalJobDto>();
+    var selectedJob = ViewBag.SelectedRealJob as ExternalJobDto;
+    var selectedJobId = ViewBag.SelectedJobId as string ?? "";
+    var userSkills = ViewBag.UserSkills as List<string> ?? new List<string>();
+    var searchTerm = ViewBag.SearchTerm as string ?? "";
+    var user = ViewBag.User as ApplicationUser;
+    var learningPath = ViewBag.LearningPath as string ?? "";
+    var appliedExternalJobIds = ViewBag.AppliedExternalJobIds as HashSet<string> ?? new HashSet<string>();
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script>
+        (function() {
+            try {
+                const theme = localStorage.getItem('theme') || 'dark';
+                document.documentElement.classList.toggle('dark', theme === 'dark');
+            } catch(e) { document.documentElement.classList.add('dark'); }
+        })();
+    </script>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Real Jobs - CodeWave</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@300..700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
+    <style>
+        * { scroll-behavior: smooth; }
+        body { font-family: 'Inter', 'Space Grotesk', sans-serif; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .glass-morphism {
+            background: rgba(17, 19, 24, 0.7);
+            backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+        }
+        html:not(.dark) .glass-morphism {
+            background: white !important;
+            backdrop-filter: none !important;
+            border: none !important;
+        }
+        .premium-card {
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .premium-card:hover {
+            background: rgba(255, 255, 255, 0.04);
+            border-color: rgba(184, 135, 227, 0.25);
+            transform: translateY(-1px);
+        }
+        .job-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        .job-card::after {
+            content: '';
+            position: absolute;
+            left: 0; top: 0;
+            height: 100%; width: 0;
+            background: linear-gradient(90deg, rgba(184,135,227,0.12) 0%, transparent 100%);
+            transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .job-card:hover::after { width: 3px; }
+        .job-card:hover { transform: translateX(4px); }
+        .job-card.active {
+            background: linear-gradient(90deg, rgba(184,135,227,0.1) 0%, rgba(184,135,227,0.02) 100%) !important;
+            border-radius: 0.75rem;
+            box-shadow: -4px 0 16px rgba(184,135,227,0.15);
+            border: none !important;
+        }
+        .skill-tag { transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); }
+        .skill-tag:hover { transform: translateY(-2px) scale(1.05); }
+        .cta-button {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative; overflow: hidden;
+        }
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 24px rgba(34,197,94,0.4);
+        }
+        html:not(.dark) .text-gradient {
+            -webkit-text-fill-color: rgb(17,24,39) !important;
+            color: rgb(17,24,39) !important;
+        }
+        .text-gradient {
+            background: linear-gradient(135deg, #ffffff 0%, #e2e8f0 70%, #cbd5e1 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .sidebar {
+            position: fixed; top: 0; left: 0;
+            height: 100vh; width: 16rem; z-index: 40;
+        }
+        @@media (min-width: 1024px) {
+            .sidebar { position: relative; height: 100vh; flex-shrink: 0; }
+        }
+        @@media (max-width: 1023px) {
+            .sidebar { transform: translateX(-100%); transition: transform 0.3s ease; }
+            .sidebar.mobile-open { transform: translateX(0); }
+        }
+        .sidebar > aside {
+            height: 100%;
+            background: white !important;
+            border-right: 0.5px solid rgb(229,231,235) !important;
+        }
+        .dark .sidebar > aside {
+            background: #111318 !important;
+            border-right: 0.5px solid rgb(31,41,55) !important;
+        }
+        html:not(.dark) .sticky { background-color: white !important; }
+        html.dark .sticky.top-0.z-20 { background: #0a0a0f !important; }
+        @@media (max-width: 1024px) {
+            .job-list-panel { width: 100%; max-width: 100%; }
+            .job-details-panel { display: none; }
+            .job-details-panel.mobile-active {
+                display: block; position: fixed;
+                inset: 0; z-index: 50; background: #0a0a0f;
+            }
+        }
+        @@keyframes shimmer {
+            0% { background-position: -500px 0; }
+            100% { background-position: 500px 0; }
+        }
+        .shimmer {
+            background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.1) 50%, transparent 100%);
+            background-size: 500px 100%;
+            animation: shimmer 2s infinite;
+        }
+        .publisher-badge {
+            display: inline-flex; align-items: center; gap: 4px;
+            padding: 2px 8px; border-radius: 9999px;
+            font-size: 11px; font-weight: 600;
+        }
+    </style>
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#b887e3",
+                        "primary-dark": "#9d6fd9",
+                        "background-light": "#f7f6f8",
+                        "background-dark": "#0a0a0f"
+                    },
+                    fontFamily: { display: ["Inter", "Space Grotesk", "sans-serif"] }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="font-display bg-background-light dark:bg-gradient-to-br dark:from-[#0a0a0f] dark:via-[#0f0f1a] dark:to-[#0a0a0f] text-gray-900 dark:text-white h-screen overflow-hidden">
+    <div class="flex h-screen w-full">
+        <!-- Mobile Menu Button -->
+        <button id="mobileMenuBtn" class="fixed top-4 left-4 z-50 lg:hidden p-2 bg-gray-100 dark:bg-white/5 rounded-lg border border-gray-300 dark:border-white/10">
+            <span class="material-symbols-outlined text-gray-900 dark:text-white">menu</span>
+        </button>
+
+        <!-- Sidebar -->
+        <div id="sidebar" class="sidebar">
+            @await Html.PartialAsync("_UserSidebar")
+        </div>
+
+        <!-- Main Content -->
+        <main class="flex-1 flex flex-col lg:flex-row overflow-hidden h-full">
+
+            <!-- Job List Panel -->
+            <div class="job-list-panel w-full lg:w-2/5 border-r border-gray-200 dark:border-white/5 bg-white dark:bg-gradient-to-b dark:from-[#0a0a0f] dark:via-[#0f1117] dark:to-[#0a0a0f] h-full flex flex-col overflow-hidden">
+
+                <!-- Header -->
+                <div class="sticky top-0 z-20 bg-white dark:bg-[#0a0a0f] border-b border-gray-200 dark:border-white/5 p-4 lg:p-5 flex-shrink-0">
+                    <div class="mb-4">
+                        <div class="flex items-center gap-3 mb-2">
+                            <div class="p-2 rounded-xl bg-gradient-to-br from-green-500/25 to-emerald-600/15 border border-green-500/40 shadow-lg">
+                                <span class="material-symbols-outlined text-green-500 text-xl">travel_explore</span>
+                            </div>
+                            <div>
+                                <h1 class="text-xl lg:text-2xl font-bold text-gray-900 dark:text-gradient mb-0.5">Real Job Listings</h1>
+                                <p class="text-gray-600 dark:text-slate-400 text-xs lg:text-sm font-medium">Live jobs from LinkedIn, Indeed & Glassdoor</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Messages -->
+                    @if (TempData["Success"] != null)
+                    {
+                        <div class="mb-3 p-3 bg-green-500/20 border border-green-500/40 rounded-lg text-green-200 text-sm">
+                            <div class="flex items-center gap-2">
+                                <span class="material-symbols-outlined text-base">check_circle</span>
+                                <span class="font-medium">@TempData["Success"]</span>
+                            </div>
+                        </div>
+                    }
+                    @if (TempData["Error"] != null)
+                    {
+                        <div class="mb-3 p-3 bg-red-500/20 border border-red-500/40 rounded-lg text-red-200 text-sm">
+                            <div class="flex items-center gap-2">
+                                <span class="material-symbols-outlined text-base">error</span>
+                                <span class="font-medium">@TempData["Error"]</span>
+                            </div>
+                        </div>
+                    }
+
+
+                    <!-- Search -->
+                    <form method="get" action="@Url.Action("RealJobs")" class="mb-2" id="searchForm">
+                        <div class="relative group">
+                            <span class="absolute left-3 top-1/2 transform -translate-y-1/2 material-symbols-outlined text-gray-500 dark:text-slate-400 group-focus-within:text-green-500 transition-all duration-300 z-10 text-base">search</span>
+                            <input type="text" name="searchTerm" id="searchInput" value="@searchTerm"
+                                   placeholder="e.g. Python developer, React, Java..."
+                                   class="w-full pl-10 pr-10 py-2.5 bg-gray-100 dark:bg-white/4 border border-gray-300 dark:border-white/8 rounded-xl text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-slate-500/60 focus:outline-none focus:border-green-500/70 focus:ring-2 focus:ring-green-500/20 transition-all duration-300 text-sm font-medium" />
+                        </div>
+                        <button type="submit" class="mt-2 w-full py-2 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl text-sm font-semibold hover:opacity-90 transition-opacity">
+                            Search Live Jobs
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Job List -->
+                <div class="p-3 lg:p-4 space-y-3 overflow-y-auto flex-1">
+                    @if (jobs.Count > 0)
+                    {
+                        @foreach (var job in jobs)
+                        {
+                            var isSelected = selectedJob?.JobId == job.JobId;
+                            var location = string.Join(", ", new[] { job.JobCity, job.JobCountry }.Where(s => !string.IsNullOrEmpty(s)));
+
+                            <div class="job-card premium-card rounded-xl p-4 cursor-pointer @(isSelected ? "active" : "")"
+                                 data-job-id="@job.JobId"
+                                 onclick="selectRealJob('@job.JobId', this)">
+                                <div class="flex items-start justify-between gap-3 mb-2">
+                                    <div class="flex-1 min-w-0">
+                                        <div class="flex items-center gap-2 mb-1 flex-wrap">
+                                            @if (!string.IsNullOrEmpty(job.EmployerLogo))
+                                            {
+                                                <img src="@job.EmployerLogo" alt="@job.EmployerName" class="w-6 h-6 rounded object-contain bg-white p-0.5" onerror="this.style.display='none'" />
+                                            }
+                                            <h3 class="text-base font-bold text-gray-900 dark:text-white leading-snug">@job.JobTitle</h3>
+                                        </div>
+                                        <p class="text-gray-700 dark:text-slate-200 text-sm font-semibold mb-1">@job.EmployerName</p>
+                                        <div class="flex items-center gap-2 flex-wrap text-xs text-gray-500 dark:text-slate-400">
+                                            @if (!string.IsNullOrEmpty(location))
+                                            {
+                                                <span class="flex items-center gap-1"><span class="material-symbols-outlined text-xs">location_on</span>@location</span>
+                                            }
+                                            @if (job.JobIsRemote)
+                                            {
+                                                <span class="px-2 py-0.5 bg-blue-500/20 text-blue-400 border border-blue-500/30 rounded-full font-semibold">Remote</span>
+                                            }
+                                            @if (!string.IsNullOrEmpty(job.JobEmploymentType))
+                                            {
+                                                <span class="px-2 py-0.5 bg-gray-500/20 text-gray-500 dark:text-slate-400 border border-gray-500/30 rounded-full">@job.JobEmploymentType</span>
+                                            }
+                                        </div>
+                                    </div>
+                                    <div class="shrink-0 flex flex-col items-end gap-1">
+                                        <div class="px-3 py-1.5 rounded-lg text-sm font-bold @GetMatchBadgeClass(job.MatchPercentage) min-w-[50px] text-center border">
+                                            @job.MatchPercentage.ToString("0")%
+                                        </div>
+                                        @if (appliedExternalJobIds.Contains(job.JobId))
+                                        {
+                                            <span class="px-2 py-0.5 text-xs bg-green-500/20 text-green-400 border border-green-500/30 rounded-full font-semibold flex items-center gap-1">
+                                                <span class="material-symbols-outlined text-xs">check_circle</span>Applied
+                                            </span>
+                                        }
+                                        else if (!string.IsNullOrEmpty(job.JobPublisher))
+                                        {
+                                            <span class="publisher-badge @GetPublisherBadgeClass(job.JobPublisher)">
+                                                @job.JobPublisher
+                                            </span>
+                                        }
+                                    </div>
+                                </div>
+                                @if (job.JobPostedAt.HasValue)
+                                {
+                                    <p class="text-xs text-gray-400 dark:text-slate-500">Posted @job.JobPostedAt.Value.ToString("MMM dd, yyyy")</p>
+                                }
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="p-16 text-center">
+                            <div class="premium-card rounded-3xl p-12 max-w-md mx-auto">
+                                <div class="p-6 rounded-full bg-slate-700/40 w-24 h-24 mx-auto mb-6 flex items-center justify-center">
+                                    <span class="material-symbols-outlined text-5xl text-gray-500 dark:text-slate-500">work_off</span>
+                                </div>
+                                <p class="text-gray-900 dark:text-slate-200 text-xl font-bold mb-2">No jobs found</p>
+                                <p class="text-gray-600 dark:text-slate-400 text-sm">Try a different search term above</p>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Job Details Panel -->
+            <div id="jobDetailsPanel" class="job-details-panel flex-1 overflow-y-auto bg-white dark:bg-gradient-to-b dark:from-[#0a0a0f] dark:via-[#0f0f1a] dark:to-[#0a0a0f] h-full">
+                @if (selectedJob != null)
+                {
+                    var location = string.Join(", ", new[] { selectedJob.JobCity, selectedJob.JobState, selectedJob.JobCountry }.Where(s => !string.IsNullOrEmpty(s)));
+                    <div class="p-4 lg:p-6">
+                        <!-- Mobile Back -->
+                        <button id="closeJobDetails" class="lg:hidden mb-4 p-2 bg-white/5 rounded-lg border border-white/10">
+                            <span class="material-symbols-outlined text-gray-900 dark:text-white text-lg">arrow_back</span>
+                        </button>
+
+                        <!-- Header Card -->
+                        <div class="premium-card rounded-xl lg:rounded-2xl p-5 lg:p-6 mb-4 lg:mb-6 bg-gradient-to-br from-green-500/10 via-emerald-600/5 to-green-500/10 border-green-500/20">
+                            <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4 mb-4">
+                                <div class="flex-1">
+                                    <div class="flex items-start gap-3 mb-3">
+                                        @if (!string.IsNullOrEmpty(selectedJob.EmployerLogo))
+                                        {
+                                            <img src="@selectedJob.EmployerLogo" alt="@selectedJob.EmployerName"
+                                                 class="w-12 h-12 rounded-xl object-contain bg-white p-1 shadow-md flex-shrink-0"
+                                                 onerror="this.style.display='none'" />
+                                        }
+                                        <div>
+                                            <h2 class="text-xl lg:text-2xl font-bold text-gray-900 dark:text-gradient mb-1 leading-tight">@selectedJob.JobTitle</h2>
+                                            <p class="text-base lg:text-lg text-gray-800 dark:text-slate-200 font-semibold">@selectedJob.EmployerName</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-3 lg:flex-col lg:items-end shrink-0">
+                                    <div class="px-4 py-2 rounded-xl text-base font-bold @GetMatchBadgeClass(selectedJob.MatchPercentage) border">
+                                        @selectedJob.MatchPercentage.ToString("0")% Match
+                                    </div>
+                                    @if (!string.IsNullOrEmpty(selectedJob.JobPublisher))
+                                    {
+                                        <span class="publisher-badge @GetPublisherBadgeClass(selectedJob.JobPublisher)">
+                                            via @selectedJob.JobPublisher
+                                        </span>
+                                    }
+                                </div>
+                            </div>
+
+                            <!-- Meta badges -->
+                            <div class="flex items-center gap-2 flex-wrap text-xs">
+                                @if (!string.IsNullOrEmpty(location))
+                                {
+                                    <span class="flex items-center gap-1.5 px-3 py-1.5 bg-white/6 rounded-lg border border-white/10">
+                                        <span class="material-symbols-outlined text-sm text-green-500">location_on</span>
+                                        <span class="text-gray-800 dark:text-slate-200 font-medium">@location</span>
+                                    </span>
+                                }
+                                @if (selectedJob.JobIsRemote)
+                                {
+                                    <span class="flex items-center gap-1.5 px-3 py-1.5 bg-blue-500/20 rounded-lg border border-blue-500/30">
+                                        <span class="material-symbols-outlined text-sm text-blue-400">wifi</span>
+                                        <span class="text-blue-700 dark:text-blue-300 font-semibold">Remote</span>
+                                    </span>
+                                }
+                                @if (!string.IsNullOrEmpty(selectedJob.JobEmploymentType))
+                                {
+                                    <span class="flex items-center gap-1.5 px-3 py-1.5 bg-white/6 rounded-lg border border-white/10">
+                                        <span class="material-symbols-outlined text-sm text-green-500">work</span>
+                                        <span class="text-gray-800 dark:text-slate-200 font-medium">@selectedJob.JobEmploymentType</span>
+                                    </span>
+                                }
+                                @if (selectedJob.JobPostedAt.HasValue)
+                                {
+                                    <span class="flex items-center gap-1.5 px-3 py-1.5 bg-white/6 rounded-lg border border-white/10">
+                                        <span class="material-symbols-outlined text-sm text-green-500">schedule</span>
+                                        <span class="text-gray-800 dark:text-slate-200 font-medium">Posted @selectedJob.JobPostedAt.Value.ToString("MMM dd, yyyy")</span>
+                                    </span>
+                                }
+                            </div>
+
+                            <!-- Salary -->
+                            @if (selectedJob.JobMinSalary.HasValue || selectedJob.JobMaxSalary.HasValue)
+                            {
+                                <div class="mt-3 flex items-center gap-2 px-4 py-2.5 bg-green-500/15 rounded-xl border border-green-500/30 w-fit">
+                                    <span class="material-symbols-outlined text-green-500 text-lg">payments</span>
+                                    <span class="text-green-700 dark:text-green-300 font-bold text-sm">
+                                        @{
+                                            var currency = selectedJob.JobSalaryCurrency ?? "USD";
+                                            var period = selectedJob.JobSalaryPeriod?.ToLower() switch
+                                            {
+                                                "year" => "/yr",
+                                                "month" => "/mo",
+                                                "hour" => "/hr",
+                                                _ => ""
+                                            };
+                                            if (selectedJob.JobMinSalary.HasValue && selectedJob.JobMaxSalary.HasValue)
+                                            {
+                                                @($"{currency} {selectedJob.JobMinSalary.Value:N0} – {selectedJob.JobMaxSalary.Value:N0}{period}")
+                                            }
+                                            else if (selectedJob.JobMinSalary.HasValue)
+                                            {
+                                                @($"{currency} {selectedJob.JobMinSalary.Value:N0}+{period}")
+                                            }
+                                            else
+                                            {
+                                                @($"Up to {currency} {selectedJob.JobMaxSalary!.Value:N0}{period}")
+                                            }
+                                        }
+                                    </span>
+                                </div>
+                            }
+                        </div>
+
+                        <!-- Apply Button -->
+                        @{
+                            var alreadyApplied = appliedExternalJobIds.Contains(selectedJob.JobId);
+                        }
+                        @if (alreadyApplied)
+                        {
+                            <div class="flex items-center gap-3 w-full bg-green-500/15 border border-green-500/40 text-green-400 px-6 py-3.5 rounded-xl font-bold text-base mb-4 lg:mb-6">
+                                <span class="material-symbols-outlined text-xl">check_circle</span>
+                                <span>You've Applied to This Job</span>
+                            </div>
+                        }
+                        else if (!string.IsNullOrEmpty(selectedJob.JobApplyLink))
+                        {
+                            <button id="applyRealJobBtn" type="button"
+                                    onclick="openApplyFlow()"
+                                    class="cta-button flex w-full bg-gradient-to-r from-green-500 via-emerald-500 to-green-500 text-white px-6 py-3.5 rounded-xl font-bold text-base lg:text-lg mb-4 lg:mb-6 shadow-xl items-center justify-center gap-2 group relative overflow-hidden">
+                                <span class="material-symbols-outlined text-lg">open_in_new</span>
+                                <span>Apply Now</span>
+                                @if (!string.IsNullOrEmpty(selectedJob.JobPublisher))
+                                {
+                                    <span class="text-green-100 font-normal text-sm">on @selectedJob.JobPublisher</span>
+                                }
+                                <span class="material-symbols-outlined text-lg group-hover:translate-x-1 transition-transform duration-300">arrow_forward</span>
+                                <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity shimmer rounded-xl"></div>
+                            </button>
+                        }
+
+                        <!-- Content -->
+                        <div class="space-y-4 lg:space-y-6">
+                            <!-- Required Skills -->
+                            @if (selectedJob.JobRequiredSkills.Any())
+                            {
+                                <div class="premium-card rounded-xl lg:rounded-2xl p-4 lg:p-6">
+                                    <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                                        <div class="p-2 rounded-lg bg-green-500/20 border border-green-500/30">
+                                            <span class="material-symbols-outlined text-green-500 text-base">code</span>
+                                        </div>
+                                        Required Skills
+                                    </h3>
+                                    <div class="flex flex-wrap gap-2">
+                                        @foreach (var skill in selectedJob.JobRequiredSkills)
+                                        {
+                                            var userHasSkill = userSkills.Any(us =>
+                                                us.Equals(skill, StringComparison.OrdinalIgnoreCase) ||
+                                                us.Contains(skill, StringComparison.OrdinalIgnoreCase) ||
+                                                skill.Contains(us, StringComparison.OrdinalIgnoreCase));
+
+                                            <span class="skill-tag px-3 py-1.5 rounded-lg text-xs font-semibold @(userHasSkill ? "bg-gradient-to-br from-green-500/25 to-emerald-500/15 text-green-700 dark:text-green-100 border border-green-400/50" : "bg-slate-700/50 text-gray-700 dark:text-slate-300 border border-slate-600/50")">
+                                                @if (userHasSkill)
+                                                {
+                                                    <span class="material-symbols-outlined text-sm align-middle mr-1">check_circle</span>
+                                                }
+                                                @skill
+                                            </span>
+                                        }
+                                    </div>
+                                </div>
+                            }
+
+                            <!-- Match Analysis -->
+                            @if (selectedJob.MatchPercentage > 0 && userSkills.Any())
+                            {
+                                <div class="premium-card rounded-xl p-4 lg:p-6 bg-gradient-to-br from-green-500/15 via-emerald-600/10 to-green-500/15 border-green-500/30">
+                                    <h3 class="text-lg font-bold text-green-600 dark:text-green-400 mb-4 flex items-center gap-2">
+                                        <div class="p-2 rounded-lg bg-green-500/25 border border-green-500/40">
+                                            <span class="material-symbols-outlined text-base">auto_awesome</span>
+                                        </div>
+                                        Why You're a @selectedJob.MatchPercentage.ToString("0")% Match
+                                    </h3>
+                                    <ul class="space-y-2">
+                                        @{
+                                            var matchedSkills = userSkills.Where(us =>
+                                                selectedJob.JobRequiredSkills.Any(rs =>
+                                                    us.Equals(rs, StringComparison.OrdinalIgnoreCase) ||
+                                                    us.Contains(rs, StringComparison.OrdinalIgnoreCase) ||
+                                                    rs.Contains(us, StringComparison.OrdinalIgnoreCase)
+                                                )).Take(5);
+                                        }
+                                        @foreach (var skill in matchedSkills)
+                                        {
+                                            <li class="flex items-center gap-3 p-3 bg-white/5 rounded-xl border border-white/10">
+                                                <span class="material-symbols-outlined text-green-400 text-lg">check_circle</span>
+                                                <span class="text-sm text-green-700 dark:text-green-100 font-medium">You have experience with <strong class="text-gray-900 dark:text-white">@skill</strong></span>
+                                            </li>
+                                        }
+                                    </ul>
+                                </div>
+                            }
+
+                            <!-- Description -->
+                            <div class="premium-card rounded-xl lg:rounded-2xl p-4 lg:p-6">
+                                <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                                    <div class="p-2 rounded-lg bg-green-500/20 border border-green-500/30">
+                                        <span class="material-symbols-outlined text-green-500 text-base">description</span>
+                                    </div>
+                                    Job Description
+                                </h3>
+                                <p class="text-gray-800 dark:text-slate-200 leading-relaxed whitespace-pre-line text-sm lg:text-base">@selectedJob.JobDescription</p>
+                            </div>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="p-6 lg:p-12 flex items-center justify-center h-full">
+                        <div class="text-center premium-card rounded-xl p-8 lg:p-12 max-w-md">
+                            <div class="p-6 rounded-full bg-gradient-to-br from-green-500/20 to-emerald-600/10 border border-green-500/30 w-24 h-24 lg:w-28 lg:h-28 mx-auto mb-6 flex items-center justify-center">
+                                <span class="material-symbols-outlined text-4xl lg:text-5xl text-green-500">travel_explore</span>
+                            </div>
+                            <p class="text-gray-900 dark:text-slate-100 text-xl font-bold mb-3">Select a job to view details</p>
+                            <p class="text-gray-600 dark:text-slate-400 text-sm font-medium">Click any job from the list to see full details and apply</p>
+                        </div>
+                    </div>
+                }
+            </div>
+        </main>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div id="applyConfirmModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+        <div class="bg-white dark:bg-[#1a1a2e] border border-gray-200 dark:border-white/10 rounded-2xl p-6 max-w-md w-full mx-4 shadow-2xl">
+            <div class="text-center mb-6">
+                <div class="w-16 h-16 mx-auto mb-4 flex items-center justify-center bg-green-500/20 rounded-full border border-green-500/40">
+                    <span class="material-symbols-outlined text-3xl text-green-500">open_in_new</span>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Application Page Opened</h3>
+                <p class="text-gray-500 dark:text-slate-400 text-sm">We opened the application page in a new tab.<br/>Did you complete your application?</p>
+            </div>
+            <div class="flex gap-3">
+                <button onclick="confirmApplied()" class="flex-1 bg-green-500 hover:bg-green-600 text-white py-3 rounded-xl font-bold text-sm transition-colors flex items-center justify-center gap-2">
+                    <span class="material-symbols-outlined text-base">check_circle</span>
+                    Yes, I Applied!
+                </button>
+                <button onclick="closeApplyModal()" class="flex-1 bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 text-gray-700 dark:text-slate-300 py-3 rounded-xl font-semibold text-sm border border-gray-200 dark:border-white/10 transition-colors">
+                    Not yet
+                </button>
+            </div>
+        </div>
+    </div>
+
+    @Html.AntiForgeryToken()
+
+    <script>
+        document.getElementById('mobileMenuBtn')?.addEventListener('click', function() {
+            document.getElementById('sidebar').classList.toggle('mobile-open');
+        });
+
+        document.getElementById('closeJobDetails')?.addEventListener('click', function() {
+            document.getElementById('jobDetailsPanel').classList.remove('mobile-active');
+        });
+
+        function selectRealJob(jobId, element) {
+            document.querySelectorAll('.job-card').forEach(c => {
+                c.classList.remove('active');
+                c.style.border = '';
+            });
+            if (element) {
+                element.classList.add('active');
+                element.style.border = 'none';
+            }
+            const base = window.location.pathname;
+            const params = new URLSearchParams(window.location.search);
+            params.set('selectedJobId', jobId);
+            const term = params.get('searchTerm');
+            if (term) params.set('searchTerm', term);
+
+            if (window.innerWidth < 1024) {
+                document.getElementById('jobDetailsPanel').classList.add('mobile-active');
+            }
+            window.location.href = base + '?' + params.toString();
+        }
+
+        window.addEventListener('resize', function() {
+            if (window.innerWidth >= 1024)
+                document.getElementById('jobDetailsPanel').classList.remove('mobile-active');
+        });
+
+        @if (selectedJob != null)
+        {
+            @:if (window.innerWidth < 1024) {
+            @:    document.getElementById('jobDetailsPanel').classList.add('mobile-active');
+            @:}
+        }
+        var currentJobData = @Html.Raw(selectedJob != null
+            ? System.Text.Json.JsonSerializer.Serialize(new {
+                externalJobId   = selectedJob.JobId,
+                jobTitle        = selectedJob.JobTitle,
+                employerName    = selectedJob.EmployerName,
+                employerLogo    = selectedJob.EmployerLogo ?? "",
+                jobLocation     = string.Join(", ", new[] { selectedJob.JobCity, selectedJob.JobState, selectedJob.JobCountry }.Where(s => !string.IsNullOrEmpty(s))),
+                applyLink       = selectedJob.JobApplyLink,
+                matchPercentage = selectedJob.MatchPercentage
+              })
+            : "null");
+
+        function openApplyFlow() {
+            if (!currentJobData) return;
+            window.open(currentJobData.applyLink, '_blank', 'noopener,noreferrer');
+            document.getElementById('applyConfirmModal').classList.remove('hidden');
+        }
+
+        function closeApplyModal() {
+            document.getElementById('applyConfirmModal').classList.add('hidden');
+        }
+
+        async function confirmApplied() {
+            if (!currentJobData) return;
+            closeApplyModal();
+
+            const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value ?? '';
+            const body = new URLSearchParams({
+                externalJobId:   currentJobData.externalJobId,
+                jobTitle:        currentJobData.jobTitle,
+                employerName:    currentJobData.employerName,
+                employerLogo:    currentJobData.employerLogo,
+                jobLocation:     currentJobData.jobLocation,
+                applyLink:       currentJobData.applyLink,
+                matchPercentage: currentJobData.matchPercentage,
+                __RequestVerificationToken: token
+            });
+
+            const resp = await fetch('/JobOffer/ApplyRealJob', { method: 'POST', body, headers: { 'Content-Type': 'application/x-www-form-urlencoded' } });
+            const result = await resp.json();
+
+            const btn = document.getElementById('applyRealJobBtn');
+            if (btn) {
+                btn.outerHTML = `<div class="flex items-center gap-3 w-full bg-green-500/15 border border-green-500/40 text-green-400 px-6 py-3.5 rounded-xl font-bold text-base mb-4 lg:mb-6"><span class="material-symbols-outlined text-xl">check_circle</span><span>You've Applied to This Job</span></div>`;
+            }
+            // Update the job card badge in the list
+            document.querySelectorAll('.job-card').forEach(card => {
+                if (card.dataset.jobId === currentJobData.externalJobId) {
+                    const badgeContainer = card.querySelector('.shrink-0.flex.flex-col');
+                    if (badgeContainer) {
+                        const pub = badgeContainer.querySelector('.publisher-badge');
+                        if (pub) {
+                            pub.outerHTML = `<span class="px-2 py-0.5 text-xs bg-green-500/20 text-green-400 border border-green-500/30 rounded-full font-semibold flex items-center gap-1"><span class="material-symbols-outlined text-xs">check_circle</span>Applied</span>`;
+                        }
+                    }
+                }
+            });
+            showToast('Application recorded! Good luck!', 'success');
+        }
+
+        function showToast(message, type) {
+            const toast = document.createElement('div');
+            toast.className = `fixed bottom-6 right-6 z-[60] flex items-center gap-3 px-5 py-3.5 rounded-xl font-semibold text-sm shadow-2xl transition-opacity duration-300 ${type === 'success' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'}`;
+            toast.innerHTML = `<span class="material-symbols-outlined text-base">${type === 'success' ? 'check_circle' : 'error'}</span>${message}`;
+            document.body.appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+    </script>
+
+    @functions {
+        public string GetMatchBadgeClass(double pct)
+        {
+            if (pct >= 80) return "bg-green-500/20 text-green-700 dark:text-green-300 border-green-500/40";
+            if (pct >= 60) return "bg-blue-500/20 text-blue-700 dark:text-blue-300 border-blue-500/40";
+            if (pct >= 40) return "bg-yellow-500/20 text-yellow-700 dark:text-yellow-300 border-yellow-500/40";
+            return "bg-slate-500/20 text-gray-600 dark:text-slate-300 border-slate-500/40";
+        }
+
+        public string GetPublisherBadgeClass(string? publisher) => publisher?.ToLower() switch
+        {
+            "linkedin" => "bg-blue-600/20 text-blue-700 dark:text-blue-300 border border-blue-600/30",
+            "indeed" => "bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 border border-indigo-500/30",
+            "glassdoor" => "bg-green-600/20 text-green-700 dark:text-green-300 border border-green-600/30",
+            "ziprecruiter" => "bg-orange-500/20 text-orange-700 dark:text-orange-300 border border-orange-500/30",
+            _ => "bg-gray-500/20 text-gray-600 dark:text-slate-300 border border-gray-500/30"
+        };
+    }
+</body>
+</html>

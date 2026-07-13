@@ -1,0 +1,183 @@
+@startuml CodeWave_Use_Case_Diagram
+
+!define ACTOR_COLOR #E6F3FF
+!define USE_CASE_COLOR #FFE6E6
+!define SYSTEM_BOUNDARY #F0F0F0
+
+skinparam actor {
+  BackgroundColor ACTOR_COLOR
+  BorderColor #0066CC
+}
+
+skinparam usecase {
+  BackgroundColor USE_CASE_COLOR
+  BorderColor #CC0000
+}
+
+skinparam rectangle {
+  BackgroundColor SYSTEM_BOUNDARY
+  BorderColor #666666
+}
+
+left to right direction
+
+actor "Learner" as Learner
+actor "Administrator" as Admin
+actor "Guest User" as Guest
+actor "Google OAuth" as Google
+actor "GitHub OAuth" as GitHub
+actor "Code Execution\nSystem" as CodeSystem
+
+rectangle "CodeWave Learning Platform" {
+  
+  package "Authentication & Registration" {
+    usecase "UC1: Register Account" as UC1
+    usecase "UC2: Login" as UC2
+    usecase "UC3: Login with Google" as UC3
+    usecase "UC4: Login with GitHub" as UC4
+    usecase "UC5: Logout" as UC5
+  }
+  
+  package "Onboarding" {
+    usecase "UC6: Complete Assessment" as UC6
+    usecase "UC7: View Onboarding Results" as UC7
+  }
+  
+  package "Learning Management" {
+    usecase "UC8: Browse Courses" as UC8
+    usecase "UC9: View Course Details" as UC9
+    usecase "UC10: Access Lesson" as UC10
+    usecase "UC11: View Lesson Content" as UC11
+    usecase "UC12: Complete Lesson" as UC12
+    usecase "UC13: Access Focus Mode" as UC13
+  }
+  
+  package "Code Execution" {
+    usecase "UC14: Write Code" as UC14
+    usecase "UC15: Execute Code" as UC15
+    usecase "UC16: Submit Exercise" as UC16
+    usecase "UC17: View Test Results" as UC17
+  }
+  
+  package "Progress Tracking" {
+    usecase "UC18: View Dashboard" as UC18
+    usecase "UC19: View Progress Statistics" as UC19
+    usecase "UC20: View Acquired Skills" as UC20
+    usecase "UC21: View Weaknesses" as UC21
+  }
+  
+  package "Quiz System" {
+    usecase "UC22: View Available Quizzes" as UC22
+    usecase "UC23: Take Quiz" as UC23
+    usecase "UC24: Submit Quiz Answers" as UC24
+    usecase "UC25: View Quiz Results" as UC25
+  }
+  
+  package "Career Tools" {
+    usecase "UC26: View Job Offers" as UC26
+    usecase "UC27: Generate CV" as UC27
+    usecase "UC28: View Projects" as UC28
+  }
+  
+  package "Admin Functions" {
+    usecase "UC29: View Admin Dashboard" as UC29
+    usecase "UC30: Manage Users" as UC30
+    usecase "UC31: Manage Courses" as UC31
+    usecase "UC32: Manage Job Offers" as UC32
+    usecase "UC33: View Reports" as UC33
+    usecase "UC34: Create Course" as UC34
+    usecase "UC35: Edit Course" as UC35
+    usecase "UC36: Delete Course" as UC36
+    usecase "UC37: Create User" as UC37
+    usecase "UC38: Edit User" as UC38
+    usecase "UC39: Delete User" as UC39
+    usecase "UC40: Toggle Admin Status" as UC40
+  }
+}
+
+' Learner associations
+Learner --> UC1
+Learner --> UC2
+Learner --> UC3
+Learner --> UC4
+Learner --> UC5
+Learner --> UC6
+Learner --> UC7
+Learner --> UC8
+Learner --> UC9
+Learner --> UC10
+Learner --> UC11
+Learner --> UC12
+Learner --> UC13
+Learner --> UC14
+Learner --> UC15
+Learner --> UC16
+Learner --> UC17
+Learner --> UC18
+Learner --> UC19
+Learner --> UC20
+Learner --> UC21
+Learner --> UC22
+Learner --> UC23
+Learner --> UC24
+Learner --> UC25
+Learner --> UC26
+Learner --> UC27
+Learner --> UC28
+
+' Admin associations
+Admin --> UC2
+Admin --> UC5
+Admin --> UC29
+Admin --> UC30
+Admin --> UC31
+Admin --> UC32
+Admin --> UC33
+Admin --> UC34
+Admin --> UC35
+Admin --> UC36
+Admin --> UC37
+Admin --> UC38
+Admin --> UC39
+Admin --> UC40
+
+' Guest associations
+Guest --> UC1
+Guest --> UC2
+Guest --> UC3
+Guest --> UC4
+
+' External system associations
+Google ..> UC3 : <<authenticates>>
+GitHub ..> UC4 : <<authenticates>>
+CodeSystem ..> UC15 : <<executes>>
+CodeSystem ..> UC16 : <<validates>>
+
+' Include relationships
+UC10 ..> UC11 : <<include>>
+UC16 ..> UC15 : <<include>>
+UC23 ..> UC24 : <<include>>
+
+' Extend relationships
+UC15 ..> UC14 : <<extend>>
+UC17 ..> UC16 : <<extend>>
+UC25 ..> UC24 : <<extend>>
+
+' Generalization
+UC2 <|-- UC3
+UC2 <|-- UC4
+
+note right of UC29
+  Admin is automatically
+  redirected to /Admin
+  after login
+end note
+
+note right of UC18
+  Regular users are
+  redirected to /Home
+  after login
+end note
+
+@enduml
+

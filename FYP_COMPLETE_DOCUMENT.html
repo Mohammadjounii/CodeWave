@@ -1,0 +1,2807 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CodeWave – FYP Complete Document</title>
+  <style>
+    /* ── Page and font ── */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: "Segoe UI", Arial, sans-serif;
+      font-size: 11pt;
+      line-height: 1.65;
+      color: #1a1a1a;
+      background: #fff;
+      padding: 0 40px;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    /* ── Headings ── */
+    h1 { font-size: 22pt; margin: 36px 0 10px; color: #1a0050; border-bottom: 3px solid #7c3aed; padding-bottom: 6px; }
+    h2 { font-size: 16pt; margin: 28px 0 8px; color: #2d0080; border-bottom: 1px solid #c4b5fd; padding-bottom: 4px; }
+    h3 { font-size: 13pt; margin: 20px 0 6px; color: #4c1d95; }
+    h4 { font-size: 11pt; margin: 14px 0 4px; color: #5b21b6; }
+
+    /* ── Body text ── */
+    p { margin: 8px 0; }
+    ul, ol { margin: 8px 0 8px 24px; }
+    li { margin: 3px 0; }
+
+    /* ── Tables ── */
+    table { border-collapse: collapse; width: 100%; margin: 12px 0; font-size: 10pt; }
+    th { background: #7c3aed; color: #fff; padding: 6px 10px; text-align: left; }
+    td { padding: 5px 10px; border-bottom: 1px solid #e5e7eb; }
+    tr:nth-child(even) td { background: #f5f3ff; }
+
+    /* ── Code blocks ── */
+    pre { background: #1e1e2e; color: #cdd6f4; padding: 14px 16px; border-radius: 6px;
+          font-family: "Consolas", monospace; font-size: 9pt; overflow: auto;
+          margin: 10px 0; white-space: pre-wrap; }
+    code { font-family: "Consolas", monospace; font-size: 9.5pt; background: #f3f0ff;
+           padding: 1px 4px; border-radius: 3px; }
+    pre code { background: none; padding: 0; color: inherit; }
+
+    /* ── Mermaid containers ── */
+    .mermaid {
+      background: #fff;
+      padding: 10px;
+      margin: 14px 0;
+      text-align: center;
+      border: 1px solid #e5e7eb;
+      border-radius: 6px;
+      page-break-inside: avoid;
+    }
+    .mermaid svg { max-width: 100%; height: auto; }
+
+    /* ── Horizontal rules ── */
+    hr { border: none; border-top: 1px solid #d8b4fe; margin: 24px 0; }
+
+    /* ── Blockquotes ── */
+    blockquote { border-left: 4px solid #7c3aed; padding-left: 14px; color: #555; margin: 10px 0; }
+
+    /* ── Print / PDF ── */
+    @media print {
+      body { padding: 0; max-width: 100%; }
+      h1, h2, h3, h4 { page-break-after: avoid; }
+      table, .mermaid, pre { page-break-inside: avoid; }
+      @page { margin: 20mm 18mm; }
+    }
+  </style>
+</head>
+<body>
+<h1 id="codewave--complete-fyp-document">CodeWave – Complete FYP Document</h1>
+<h2 id="csci420--final-year-project">CSCI420 – Final Year Project</h2>
+<hr>
+<p><strong>Project Title:</strong> CodeWave – Interactive Programming Learning Platform</p>
+<p><strong>Group Members:</strong></p>
+<ul>
+<li>[Student Name 1]</li>
+<li>[Student Name 2]</li>
+<li>[Student Name 3]</li>
+</ul>
+<p><strong>Submission Date:</strong> April 20, 2026</p>
+<p><strong>Supervisor:</strong> CSCI420 Course Supervisor</p>
+<p><strong>Document Version:</strong> 1.0</p>
+<hr>
+<h2 id="table-of-contents">Table of Contents</h2>
+<h3 id="part-1--project-proposal-vision-document">Part 1 – Project Proposal (Vision Document)</h3>
+<ol>
+<li><a href="#1-project-idea">Project Idea</a></li>
+<li><a href="#2-problem-statement">Problem Statement</a></li>
+<li><a href="#3-need-and-significance">Need and Significance</a></li>
+<li><a href="#4-novelty-and-innovation">Novelty and Innovation</a></li>
+<li><a href="#5-key-features">Key Features</a></li>
+</ol>
+<h3 id="part-2--engineering-se-document">Part 2 – Engineering (SE Document)</h3>
+<ol start="6">
+<li><a href="#6-functional-requirements">Functional Requirements</a></li>
+<li><a href="#7-use-cases">Use Cases</a></li>
+<li><a href="#8-edge-cases">Edge Cases</a></li>
+<li><a href="#9-er-diagram">ER Diagram</a></li>
+<li><a href="#10-ui-interfaces">UI Interfaces</a></li>
+<li><a href="#11-apis-and-services">APIs and Services</a></li>
+</ol>
+<h3 id="appendices">Appendices</h3>
+<ol start="12">
+<li><a href="#12-activity-diagrams">Activity Diagrams</a></li>
+<li><a href="#13-data-flow-diagrams-dfd">Data Flow Diagrams (DFD)</a></li>
+<li><a href="#14-system-architecture">System Architecture</a></li>
+<li><a href="#15-non-functional-requirements">Non-Functional Requirements</a></li>
+<li><a href="#16-plantuml-source-code">PlantUML Source Code</a></li>
+</ol>
+<hr>
+<h1 id="part-1--project-proposal-vision-document-1">PART 1 – PROJECT PROPOSAL (VISION DOCUMENT)</h1>
+<hr>
+<h2 id="1-project-idea">1. Project Idea</h2>
+<p>CodeWave is a web-based Learning Management System (LMS) purpose-built for programming education. The platform allows learners to enroll in structured Python and Java courses, write and execute code directly in the browser, take auto-graded quizzes, and track their learning progress — all in one place.</p>
+<p>Beyond learning, CodeWave integrates career-readiness tools: learners can automatically generate a professional PDF CV populated from their completed courses and achievements, and browse a curated job offers board. An AI-powered Focus Mode embeds a Google Gemini chatbot directly into the coding environment, providing contextual assistance without leaving the platform.</p>
+<p>The system supports two roles — Learner and Administrator — and is built on a clean four-layer architecture (Domain, Application, Infrastructure, Web) using ASP.NET Core 9.0, MySQL, Entity Framework Core, Docker, and SignalR.</p>
+<hr>
+<h2 id="2-problem-statement">2. Problem Statement</h2>
+<p>Learning to program today requires juggling a fragmented set of tools: video tutorials on one platform, a separate code editor, quizzes somewhere else, and no clear connection between effort and career opportunities. This fragmentation creates friction that discourages beginners and reduces learning effectiveness.</p>
+<p>Specifically, the problems CodeWave addresses are:</p>
+<ul>
+<li><strong>No integrated practice environment:</strong> Mainstream platforms (Udemy, Coursera, YouTube) provide content but no hands-on code execution linked to lessons.</li>
+<li><strong>Lack of personalization:</strong> Learners with different skill levels are given the same content, with no adaptive routing based on existing knowledge.</li>
+<li><strong>No career bridge:</strong> There is no direct link between what a learner has mastered and how that translates into employability or a professional profile.</li>
+<li><strong>Passive learning:</strong> Most platforms deliver content passively (watch → read) rather than actively (code → test → feedback).</li>
+<li><strong>No real-time feedback during practice:</strong> Learners working on coding exercises have no in-context assistance when stuck.</li>
+</ul>
+<hr>
+<h2 id="3-need-and-significance">3. Need and Significance</h2>
+<p><strong>Why this matters now:</strong></p>
+<ul>
+<li>Demand for software developers continues to grow globally, yet entry barriers remain high due to poor learning tooling.</li>
+<li>Self-paced learners drop out at high rates on existing platforms primarily because they lack immediate, interactive feedback loops.</li>
+<li>Educators and bootcamps need affordable, configurable LMS solutions that go beyond slide decks and PDFs.</li>
+</ul>
+<p><strong>Significance of CodeWave:</strong></p>
+<ul>
+<li>Provides a <strong>single, unified platform</strong> covering content delivery, interactive practice, assessment, and career preparation.</li>
+<li><strong>Reduces the cost of entry</strong> to quality programming education by eliminating the need to subscribe to multiple services.</li>
+<li>Enables <strong>data-driven learning</strong> through progress dashboards and analytics that identify strengths and weaknesses.</li>
+<li>The <strong>CV auto-generation</strong> feature directly maps learning achievements to professional outcomes, creating a tangible return on investment for learners.</li>
+<li>The Docker-based execution sandbox makes the platform safe and scalable — each code run is isolated, protecting both the learner&#39;s work and the server.</li>
+</ul>
+<hr>
+<h2 id="4-novelty-and-innovation">4. Novelty and Innovation</h2>
+<p>CodeWave differentiates itself from existing platforms through five key innovations:</p>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Innovation</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td><strong>Docker-based secure code sandbox</strong></td>
+<td>Each code submission runs in an isolated Docker container, enabling safe execution of arbitrary Python and Java code without risk to the host system. This is the same approach used by production-grade platforms (e.g., LeetCode, HackerRank).</td>
+</tr>
+<tr>
+<td>2</td>
+<td><strong>AI-powered Focus Mode</strong></td>
+<td>A distraction-free coding environment with a Google Gemini chatbot embedded directly in the editor panel. Learners can ask questions and get contextual hints without switching tabs or leaving their flow state.</td>
+</tr>
+<tr>
+<td>3</td>
+<td><strong>Achievement-driven CV generation</strong></td>
+<td>The platform automatically constructs a professional PDF CV for each learner based on courses completed, skills acquired, and exercises passed — making the learning record immediately portable and shareable with employers.</td>
+</tr>
+<tr>
+<td>4</td>
+<td><strong>Assessment-gated adaptive enrollment</strong></td>
+<td>New users take a skill assessment quiz before being assigned to a learning path. The system routes them to the appropriate starting point (Python beginner, Java intermediate, etc.) rather than forcing all users through the same linear content.</td>
+</tr>
+<tr>
+<td>5</td>
+<td><strong>Real-time progress notifications via SignalR</strong></td>
+<td>Lesson completions, quiz results, and achievement unlocks are pushed to the client in real time, creating an engaging, responsive experience comparable to native mobile applications.</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="5-key-features">5. Key Features</h2>
+<h3 id="learner-facing-features">Learner-Facing Features</h3>
+<ul>
+<li><strong>User registration and authentication</strong> — standard email/password and OAuth login via Google and GitHub</li>
+<li><strong>Skill assessment quiz</strong> — determines the learner&#39;s entry point on enrollment</li>
+<li><strong>Structured courses and lessons</strong> — organized content modules for Python and Java</li>
+<li><strong>Monaco-based code editor</strong> — the same editor powering VS Code, embedded in the browser</li>
+<li><strong>Real-time code execution</strong> — submit Python or Java code and see output instantly, powered by Docker runners</li>
+<li><strong>Quiz system</strong> — lesson-linked quizzes with automated grading and instant feedback</li>
+<li><strong>Progress dashboard</strong> — visual tracking of completed lessons, quiz scores, and overall course progress</li>
+<li><strong>AI Focus Mode</strong> — distraction-free coding environment with integrated Google Gemini chatbot</li>
+<li><strong>CV generator</strong> — auto-populated PDF CV based on course completions and earned achievements</li>
+<li><strong>Job offers board</strong> — curated listings that learners can apply to directly from the platform</li>
+</ul>
+<h3 id="administrator-features">Administrator Features</h3>
+<ul>
+<li><strong>Admin dashboard</strong> — overview of platform activity with Chart.js analytics for user engagement and skill distribution</li>
+<li><strong>Content management</strong> — create, edit, and publish courses, lessons, exercises, and quizzes</li>
+<li><strong>User management</strong> — view, edit, manage, and toggle admin status for learner accounts</li>
+<li><strong>Job offer management</strong> — create and manage job listings with deadlines</li>
+</ul>
+<h3 id="platform-features">Platform Features</h3>
+<ul>
+<li><strong>Role-based access control</strong> — enforced separation between Learner and Admin capabilities</li>
+<li><strong>Real-time notifications</strong> — SignalR-powered push events for achievements and progress milestones</li>
+<li><strong>Responsive UI</strong> — Tailwind CSS-based design that works across desktop and mobile browsers</li>
+<li><strong>Secure architecture</strong> — four-layer clean architecture with repository pattern and unit of work</li>
+</ul>
+<hr>
+<h1 id="part-2--engineering-se-document-1">PART 2 – ENGINEERING (SE DOCUMENT)</h1>
+<hr>
+<h2 id="6-functional-requirements">6. Functional Requirements</h2>
+<h3 id="61-user-authentication-and-authorization">6.1 User Authentication and Authorization</h3>
+<h4 id="611-user-registration">6.1.1 User Registration</h4>
+<p><strong>Priority:</strong> High</p>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Requirement</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>FR-1.1</td>
+<td>System shall allow users to register with email and password</td>
+</tr>
+<tr>
+<td>FR-1.2</td>
+<td>System shall support OAuth registration via Google</td>
+</tr>
+<tr>
+<td>FR-1.3</td>
+<td>System shall support OAuth registration via GitHub</td>
+</tr>
+<tr>
+<td>FR-1.4</td>
+<td>System shall validate email format and password strength</td>
+</tr>
+<tr>
+<td>FR-1.5</td>
+<td>System shall redirect new users to onboarding/assessment flow</td>
+</tr>
+<tr>
+<td>FR-1.6</td>
+<td>System shall store user profile information (FirstName, LastName, Email)</td>
+</tr>
+</tbody></table>
+<h4 id="612-user-login">6.1.2 User Login</h4>
+<p><strong>Priority:</strong> High</p>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Requirement</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>FR-2.1</td>
+<td>System shall allow email/password login</td>
+</tr>
+<tr>
+<td>FR-2.2</td>
+<td>System shall support Google OAuth login</td>
+</tr>
+<tr>
+<td>FR-2.3</td>
+<td>System shall support GitHub OAuth login</td>
+</tr>
+<tr>
+<td>FR-2.4</td>
+<td>System shall redirect admins to <code>/Admin</code> dashboard after login</td>
+</tr>
+<tr>
+<td>FR-2.5</td>
+<td>System shall redirect regular users to <code>/Home</code> dashboard after login</td>
+</tr>
+<tr>
+<td>FR-2.6</td>
+<td>System shall maintain session state after login</td>
+</tr>
+<tr>
+<td>FR-2.7</td>
+<td>System shall handle invalid credentials with error messages</td>
+</tr>
+</tbody></table>
+<h4 id="613-role-based-access-control">6.1.3 Role-Based Access Control</h4>
+<p><strong>Priority:</strong> High</p>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Requirement</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>FR-3.1</td>
+<td>System shall support two user roles: Admin and Regular User</td>
+</tr>
+<tr>
+<td>FR-3.2</td>
+<td>System shall restrict admin pages to users with <code>IsAdmin = true</code></td>
+</tr>
+<tr>
+<td>FR-3.3</td>
+<td>System shall use policy-based authorization (<code>AdminOnly</code> policy)</td>
+</tr>
+<tr>
+<td>FR-3.4</td>
+<td>System shall add <code>IsAdmin</code> claim to user principal for admins</td>
+</tr>
+</tbody></table>
+<hr>
+<h3 id="62-learning-path-assessment">6.2 Learning Path Assessment</h3>
+<h4 id="621-initial-assessment">6.2.1 Initial Assessment</h4>
+<p><strong>Priority:</strong> High</p>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Requirement</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>FR-4.1</td>
+<td>System shall present assessment questions to new users</td>
+</tr>
+<tr>
+<td>FR-4.2</td>
+<td>System shall collect user answers to assessment questions</td>
+</tr>
+<tr>
+<td>FR-4.3</td>
+<td>System shall evaluate answers to determine skill level</td>
+</tr>
+<tr>
+<td>FR-4.4</td>
+<td>System shall assign learning path (Python or Java) based on assessment</td>
+</tr>
+<tr>
+<td>FR-4.5</td>
+<td>System shall set user&#39;s <code>Level</code> and <code>LearningPath</code> properties</td>
+</tr>
+<tr>
+<td>FR-4.6</td>
+<td>System shall redirect users to their assigned learning path dashboard</td>
+</tr>
+</tbody></table>
+<hr>
+<h3 id="63-course-management">6.3 Course Management</h3>
+<h4 id="631-course-browsing">6.3.1 Course Browsing</h4>
+<p><strong>Priority:</strong> High</p>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Requirement</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>FR-5.1</td>
+<td>System shall display courses filtered by user&#39;s learning path</td>
+</tr>
+<tr>
+<td>FR-5.2</td>
+<td>System shall show course title, description, difficulty level</td>
+</tr>
+<tr>
+<td>FR-5.3</td>
+<td>System shall display course progress for enrolled users</td>
+</tr>
+<tr>
+<td>FR-5.4</td>
+<td>System shall allow users to navigate to course details</td>
+</tr>
+</tbody></table>
+<h4 id="632-course-enrollment">6.3.2 Course Enrollment</h4>
+<p><strong>Priority:</strong> High</p>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Requirement</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>FR-6.1</td>
+<td>System shall automatically enroll users in courses matching their learning path</td>
+</tr>
+<tr>
+<td>FR-6.2</td>
+<td>System shall create <code>UserCourse</code> entry upon enrollment</td>
+</tr>
+<tr>
+<td>FR-6.3</td>
+<td>System shall track enrollment date</td>
+</tr>
+</tbody></table>
+<h4 id="633-course-content">6.3.3 Course Content</h4>
+<p><strong>Priority:</strong> High</p>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Requirement</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>FR-7.1</td>
+<td>System shall display course lessons in order</td>
+</tr>
+<tr>
+<td>FR-7.2</td>
+<td>System shall show lesson content with code examples</td>
+</tr>
+<tr>
+<td>FR-7.3</td>
+<td>System shall provide coding exercises for each lesson</td>
+</tr>
+<tr>
+<td>FR-7.4</td>
+<td>System shall track lesson completion</td>
+</tr>
+<tr>
+<td>FR-7.5</td>
+<td>System shall unlock next lesson upon completion</td>
+</tr>
+</tbody></table>
+<hr>
+<h3 id="64-interactive-code-editor">6.4 Interactive Code Editor</h3>
+<h4 id="641-code-editor-interface">6.4.1 Code Editor Interface</h4>
+<p><strong>Priority:</strong> High</p>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Requirement</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>FR-8.1</td>
+<td>System shall provide Monaco Editor for code editing</td>
+</tr>
+<tr>
+<td>FR-8.2</td>
+<td>System shall support syntax highlighting for Python and Java</td>
+</tr>
+<tr>
+<td>FR-8.3</td>
+<td>System shall provide code snippets/suggestions</td>
+</tr>
+<tr>
+<td>FR-8.4</td>
+<td>System shall auto-save user code to local storage</td>
+</tr>
+<tr>
+<td>FR-8.5</td>
+<td>System shall allow code execution without exercise selection (experiment mode)</td>
+</tr>
+<tr>
+<td>FR-8.6</td>
+<td>System shall display code editor in Focus Mode lesson view</td>
+</tr>
+</tbody></table>
+<h4 id="642-code-execution">6.4.2 Code Execution</h4>
+<p><strong>Priority:</strong> High</p>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Requirement</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>FR-9.1</td>
+<td>System shall execute Python code using Python 3 interpreter</td>
+</tr>
+<tr>
+<td>FR-9.2</td>
+<td>System shall execute Java code using Java compiler and runtime</td>
+</tr>
+<tr>
+<td>FR-9.3</td>
+<td>System shall detect programming language from course context</td>
+</tr>
+<tr>
+<td>FR-9.4</td>
+<td>System shall run code in isolated Docker containers</td>
+</tr>
+<tr>
+<td>FR-9.5</td>
+<td>System shall display execution output in console</td>
+</tr>
+<tr>
+<td>FR-9.6</td>
+<td>System shall handle compilation and runtime errors</td>
+</tr>
+<tr>
+<td>FR-9.7</td>
+<td>System shall support code execution with or without exercise context</td>
+</tr>
+</tbody></table>
+<h4 id="643-exercise-submission">6.4.3 Exercise Submission</h4>
+<p><strong>Priority:</strong> High</p>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Requirement</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>FR-10.1</td>
+<td>System shall validate code against multiple test cases</td>
+</tr>
+<tr>
+<td>FR-10.2</td>
+<td>System shall compare output with expected results</td>
+</tr>
+<tr>
+<td>FR-10.3</td>
+<td>System shall provide detailed test case results</td>
+</tr>
+<tr>
+<td>FR-10.4</td>
+<td>System shall mark exercise as completed when all tests pass</td>
+</tr>
+<tr>
+<td>FR-10.5</td>
+<td>System shall save exercise submission with timestamp</td>
+</tr>
+<tr>
+<td>FR-10.6</td>
+<td>System shall unlock next lesson upon exercise completion</td>
+</tr>
+</tbody></table>
+<hr>
+<h3 id="65-progress-tracking">6.5 Progress Tracking</h3>
+<h4 id="651-user-dashboard">6.5.1 User Dashboard</h4>
+<p><strong>Priority:</strong> High</p>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Requirement</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>FR-11.1</td>
+<td>System shall display completed lessons count</td>
+</tr>
+<tr>
+<td>FR-11.2</td>
+<td>System shall display completed exercises count</td>
+</tr>
+<tr>
+<td>FR-11.3</td>
+<td>System shall display quiz attempts and scores</td>
+</tr>
+<tr>
+<td>FR-11.4</td>
+<td>System shall calculate and display total study time</td>
+</tr>
+<tr>
+<td>FR-11.5</td>
+<td>System shall show dynamically acquired skills</td>
+</tr>
+<tr>
+<td>FR-11.6</td>
+<td>System shall identify user weaknesses</td>
+</tr>
+<tr>
+<td>FR-11.7</td>
+<td>System shall display learning path progress percentage</td>
+</tr>
+</tbody></table>
+<h4 id="652-lesson-completion-tracking">6.5.2 Lesson Completion Tracking</h4>
+<p><strong>Priority:</strong> High</p>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Requirement</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>FR-12.1</td>
+<td>System shall record lesson completion with timestamp</td>
+</tr>
+<tr>
+<td>FR-12.2</td>
+<td>System shall prevent duplicate completion entries</td>
+</tr>
+<tr>
+<td>FR-12.3</td>
+<td>System shall calculate course progress based on completions</td>
+</tr>
+</tbody></table>
+<hr>
+<h3 id="66-quiz-system">6.6 Quiz System</h3>
+<h4 id="661-quiz-display">6.6.1 Quiz Display</h4>
+<p><strong>Priority:</strong> Medium</p>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Requirement</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>FR-13.1</td>
+<td>System shall display quizzes based on user&#39;s completed lessons</td>
+</tr>
+<tr>
+<td>FR-13.2</td>
+<td>System shall filter quizzes by learning path</td>
+</tr>
+<tr>
+<td>FR-13.3</td>
+<td>System shall show quiz title, description, question count</td>
+</tr>
+<tr>
+<td>FR-13.4</td>
+<td>System shall display quiz icon on home page</td>
+</tr>
+</tbody></table>
+<h4 id="662-quiz-taking">6.6.2 Quiz Taking</h4>
+<p><strong>Priority:</strong> Medium</p>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Requirement</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>FR-14.1</td>
+<td>System shall present quiz questions one at a time or all at once</td>
+</tr>
+<tr>
+<td>FR-14.2</td>
+<td>System shall provide multiple choice answer options</td>
+</tr>
+<tr>
+<td>FR-14.3</td>
+<td>System shall allow users to select answers</td>
+</tr>
+<tr>
+<td>FR-14.4</td>
+<td>System shall track time spent on quiz</td>
+</tr>
+<tr>
+<td>FR-14.5</td>
+<td>System shall validate that quiz has at least one question</td>
+</tr>
+</tbody></table>
+<h4 id="663-quiz-results">6.6.3 Quiz Results</h4>
+<p><strong>Priority:</strong> Medium</p>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Requirement</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>FR-15.1</td>
+<td>System shall calculate quiz score (percentage)</td>
+</tr>
+<tr>
+<td>FR-15.2</td>
+<td>System shall determine pass/fail status (threshold: 70%)</td>
+</tr>
+<tr>
+<td>FR-15.3</td>
+<td>System shall save quiz attempt with score and timestamp</td>
+</tr>
+<tr>
+<td>FR-15.4</td>
+<td>System shall display correct/incorrect answers</td>
+</tr>
+<tr>
+<td>FR-15.5</td>
+<td>System shall track user performance over time</td>
+</tr>
+</tbody></table>
+<hr>
+<h3 id="67-focus-mode">6.7 Focus Mode</h3>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Requirement</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>FR-16.1</td>
+<td>System shall display lesson content in full-screen focus mode</td>
+</tr>
+<tr>
+<td>FR-16.2</td>
+<td>System shall provide code editor in focus mode</td>
+</tr>
+<tr>
+<td>FR-16.3</td>
+<td>System shall allow exercise selection within lesson</td>
+</tr>
+<tr>
+<td>FR-16.4</td>
+<td>System shall provide navigation to previous/next lesson</td>
+</tr>
+<tr>
+<td>FR-16.5</td>
+<td>System shall make page scrollable for long content</td>
+</tr>
+<tr>
+<td>FR-16.6</td>
+<td>System shall integrate AI Helper chat (Google Gemini)</td>
+</tr>
+<tr>
+<td>FR-17.1</td>
+<td>System shall provide chat interface in focus mode</td>
+</tr>
+<tr>
+<td>FR-17.2</td>
+<td>System shall send user messages to Google Gemini API</td>
+</tr>
+<tr>
+<td>FR-17.3</td>
+<td>System shall render AI responses in markdown format</td>
+</tr>
+<tr>
+<td>FR-17.4</td>
+<td>System shall maintain chat history during session</td>
+</tr>
+</tbody></table>
+<hr>
+<h3 id="68-admin-dashboard">6.8 Admin Dashboard</h3>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Requirement</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>FR-18.1</td>
+<td>System shall display total users count</td>
+</tr>
+<tr>
+<td>FR-18.2</td>
+<td>System shall display total courses count</td>
+</tr>
+<tr>
+<td>FR-18.3</td>
+<td>System shall display total job offers count</td>
+</tr>
+<tr>
+<td>FR-18.4</td>
+<td>System shall show user engagement chart (Chart.js)</td>
+</tr>
+<tr>
+<td>FR-18.5</td>
+<td>System shall show skill distribution chart (Chart.js)</td>
+</tr>
+<tr>
+<td>FR-19.1</td>
+<td>Admin shall list all users with pagination</td>
+</tr>
+<tr>
+<td>FR-19.2</td>
+<td>Admin shall search users by email, name</td>
+</tr>
+<tr>
+<td>FR-19.3</td>
+<td>Admin shall create, edit, delete users</td>
+</tr>
+<tr>
+<td>FR-19.4</td>
+<td>Admin shall toggle user admin status</td>
+</tr>
+<tr>
+<td>FR-19.5</td>
+<td>Admin shall view user details (progress, courses, quizzes)</td>
+</tr>
+<tr>
+<td>FR-20.1</td>
+<td>Admin shall create, edit, delete courses (soft delete)</td>
+</tr>
+<tr>
+<td>FR-20.2</td>
+<td>Admin shall filter courses by learning path</td>
+</tr>
+<tr>
+<td>FR-21.1</td>
+<td>Admin shall create, edit, delete job offers</td>
+</tr>
+<tr>
+<td>FR-21.2</td>
+<td>Admin shall set job offer deadline</td>
+</tr>
+<tr>
+<td>FR-22.1</td>
+<td>System shall display user progress and enrollment analytics</td>
+</tr>
+</tbody></table>
+<hr>
+<h3 id="69-career-tools">6.9 Career Tools</h3>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Requirement</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>FR-23.1</td>
+<td>System shall display active job offers with title, company, skills, deadline</td>
+</tr>
+<tr>
+<td>FR-23.2</td>
+<td>System shall allow users to filter job offers</td>
+</tr>
+<tr>
+<td>FR-24.1</td>
+<td>System shall collect user&#39;s completed courses and acquired skills</td>
+</tr>
+<tr>
+<td>FR-24.2</td>
+<td>System shall include quiz scores and projects in CV</td>
+</tr>
+<tr>
+<td>FR-24.3</td>
+<td>System shall generate downloadable PDF CV document</td>
+</tr>
+<tr>
+<td>FR-24.4</td>
+<td>System shall format CV professionally using QuestPDF</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="7-use-cases">7. Use Cases</h2>
+<h3 id="actors">Actors</h3>
+<table>
+<thead>
+<tr>
+<th>Actor</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Learner</td>
+<td>Primary</td>
+<td>Student/professional learning Python or Java</td>
+</tr>
+<tr>
+<td>Administrator</td>
+<td>Primary</td>
+<td>Platform manager with full system access</td>
+</tr>
+<tr>
+<td>Guest User</td>
+<td>Primary</td>
+<td>Unauthenticated visitor (registration/login only)</td>
+</tr>
+<tr>
+<td>Google OAuth</td>
+<td>Secondary</td>
+<td>External authentication provider</td>
+</tr>
+<tr>
+<td>GitHub OAuth</td>
+<td>Secondary</td>
+<td>External authentication provider</td>
+</tr>
+<tr>
+<td>Code Execution System</td>
+<td>Secondary</td>
+<td>Docker-based code runner</td>
+</tr>
+</tbody></table>
+<hr>
+<h3 id="use-case-diagram">Use Case Diagram</h3>
+<pre><code class="language-mermaid">graph TB
+    subgraph &quot;Authentication &amp; Registration&quot;
+        UC1[UC1: Register Account]
+        UC2[UC2: Login]
+        UC3[UC3: Login with Google]
+        UC4[UC4: Login with GitHub]
+        UC5[UC5: Logout]
+    end
+    
+    subgraph &quot;Onboarding&quot;
+        UC6[UC6: Complete Assessment]
+        UC7[UC7: View Onboarding Results]
+    end
+    
+    subgraph &quot;Learning Management&quot;
+        UC8[UC8: Browse Courses]
+        UC9[UC9: View Course Details]
+        UC10[UC10: Access Lesson]
+        UC11[UC11: View Lesson Content]
+        UC12[UC12: Complete Lesson]
+        UC13[UC13: Access Focus Mode]
+    end
+    
+    subgraph &quot;Code Execution&quot;
+        UC14[UC14: Write Code]
+        UC15[UC15: Execute Code]
+        UC16[UC16: Submit Exercise]
+        UC17[UC17: View Test Results]
+    end
+    
+    subgraph &quot;Progress Tracking&quot;
+        UC18[UC18: View Dashboard]
+        UC19[UC19: View Progress Statistics]
+        UC20[UC20: View Acquired Skills]
+        UC21[UC21: View Weaknesses]
+    end
+    
+    subgraph &quot;Quiz System&quot;
+        UC22[UC22: View Available Quizzes]
+        UC23[UC23: Take Quiz]
+        UC24[UC24: Submit Quiz Answers]
+        UC25[UC25: View Quiz Results]
+    end
+    
+    subgraph &quot;Career Tools&quot;
+        UC26[UC26: View Job Offers]
+        UC27[UC27: Generate CV]
+        UC28[UC28: View Projects]
+    end
+    
+    subgraph &quot;Admin Functions&quot;
+        UC29[UC29: View Admin Dashboard]
+        UC30[UC30: Manage Users]
+        UC31[UC31: Manage Courses]
+        UC32[UC32: Manage Job Offers]
+        UC33[UC33: View Reports]
+        UC34[UC34: Create Course]
+        UC35[UC35: Edit Course]
+        UC36[UC36: Delete Course]
+        UC37[UC37: Create User]
+        UC38[UC38: Edit User]
+        UC39[UC39: Delete User]
+        UC40[UC40: Toggle Admin Status]
+    end
+
+    Learner --&gt; UC1
+    Learner --&gt; UC2
+    Learner --&gt; UC3
+    Learner --&gt; UC4
+    Learner --&gt; UC5
+    Learner --&gt; UC6
+    Learner --&gt; UC7
+    Learner --&gt; UC8
+    Learner --&gt; UC9
+    Learner --&gt; UC10
+    Learner --&gt; UC11
+    Learner --&gt; UC12
+    Learner --&gt; UC13
+    Learner --&gt; UC14
+    Learner --&gt; UC15
+    Learner --&gt; UC16
+    Learner --&gt; UC17
+    Learner --&gt; UC18
+    Learner --&gt; UC19
+    Learner --&gt; UC20
+    Learner --&gt; UC21
+    Learner --&gt; UC22
+    Learner --&gt; UC23
+    Learner --&gt; UC24
+    Learner --&gt; UC25
+    Learner --&gt; UC26
+    Learner --&gt; UC27
+    Learner --&gt; UC28
+    
+    Admin --&gt; UC2
+    Admin --&gt; UC5
+    Admin --&gt; UC29
+    Admin --&gt; UC30
+    Admin --&gt; UC31
+    Admin --&gt; UC32
+    Admin --&gt; UC33
+    Admin --&gt; UC34
+    Admin --&gt; UC35
+    Admin --&gt; UC36
+    Admin --&gt; UC37
+    Admin --&gt; UC38
+    Admin --&gt; UC39
+    Admin --&gt; UC40
+    
+    Guest --&gt; UC1
+    Guest --&gt; UC2
+    Guest --&gt; UC3
+    Guest --&gt; UC4
+</code></pre>
+<hr>
+<h3 id="use-case-descriptions">Use Case Descriptions</h3>
+<h4 id="uc1-register-account">UC1: Register Account</h4>
+<p><strong>Actor:</strong> Guest User | <strong>Priority:</strong> High<br><strong>Preconditions:</strong> User is not logged in</p>
+<p><strong>Main Flow:</strong></p>
+<ol>
+<li>User navigates to registration page</li>
+<li>User enters email, password, first name, last name</li>
+<li>System validates input (email format, password strength)</li>
+<li>System creates user account</li>
+<li>System logs user in automatically</li>
+<li>System redirects to onboarding/assessment flow</li>
+</ol>
+<p><strong>Alternative Flows:</strong></p>
+<ul>
+<li>3a. Invalid email format → System displays error, user corrects</li>
+<li>3b. Weak password → System displays requirements, user updates</li>
+<li>3c. Email already exists → System displays error, prompts login</li>
+</ul>
+<p><strong>Postconditions:</strong> User account created, user logged in, redirected to assessment</p>
+<hr>
+<h4 id="uc2-login">UC2: Login</h4>
+<p><strong>Actor:</strong> Guest User, Learner, Administrator | <strong>Priority:</strong> High<br><strong>Preconditions:</strong> User has an account</p>
+<p><strong>Main Flow:</strong></p>
+<ol>
+<li>User navigates to login page</li>
+<li>User enters email and password</li>
+<li>System validates credentials</li>
+<li>System creates session</li>
+<li>Admin users → redirect to <code>/Admin</code>, regular users → redirect to <code>/Home</code></li>
+</ol>
+<p><strong>Alternative Flows:</strong></p>
+<ul>
+<li>3a. Invalid credentials → System displays error, user retries</li>
+<li>3b. Account locked → System displays lockout message</li>
+</ul>
+<hr>
+<h4 id="uc3-login-with-google">UC3: Login with Google</h4>
+<p><strong>Actor:</strong> Guest User | <strong>Priority:</strong> Medium  </p>
+<ol>
+<li>User clicks &quot;Login with Google&quot;</li>
+<li>System redirects to Google OAuth</li>
+<li>User authorizes application</li>
+<li>Google returns authentication token</li>
+<li>System checks if user exists — creates account if new</li>
+<li>System redirects to appropriate dashboard</li>
+</ol>
+<hr>
+<h4 id="uc4-login-with-github">UC4: Login with GitHub</h4>
+<p><strong>Actor:</strong> Guest User | <strong>Priority:</strong> Medium<br>Same flow as UC3 but via GitHub OAuth provider.</p>
+<hr>
+<h4 id="uc5-logout">UC5: Logout</h4>
+<p><strong>Actor:</strong> Learner, Administrator | <strong>Priority:</strong> High  </p>
+<ol>
+<li>User clicks logout</li>
+<li>System invalidates session</li>
+<li>System redirects to welcome page</li>
+</ol>
+<hr>
+<h4 id="uc6-complete-assessment">UC6: Complete Assessment</h4>
+<p><strong>Actor:</strong> Learner | <strong>Priority:</strong> High<br><strong>Preconditions:</strong> User is logged in, has not completed assessment</p>
+<p><strong>Main Flow:</strong></p>
+<ol>
+<li>System displays assessment questions</li>
+<li>User answers each question and submits</li>
+<li>System evaluates answers, calculates score, determines level</li>
+<li>System assigns learning path (Python or Java)</li>
+<li>System updates user profile and redirects to dashboard</li>
+</ol>
+<hr>
+<h4 id="uc8-browse-courses">UC8: Browse Courses</h4>
+<p><strong>Actor:</strong> Learner | <strong>Priority:</strong> High  </p>
+<ol>
+<li>User navigates to courses</li>
+<li>System retrieves courses matching user&#39;s learning path</li>
+<li>System displays course list with titles, descriptions, progress</li>
+<li>User filters or searches courses</li>
+</ol>
+<hr>
+<h4 id="uc10-access-lesson">UC10: Access Lesson</h4>
+<p><strong>Actor:</strong> Learner | <strong>Priority:</strong> High  </p>
+<ol>
+<li>User clicks on a lesson from course page</li>
+<li>System checks if previous lessons are completed</li>
+<li>If not completed → System prevents access and shows message</li>
+<li>If unlocked → System displays lesson content</li>
+</ol>
+<hr>
+<h4 id="uc15-execute-code">UC15: Execute Code</h4>
+<p><strong>Actor:</strong> Learner | <strong>Priority:</strong> High  </p>
+<ol>
+<li>User clicks &quot;Run Code&quot;</li>
+<li>System detects programming language from course context</li>
+<li>System sends code to Docker-based code execution service</li>
+<li>System captures stdout and stderr output</li>
+<li>System displays results in console section</li>
+</ol>
+<p><strong>Alternative Flows:</strong></p>
+<ul>
+<li>Compilation error → System displays error with line number</li>
+<li>Runtime error → System displays exception message</li>
+<li>Timeout (&gt;5s) → System displays &quot;Execution timed out&quot;</li>
+</ul>
+<hr>
+<h4 id="uc16-submit-exercise">UC16: Submit Exercise</h4>
+<p><strong>Actor:</strong> Learner | <strong>Priority:</strong> High  </p>
+<ol>
+<li>User selects an exercise and writes code solution</li>
+<li>User clicks &quot;Submit&quot;</li>
+<li>System executes code against all test cases</li>
+<li>System compares actual output vs expected output per test case</li>
+<li>All tests pass → exercise marked complete, next lesson unlocked</li>
+<li>Tests fail → System displays which test cases failed</li>
+</ol>
+<hr>
+<h4 id="uc23-take-quiz">UC23: Take Quiz</h4>
+<p><strong>Actor:</strong> Learner | <strong>Priority:</strong> Medium  </p>
+<ol>
+<li>User selects a quiz and clicks &quot;Take Quiz&quot;</li>
+<li>System starts timer if applicable</li>
+<li>User answers all questions</li>
+<li>User submits quiz</li>
+<li>System calculates score, determines pass/fail, saves attempt</li>
+</ol>
+<hr>
+<h4 id="uc27-generate-cv">UC27: Generate CV</h4>
+<p><strong>Actor:</strong> Learner | <strong>Priority:</strong> Low  </p>
+<ol>
+<li>User navigates to CV section</li>
+<li>System collects completed courses, acquired skills, quiz scores, projects</li>
+<li>System generates and formats PDF CV using QuestPDF</li>
+<li>User downloads CV</li>
+</ol>
+<p><strong>Alternative Flow:</strong></p>
+<ul>
+<li>No completed courses → System prompts to complete courses first</li>
+</ul>
+<hr>
+<h4 id="uc29-view-admin-dashboard">UC29: View Admin Dashboard</h4>
+<p><strong>Actor:</strong> Administrator | <strong>Priority:</strong> High  </p>
+<ol>
+<li>Admin is auto-redirected to <code>/Admin</code> after login</li>
+<li>System retrieves platform statistics</li>
+<li>System displays KPI cards, user engagement chart, skill distribution chart</li>
+<li>Admin navigates to management sections</li>
+</ol>
+<hr>
+<h4 id="uc30uc33-admin-management-summary">UC30–UC33: Admin Management (Summary)</h4>
+<table>
+<thead>
+<tr>
+<th>UC</th>
+<th>Action</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>UC30</td>
+<td>Manage Users</td>
+<td>View, search, create, edit, delete, toggle admin status</td>
+</tr>
+<tr>
+<td>UC31</td>
+<td>Manage Courses</td>
+<td>View, create, edit, soft-delete courses</td>
+</tr>
+<tr>
+<td>UC32</td>
+<td>Manage Job Offers</td>
+<td>Create, edit, delete job offers</td>
+</tr>
+<tr>
+<td>UC33</td>
+<td>View Reports</td>
+<td>View analytics: user progress, enrollment, quiz performance</td>
+</tr>
+</tbody></table>
+<hr>
+<h3 id="use-case-relationships">Use Case Relationships</h3>
+<table>
+<thead>
+<tr>
+<th>Relationship</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>UC10 → UC11</td>
+<td>Include (access lesson includes viewing content)</td>
+</tr>
+<tr>
+<td>UC16 → UC15</td>
+<td>Include (submit exercise includes executing code)</td>
+</tr>
+<tr>
+<td>UC23 → UC24</td>
+<td>Include (taking quiz includes submitting answers)</td>
+</tr>
+<tr>
+<td>UC15 extends UC14</td>
+<td>Extend (execute extends write when submitted)</td>
+</tr>
+<tr>
+<td>UC17 extends UC16</td>
+<td>Extend (test results extend exercise submission)</td>
+</tr>
+<tr>
+<td>UC25 extends UC24</td>
+<td>Extend (quiz results extend quiz submission)</td>
+</tr>
+<tr>
+<td>UC3, UC4 generalize UC2</td>
+<td>Generalization (OAuth specializations of login)</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="8-edge-cases">8. Edge Cases</h2>
+<p>Edge cases document unexpected or boundary inputs and behaviors that the system must handle gracefully.</p>
+<hr>
+<h3 id="81-registration-and-authentication">8.1 Registration and Authentication</h3>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Scenario</th>
+<th>Expected Behavior</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>EC-1.1</td>
+<td>Register with an email that already exists</td>
+<td>System returns error: &quot;Email already in use.&quot; User is directed to login.</td>
+</tr>
+<tr>
+<td>EC-1.2</td>
+<td>Register with invalid email format (e.g., <code>user@</code>, <code>user.com</code>)</td>
+<td>System rejects with validation error: &quot;Enter a valid email address.&quot;</td>
+</tr>
+<tr>
+<td>EC-1.3</td>
+<td>Register with password shorter than 6 characters</td>
+<td>System rejects with: &quot;Password must be at least 6 characters.&quot;</td>
+</tr>
+<tr>
+<td>EC-1.4</td>
+<td>Register with mismatched password and confirm-password fields</td>
+<td>System rejects with: &quot;Passwords do not match.&quot;</td>
+</tr>
+<tr>
+<td>EC-1.5</td>
+<td>OAuth provider returns no email (GitHub with private email setting)</td>
+<td>System prompts user to enter an email manually before proceeding.</td>
+</tr>
+<tr>
+<td>EC-1.6</td>
+<td>OAuth account email matches an existing local account</td>
+<td>System links the OAuth identity to the existing account and logs in.</td>
+</tr>
+<tr>
+<td>EC-1.7</td>
+<td>Login with correct email but wrong password repeated 5+ times</td>
+<td>Account lockout triggered; system displays lockout message with retry timer.</td>
+</tr>
+<tr>
+<td>EC-1.8</td>
+<td>User tries to access authenticated page without being logged in</td>
+<td>System redirects to login page with return URL preserved.</td>
+</tr>
+<tr>
+<td>EC-1.9</td>
+<td>Admin tries to access learner-only page</td>
+<td>System serves page normally (admins have all learner access).</td>
+</tr>
+<tr>
+<td>EC-1.10</td>
+<td>Regular user tries to access <code>/Admin</code></td>
+<td>System returns 403 Forbidden via <code>AdminOnly</code> policy.</td>
+</tr>
+</tbody></table>
+<hr>
+<h3 id="82-assessment">8.2 Assessment</h3>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Scenario</th>
+<th>Expected Behavior</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>EC-2.1</td>
+<td>User submits assessment without answering all questions</td>
+<td>System prompts to answer all questions before submitting.</td>
+</tr>
+<tr>
+<td>EC-2.2</td>
+<td>User navigates to assessment page after already completing it</td>
+<td>System redirects to their dashboard (assessment already done).</td>
+</tr>
+<tr>
+<td>EC-2.3</td>
+<td>Assessment database has no questions loaded</td>
+<td>System displays an error message; admin is notified to seed assessment data.</td>
+</tr>
+<tr>
+<td>EC-2.4</td>
+<td>All answers are incorrect (score = 0%)</td>
+<td>System assigns a default learning path (e.g., Python Beginner) and proceeds.</td>
+</tr>
+</tbody></table>
+<hr>
+<h3 id="83-courses-and-lessons">8.3 Courses and Lessons</h3>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Scenario</th>
+<th>Expected Behavior</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>EC-3.1</td>
+<td>User tries to access a lesson URL directly without completing prerequisites</td>
+<td>System checks completion status and returns &quot;Lesson locked&quot; message.</td>
+</tr>
+<tr>
+<td>EC-3.2</td>
+<td>Course has zero lessons</td>
+<td>System displays course page with &quot;No lessons available yet&quot; message.</td>
+</tr>
+<tr>
+<td>EC-3.3</td>
+<td>User navigates to a non-existent course ID</td>
+<td>System returns 404 Not Found page.</td>
+</tr>
+<tr>
+<td>EC-3.4</td>
+<td>User tries to access a soft-deleted course</td>
+<td>System returns 404 Not Found (soft-deleted records are excluded from queries).</td>
+</tr>
+<tr>
+<td>EC-3.5</td>
+<td>User accesses a course from a different learning path than assigned</td>
+<td>System allows access (path filter is a recommendation, not a restriction).</td>
+</tr>
+<tr>
+<td>EC-3.6</td>
+<td>Lesson completion is recorded twice (double-click or rapid navigation)</td>
+<td>System applies FR-12.2 — duplicate completion entries are prevented; only one record stored.</td>
+</tr>
+</tbody></table>
+<hr>
+<h3 id="84-code-execution">8.4 Code Execution</h3>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Scenario</th>
+<th>Expected Behavior</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>EC-4.1</td>
+<td>User submits empty code</td>
+<td>System returns error: &quot;Code cannot be empty.&quot; No Docker container spawned.</td>
+</tr>
+<tr>
+<td>EC-4.2</td>
+<td>Code causes an infinite loop</td>
+<td>Docker container enforces timeout (~5 seconds); system returns &quot;Execution timed out.&quot;</td>
+</tr>
+<tr>
+<td>EC-4.3</td>
+<td>Code crashes with a runtime exception</td>
+<td>System captures stderr and displays error message (e.g., <code>NullPointerException at line 3</code>).</td>
+</tr>
+<tr>
+<td>EC-4.4</td>
+<td>Code causes a compilation error (Java)</td>
+<td>System displays compiler error with line numbers before attempting to run.</td>
+</tr>
+<tr>
+<td>EC-4.5</td>
+<td>User submits Python code when the exercise is Java</td>
+<td>System detects language mismatch from course context; warns user or executes as Python experiment.</td>
+</tr>
+<tr>
+<td>EC-4.6</td>
+<td>Code output has trailing newlines/whitespace vs expected clean string</td>
+<td>System trims both actual and expected output before comparison to avoid false failures.</td>
+</tr>
+<tr>
+<td>EC-4.7</td>
+<td>Test case expects empty output (<code>&quot;&quot;</code>) but code outputs nothing</td>
+<td>System treats empty stdout as matching an empty expected output — passes.</td>
+</tr>
+<tr>
+<td>EC-4.8</td>
+<td>Multiple simultaneous submissions from the same user</td>
+<td>Each submission gets its own Docker container instance; race conditions are isolated.</td>
+</tr>
+<tr>
+<td>EC-4.9</td>
+<td>Code attempts to read from stdin when no input is provided</td>
+<td>System injects empty string for stdin; code either uses default values or throws handled exception.</td>
+</tr>
+<tr>
+<td>EC-4.10</td>
+<td>Code execution service (Docker) is unavailable</td>
+<td>System returns graceful error: &quot;Code execution is temporarily unavailable. Please try again.&quot;</td>
+</tr>
+<tr>
+<td>EC-4.11</td>
+<td>Exercise has no test cases defined</td>
+<td>System disables the &quot;Submit&quot; button and shows: &quot;This exercise has no test cases configured.&quot;</td>
+</tr>
+</tbody></table>
+<hr>
+<h3 id="85-quiz-system">8.5 Quiz System</h3>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Scenario</th>
+<th>Expected Behavior</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>EC-5.1</td>
+<td>Admin created a quiz with zero questions</td>
+<td>System validates at quiz creation; blocks saving an empty quiz (FR-14.5).</td>
+</tr>
+<tr>
+<td>EC-5.2</td>
+<td>Quiz time limit expires before user submits</td>
+<td>System auto-submits quiz with current answers and calculates score.</td>
+</tr>
+<tr>
+<td>EC-5.3</td>
+<td>User navigates away from quiz mid-session</td>
+<td>Quiz attempt remains &quot;in progress&quot;; on return, system shows incomplete attempt warning.</td>
+</tr>
+<tr>
+<td>EC-5.4</td>
+<td>User submits quiz with no answers selected</td>
+<td>System either blocks (if required) or scores as 0% and marks as failed.</td>
+</tr>
+<tr>
+<td>EC-5.5</td>
+<td>Quiz has a question with no correct answer option</td>
+<td>System logs the data integrity issue; all options marked incorrect yields 0 points for that question.</td>
+</tr>
+<tr>
+<td>EC-5.6</td>
+<td>Passing score threshold is set to 0%</td>
+<td>All submissions automatically pass; system proceeds normally.</td>
+</tr>
+</tbody></table>
+<hr>
+<h3 id="86-cv-generation">8.6 CV Generation</h3>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Scenario</th>
+<th>Expected Behavior</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>EC-6.1</td>
+<td>User tries to generate CV with no completed courses</td>
+<td>System displays warning: &quot;Complete at least one course to generate your CV.&quot;</td>
+</tr>
+<tr>
+<td>EC-6.2</td>
+<td>CV is generated a second time</td>
+<td>System overwrites the existing CV record (one CV per user — unique constraint on <code>CV.UserId</code>).</td>
+</tr>
+<tr>
+<td>EC-6.3</td>
+<td>PDF generation library (QuestPDF) encounters a layout error</td>
+<td>System logs the error and returns a friendly message: &quot;CV generation failed. Please try again.&quot;</td>
+</tr>
+</tbody></table>
+<hr>
+<h3 id="87-job-offers">8.7 Job Offers</h3>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Scenario</th>
+<th>Expected Behavior</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>EC-7.1</td>
+<td>User views or applies to a job offer past its deadline</td>
+<td>System marks offer as expired and disables the apply button.</td>
+</tr>
+<tr>
+<td>EC-7.2</td>
+<td>Job offer has no required skills listed</td>
+<td>System displays the offer without a skills section (empty field renders blank gracefully).</td>
+</tr>
+</tbody></table>
+<hr>
+<h3 id="88-admin-operations">8.8 Admin Operations</h3>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Scenario</th>
+<th>Expected Behavior</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>EC-8.1</td>
+<td>Admin tries to delete their own account</td>
+<td>System blocks self-deletion with error: &quot;You cannot delete your own account.&quot;</td>
+</tr>
+<tr>
+<td>EC-8.2</td>
+<td>Admin tries to revoke their own admin status</td>
+<td>System warns: &quot;Revoking your own admin access will log you out of admin functions.&quot;</td>
+</tr>
+<tr>
+<td>EC-8.3</td>
+<td>Admin deletes a course that has active enrollments</td>
+<td>System performs soft delete (IsDeleted = true); enrolled users retain their progress records.</td>
+</tr>
+<tr>
+<td>EC-8.4</td>
+<td>Admin tries to delete a user who has exercise submissions</td>
+<td>Soft delete sets <code>IsDeleted = true</code> on the user; submission records are preserved for data integrity.</td>
+</tr>
+<tr>
+<td>EC-8.5</td>
+<td>Admin creates a course with a duplicate title</td>
+<td>System either allows it (no unique constraint on title) or warns if uniqueness is enforced.</td>
+</tr>
+<tr>
+<td>EC-8.6</td>
+<td>Admin tries to save a quiz course entity without selecting a course</td>
+<td>System returns validation error: &quot;Course is required.&quot;</td>
+</tr>
+</tbody></table>
+<hr>
+<h3 id="89-background-service-and-system">8.9 Background Service and System</h3>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Scenario</th>
+<th>Expected Behavior</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>EC-9.1</td>
+<td>Background cleanup service runs and finds no temp files</td>
+<td>Service completes silently with a log entry: &quot;No files to clean up.&quot;</td>
+</tr>
+<tr>
+<td>EC-9.2</td>
+<td>Database connection is lost during a user session</td>
+<td>System returns a 500 error page; no data corruption occurs due to EF Core transaction rollback.</td>
+</tr>
+<tr>
+<td>EC-9.3</td>
+<td>SignalR connection drops mid-session</td>
+<td>Client-side JavaScript handles reconnection automatically (reconnect logic in <code>signalr-client.js</code>).</td>
+</tr>
+<tr>
+<td>EC-9.4</td>
+<td>User has cookies disabled</td>
+<td>OAuth and session-based auth will fail; system displays a message to enable cookies.</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="9-er-diagram">9. ER Diagram</h2>
+<p>The database schema follows a clean architecture pattern with GUID primary keys, soft-delete flags, and audit timestamps on all entities.</p>
+<h3 id="key-design-principles">Key Design Principles</h3>
+<ul>
+<li><strong>Soft Deletes:</strong> Most entities use <code>IsDeleted</code> flag instead of hard deletes</li>
+<li><strong>GUID Primary Keys:</strong> All entities use <code>Guid</code> as primary key</li>
+<li><strong>Audit Fields:</strong> <code>CreatedAt</code> timestamp on most entities</li>
+<li><strong>Many-to-Many:</strong> Resolved through junction tables (e.g., <code>UserCourse</code>, <code>LessonCompletion</code>)</li>
+</ul>
+<hr>
+<h3 id="complete-er-diagram">Complete ER Diagram</h3>
+<pre><code class="language-mermaid">erDiagram
+    ApplicationUser ||--o{ UserAssesment : &quot;takes&quot;
+    ApplicationUser ||--o{ UserCourse : &quot;enrolls&quot;
+    ApplicationUser ||--o{ LessonCompletion : &quot;completes&quot;
+    ApplicationUser ||--o{ ExerciseSubmission : &quot;submits&quot;
+    ApplicationUser ||--o{ UserQuizAttempt : &quot;attempts&quot;
+    ApplicationUser ||--o{ Project : &quot;creates&quot;
+    ApplicationUser ||--o| CV : &quot;has&quot;
+    
+    Assessment ||--o{ Question : &quot;contains&quot;
+    Assessment ||--o{ UserAssesment : &quot;has&quot;
+    
+    Question ||--o{ AnswerOption : &quot;has&quot;
+    Question ||--o{ UserAnswer : &quot;answered_by&quot;
+    
+    AnswerOption ||--o{ UserAnswer : &quot;selected_in&quot;
+    UserAssesment ||--o{ UserAnswer : &quot;contains&quot;
+    
+    Course ||--o{ Lesson : &quot;contains&quot;
+    Course ||--o{ UserCourse : &quot;enrolled_by&quot;
+    Course ||--o{ Quiz : &quot;has&quot;
+    
+    Lesson ||--o{ CodingExercise : &quot;has&quot;
+    Lesson ||--o{ LessonCompletion : &quot;completed_by&quot;
+    
+    CodingExercise ||--o{ ExerciseTestCase : &quot;has&quot;
+    CodingExercise ||--o{ ExerciseSubmission : &quot;submitted_for&quot;
+    
+    Quiz ||--o{ QuizQuestion : &quot;contains&quot;
+    Quiz ||--o{ UserQuizAttempt : &quot;attempted_by&quot;
+    
+    QuizQuestion ||--o{ QuizAnswerOption : &quot;has&quot;
+    QuizQuestion ||--o{ UserQuizAnswer : &quot;answered_in&quot;
+    
+    QuizAnswerOption ||--o{ UserQuizAnswer : &quot;selected_in&quot;
+    UserQuizAttempt ||--o{ UserQuizAnswer : &quot;contains&quot;
+
+    ApplicationUser {
+        Guid Id PK
+        string UserName
+        string Email
+        string FirstName
+        string LastName
+        string Level
+        string LearningPath
+        bool IsAdmin
+    }
+    
+    Course {
+        Guid Id PK
+        string Title
+        string Description
+        string DifficultyLevel
+        string LearningPath
+        Language ProgrammingLanguage
+        DateTime CreatedAt
+        bool IsDeleted
+    }
+    
+    Lesson {
+        Guid Id PK
+        Guid CourseId FK
+        string Title
+        string Content
+        int OrderNumber
+        DateTime CreatedAt
+        bool isDeleted
+    }
+    
+    CodingExercise {
+        Guid Id PK
+        Guid LessonId FK
+        string Title
+        string Description
+        string StarterCode
+        string ExpectedOutput
+        bool isDeleted
+    }
+    
+    ExerciseTestCase {
+        Guid Id PK
+        Guid ExerciseId FK
+        string Input
+        string ExpectedOutput
+        int OrderNumber
+        bool IsDeleted
+    }
+    
+    ExerciseSubmission {
+        Guid Id PK
+        Guid UserId FK
+        Guid ExerciseId FK
+        string SubmittedCode
+        string Output
+        bool IsCorrect
+        DateTime SubmissionDate
+    }
+    
+    LessonCompletion {
+        Guid Id PK
+        Guid UserId FK
+        Guid LessonId FK
+        bool IsCompleted
+        int TimeSpentMinutes
+        DateTime CompletionDate
+    }
+    
+    UserCourse {
+        Guid Id PK
+        Guid UserId FK
+        Guid CourseId FK
+        int ProgressPercent
+        DateTime CompletionDate
+    }
+    
+    Quiz {
+        Guid Id PK
+        Guid CourseId FK
+        string Title
+        int TimeLimitMinutes
+        int PassingScore
+        bool IsDeleted
+    }
+    
+    QuizQuestion {
+        Guid Id PK
+        Guid QuizId FK
+        string Text
+        string Difficulty
+        int OrderNumber
+        bool IsDeleted
+    }
+    
+    QuizAnswerOption {
+        Guid Id PK
+        Guid QuizQuestionId FK
+        string Text
+        bool IsCorrect
+        bool IsDeleted
+    }
+    
+    UserQuizAttempt {
+        Guid Id PK
+        Guid UserId FK
+        Guid QuizId FK
+        double Score
+        bool IsPassed
+        int TimeSpentMinutes
+        DateTime StartedAt
+    }
+    
+    UserQuizAnswer {
+        Guid Id PK
+        Guid UserQuizAttemptId FK
+        Guid QuizQuestionId FK
+        Guid SelectedAnswerOptionId FK
+        bool IsCorrect
+    }
+    
+    Assessment {
+        Guid Id PK
+        string Title
+        bool isDeleted
+    }
+    
+    Question {
+        Guid Id PK
+        Guid AssessmentId FK
+        string Text
+        string Difficulty
+    }
+    
+    AnswerOption {
+        Guid Id PK
+        Guid QuestionId FK
+        string Text
+        bool IsCorrect
+    }
+    
+    UserAssesment {
+        Guid Id PK
+        Guid UserId FK
+        Guid AssessmentId FK
+        double Score
+        string ResultLevel
+        string AssignedLearningPath
+        DateTime DateTaken
+    }
+    
+    UserAnswer {
+        Guid Id PK
+        Guid UserAssessmentId FK
+        Guid QuestionId FK
+        Guid AnswerOptionId FK
+        bool IsCorrect
+    }
+    
+    JobOffer {
+        Guid Id PK
+        string JobTitle
+        string Company
+        string Description
+        string RequiredSkills
+        DateTime PostedDate
+        DateTime Deadline
+        bool isDeleted
+    }
+    
+    Project {
+        Guid Id PK
+        Guid UserId FK
+        string Title
+        string Description
+        DateTime CompletionDate
+        string Result
+    }
+    
+    CV {
+        Guid Id PK
+        Guid UserId FK
+        string Summary
+        string Skills
+        string Education
+        string Experience
+        string Certifications
+        DateTime LastUpdated
+    }
+</code></pre>
+<hr>
+<h3 id="relationship-summary">Relationship Summary</h3>
+<table>
+<thead>
+<tr>
+<th>Relationship</th>
+<th>Type</th>
+<th>Cardinality</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>User → Assessment</td>
+<td>Takes</td>
+<td>1:N</td>
+</tr>
+<tr>
+<td>Assessment → Question</td>
+<td>Contains</td>
+<td>1:N</td>
+</tr>
+<tr>
+<td>Question → AnswerOption</td>
+<td>Has</td>
+<td>1:N</td>
+</tr>
+<tr>
+<td>Course → Lesson</td>
+<td>Contains</td>
+<td>1:N</td>
+</tr>
+<tr>
+<td>Lesson → CodingExercise</td>
+<td>Has</td>
+<td>1:N</td>
+</tr>
+<tr>
+<td>CodingExercise → ExerciseTestCase</td>
+<td>Has</td>
+<td>1:N</td>
+</tr>
+<tr>
+<td>Course → Quiz</td>
+<td>Has</td>
+<td>1:N</td>
+</tr>
+<tr>
+<td>Quiz → QuizQuestion</td>
+<td>Contains</td>
+<td>1:N</td>
+</tr>
+<tr>
+<td>QuizQuestion → QuizAnswerOption</td>
+<td>Has</td>
+<td>1:N</td>
+</tr>
+<tr>
+<td>User ↔ Course</td>
+<td>Enrolls</td>
+<td>M:N (via UserCourse)</td>
+</tr>
+<tr>
+<td>User ↔ Lesson</td>
+<td>Completes</td>
+<td>M:N (via LessonCompletion)</td>
+</tr>
+<tr>
+<td>User ↔ CodingExercise</td>
+<td>Submits</td>
+<td>M:N (via ExerciseSubmission)</td>
+</tr>
+<tr>
+<td>User ↔ Quiz</td>
+<td>Attempts</td>
+<td>M:N (via UserQuizAttempt)</td>
+</tr>
+<tr>
+<td>User → CV</td>
+<td>Has</td>
+<td>1:1</td>
+</tr>
+</tbody></table>
+<hr>
+<h3 id="delete-behaviors">Delete Behaviors</h3>
+<table>
+<thead>
+<tr>
+<th>Relationship</th>
+<th>Behavior</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Assessment → Question</td>
+<td>Cascade Delete</td>
+</tr>
+<tr>
+<td>Course → Lesson</td>
+<td>Cascade Delete</td>
+</tr>
+<tr>
+<td>Course → Quiz</td>
+<td>Cascade Delete</td>
+</tr>
+<tr>
+<td>Quiz → QuizQuestion</td>
+<td>Cascade Delete</td>
+</tr>
+<tr>
+<td>QuizQuestion → QuizAnswerOption</td>
+<td>Cascade Delete</td>
+</tr>
+<tr>
+<td>CodingExercise → ExerciseTestCase</td>
+<td>Cascade Delete</td>
+</tr>
+<tr>
+<td>Quiz → UserQuizAttempt</td>
+<td>Restrict (data preserved)</td>
+</tr>
+<tr>
+<td>Most entities</td>
+<td>Soft Delete via IsDeleted flag</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="10-ui-interfaces">10. UI Interfaces</h2>
+<p>The following describes the key screens of the CodeWave web application. All UI is built using Razor Views with Tailwind CSS, supporting both light and dark themes with responsive layouts.</p>
+<hr>
+<h3 id="101-welcome--landing-page">10.1 Welcome / Landing Page</h3>
+<p><strong>Route:</strong> <code>/</code><br><strong>Access:</strong> Public (Guest)</p>
+<p><strong>Components:</strong></p>
+<ul>
+<li>Platform name and tagline (&quot;Learn to Code. Get Hired.&quot;)</li>
+<li>&quot;Get Started&quot; and &quot;Login&quot; call-to-action buttons</li>
+<li>Feature highlights (code execution, AI mode, career tools)</li>
+<li>Responsive hero section</li>
+</ul>
+<hr>
+<h3 id="102-login-page">10.2 Login Page</h3>
+<p><strong>Route:</strong> <code>/User/Login</code><br><strong>Access:</strong> Guest</p>
+<p><strong>Components:</strong></p>
+<ul>
+<li>Email and password fields with client-side validation</li>
+<li>&quot;Login with Google&quot; OAuth button</li>
+<li>&quot;Login with GitHub&quot; OAuth button</li>
+<li>Link to registration page</li>
+<li>Password visibility toggle</li>
+<li>Error message display area</li>
+</ul>
+<hr>
+<h3 id="103-registration-page">10.3 Registration Page</h3>
+<p><strong>Route:</strong> <code>/User/SignUp</code><br><strong>Access:</strong> Guest</p>
+<p><strong>Components:</strong></p>
+<ul>
+<li>First name, last name, email, password, confirm-password fields</li>
+<li>Real-time password strength indicator (color-coded bar)</li>
+<li>Real-time password match validation</li>
+<li>OAuth registration options (Google, GitHub)</li>
+<li>Data annotations-backed server validation</li>
+</ul>
+<hr>
+<h3 id="104-assessment--onboarding-page">10.4 Assessment / Onboarding Page</h3>
+<p><strong>Route:</strong> <code>/Assessment</code><br><strong>Access:</strong> Authenticated (new users)</p>
+<p><strong>Components:</strong></p>
+<ul>
+<li>Multi-step question display (one question at a time)</li>
+<li>Multiple-choice answer selection</li>
+<li>Progress indicator (Question 3 of 10)</li>
+<li>Submit button enabled only when all questions answered</li>
+<li>Results page showing assigned learning path (Python / Java)</li>
+</ul>
+<hr>
+<h3 id="105-home-dashboard">10.5 Home Dashboard</h3>
+<p><strong>Route:</strong> <code>/Home</code><br><strong>Access:</strong> Authenticated Learner</p>
+<p><strong>Components:</strong></p>
+<ul>
+<li>Welcome message with user name and learning path</li>
+<li>Progress statistics cards: Lessons Completed, Exercises Done, Quiz Score, Study Time</li>
+<li>Enrolled courses list with progress bars</li>
+<li>Recent activity feed</li>
+<li>Acquired skills tags</li>
+<li>Weaknesses section</li>
+<li>Job offers preview strip</li>
+<li>Quiz availability notification</li>
+</ul>
+<hr>
+<h3 id="106-course-list-page">10.6 Course List Page</h3>
+<p><strong>Route:</strong> <code>/LearningPath/Courses</code><br><strong>Access:</strong> Authenticated Learner</p>
+<p><strong>Components:</strong></p>
+<ul>
+<li>Course cards with: title, description, difficulty badge, language icon, progress bar</li>
+<li>Search/filter bar (by language, difficulty)</li>
+<li>Enrolled vs. available status indicator</li>
+</ul>
+<hr>
+<h3 id="107-lesson-view-page">10.7 Lesson View Page</h3>
+<p><strong>Route:</strong> <code>/LearningPath/Lesson/{lessonId}</code><br><strong>Access:</strong> Authenticated Learner</p>
+<p><strong>Components:</strong></p>
+<ul>
+<li>Lesson title and breadcrumb navigation</li>
+<li>Rich text lesson content (markdown rendered with code highlighting)</li>
+<li>Coding exercise panel on the right</li>
+<li>Monaco code editor (VS Code editor embedded)</li>
+<li>&quot;Run Code&quot; and &quot;Submit&quot; buttons</li>
+<li>Console output panel showing stdout/stderr</li>
+<li>Test case results table (Input | Expected | Actual | Status)</li>
+<li>&quot;Focus Mode&quot; button</li>
+<li>Lesson completion button</li>
+</ul>
+<hr>
+<h3 id="108-focus-mode-page">10.8 Focus Mode Page</h3>
+<p><strong>Route:</strong> <code>/LearningPath/FocusMode/{lessonId}</code><br><strong>Access:</strong> Authenticated Learner</p>
+<p><strong>Components:</strong></p>
+<ul>
+<li>Full-screen layout with no navigation distractions</li>
+<li>Left panel: Lesson content (scrollable)</li>
+<li>Center panel: Monaco code editor</li>
+<li>Right panel: Exercise selector dropdown + test results</li>
+<li>AI Helper chat popup (bottom-right) powered by Google Gemini</li>
+<li>Previous / Next lesson navigation arrows</li>
+<li>Exit Focus Mode button</li>
+</ul>
+<hr>
+<h3 id="109-quiz-page">10.9 Quiz Page</h3>
+<p><strong>Route:</strong> <code>/Quiz/Take/{quizId}</code><br><strong>Access:</strong> Authenticated Learner</p>
+<p><strong>Components:</strong></p>
+<ul>
+<li>Quiz title and description</li>
+<li>Question display with multiple-choice options (radio buttons)</li>
+<li>Timer countdown (if time limit configured)</li>
+<li>Question progress indicator (2/10)</li>
+<li>&quot;Submit Quiz&quot; button</li>
+<li>Results page: score percentage, pass/fail badge, per-question breakdown</li>
+</ul>
+<hr>
+<h3 id="1010-progress--dashboard-stats-page">10.10 Progress / Dashboard Stats Page</h3>
+<p><strong>Route:</strong> <code>/Progress</code><br><strong>Access:</strong> Authenticated Learner</p>
+<p><strong>Components:</strong></p>
+<ul>
+<li>Circular progress charts per course</li>
+<li>Skills list with category grouping</li>
+<li>Weaknesses list with suggested review links</li>
+<li>Study time breakdown by day/week</li>
+<li>Quiz history table</li>
+</ul>
+<hr>
+<h3 id="1011-cv-builder-page">10.11 CV Builder Page</h3>
+<p><strong>Route:</strong> <code>/CV</code><br><strong>Access:</strong> Authenticated Learner</p>
+<p><strong>Components:</strong></p>
+<ul>
+<li>Auto-populated fields from: completed courses, acquired skills, quiz scores, projects</li>
+<li>Editable summary/bio field</li>
+<li>Education and experience manual input fields</li>
+<li>Preview pane showing formatted CV layout</li>
+<li>&quot;Download PDF&quot; button (QuestPDF generation)</li>
+</ul>
+<hr>
+<h3 id="1012-job-offers-page">10.12 Job Offers Page</h3>
+<p><strong>Route:</strong> <code>/JobOffers</code><br><strong>Access:</strong> Authenticated Learner</p>
+<p><strong>Components:</strong></p>
+<ul>
+<li>Job listing cards: title, company name, description, required skills tags, deadline</li>
+<li>Filter bar by skill or company</li>
+<li>&quot;Apply&quot; button (disabled if deadline passed)</li>
+<li>Expired jobs shown with greyed styling</li>
+</ul>
+<hr>
+<h3 id="1013-admin-dashboard">10.13 Admin Dashboard</h3>
+<p><strong>Route:</strong> <code>/Admin</code><br><strong>Access:</strong> Administrator only</p>
+<p><strong>Components:</strong></p>
+<ul>
+<li>KPI cards: Total Users, Total Courses, Total Job Offers</li>
+<li>User Engagement Chart (Chart.js line chart — daily active users)</li>
+<li>Skill Distribution Chart (Chart.js bar chart — Beginner/Intermediate/Advanced)</li>
+<li>Navigation to: User Management, Course Management, Job Management, Reports</li>
+<li>Recent activity feed</li>
+</ul>
+<hr>
+<h3 id="1014-admin-user-management">10.14 Admin User Management</h3>
+<p><strong>Route:</strong> <code>/Admin/Users</code><br><strong>Access:</strong> Administrator only</p>
+<p><strong>Components:</strong></p>
+<ul>
+<li>Paginated user table: Name, Email, Role, Learning Path, Status</li>
+<li>Search bar (by email or name)</li>
+<li>Action buttons per row: View Details, Edit, Delete, Toggle Admin</li>
+<li>Create User form modal/page</li>
+<li>User details panel: progress statistics, course list, quiz history</li>
+</ul>
+<hr>
+<h2 id="11-apis-and-services">11. APIs and Services</h2>
+<h3 id="111-rest-api-endpoints">11.1 REST API Endpoints</h3>
+<h4 id="courses-api">Courses API</h4>
+<p><strong>Base Route:</strong> <code>/api/v1/CoursesApi</code></p>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Endpoint</th>
+<th>Auth</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>GET</td>
+<td><code>/api/v1/CoursesApi</code></td>
+<td>None</td>
+<td>Get all available courses</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/CoursesApi/{id}</code></td>
+<td>None</td>
+<td>Get course details by ID</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/CoursesApi/my-courses</code></td>
+<td>Required</td>
+<td>Get authenticated user&#39;s enrolled courses</td>
+</tr>
+</tbody></table>
+<p><strong>Sample Response — GET /api/v1/CoursesApi:</strong></p>
+<pre><code class="language-json">[
+  {
+    &quot;id&quot;: &quot;3fa85f64-5717-4562-b3fc-2c963f66afa6&quot;,
+    &quot;title&quot;: &quot;Python Basics&quot;,
+    &quot;description&quot;: &quot;Learn Python from scratch&quot;,
+    &quot;difficulty&quot;: &quot;Beginner&quot;,
+    &quot;language&quot;: &quot;Python&quot;,
+    &quot;lessonCount&quot;: 10,
+    &quot;createdAt&quot;: &quot;2025-01-01T00:00:00Z&quot;
+  }
+]
+</code></pre>
+<hr>
+<h4 id="code-execution-api">Code Execution API</h4>
+<p><strong>Base Route:</strong> <code>/api/code</code></p>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Endpoint</th>
+<th>Auth</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>POST</td>
+<td><code>/api/code/run</code></td>
+<td>Required</td>
+<td>Execute user code (with or without exercise)</td>
+</tr>
+</tbody></table>
+<p><strong>Request Body:</strong></p>
+<pre><code class="language-json">{
+  &quot;language&quot;: &quot;java&quot;,
+  &quot;code&quot;: &quot;public class Main { public static void main(String[] args) { System.out.println(\&quot;Hello\&quot;); } }&quot;,
+  &quot;exerciseId&quot;: &quot;guid-optional&quot;
+}
+</code></pre>
+<p><strong>Response:</strong></p>
+<pre><code class="language-json">{
+  &quot;output&quot;: &quot;Hello&quot;,
+  &quot;isCorrect&quot;: true,
+  &quot;message&quot;: &quot;All tests passed&quot;,
+  &quot;testCaseResults&quot;: [
+    { &quot;input&quot;: &quot;&quot;, &quot;expected&quot;: &quot;Hello&quot;, &quot;actual&quot;: &quot;Hello&quot;, &quot;passed&quot;: true }
+  ],
+  &quot;passedTests&quot;: 1,
+  &quot;totalTests&quot;: 1
+}
+</code></pre>
+<hr>
+<h4 id="code-runner-api">Code Runner API</h4>
+<p><strong>Base Route:</strong> <code>/api/CodeRunner</code></p>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Endpoint</th>
+<th>Auth</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>POST</td>
+<td><code>/api/CodeRunner/run-java</code></td>
+<td>None</td>
+<td>Execute Java code directly via Docker runner</td>
+</tr>
+</tbody></table>
+<hr>
+<h4 id="progress-api">Progress API</h4>
+<p><strong>Base Route:</strong> <code>/api/progress</code></p>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Endpoint</th>
+<th>Auth</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>POST</td>
+<td><code>/api/progress/completeLesson</code></td>
+<td>Required</td>
+<td>Mark a lesson as completed</td>
+</tr>
+</tbody></table>
+<hr>
+<h3 id="112-internal-service-layer">11.2 Internal Service Layer</h3>
+<table>
+<thead>
+<tr>
+<th>Service</th>
+<th>Interface</th>
+<th>Responsibility</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>CodeService</code></td>
+<td><code>ICodeService</code></td>
+<td>Executes code in Docker containers, validates against test cases</td>
+</tr>
+<tr>
+<td><code>LearningPathService</code></td>
+<td><code>ILearningPathService</code></td>
+<td>Manages course enrollment, lesson access, completion tracking</td>
+</tr>
+<tr>
+<td><code>ProgressService</code></td>
+<td><code>IProgressService</code></td>
+<td>Calculates statistics, extracts skills, identifies weaknesses</td>
+</tr>
+<tr>
+<td><code>QuizService</code></td>
+<td><code>IQuizService</code></td>
+<td>Manages quiz retrieval, answer submission, score calculation</td>
+</tr>
+<tr>
+<td><code>AssessmentService</code></td>
+<td><code>IAssessmentService</code></td>
+<td>Handles initial skill assessment and learning path assignment</td>
+</tr>
+<tr>
+<td><code>CVService</code></td>
+<td><code>ICVService</code></td>
+<td>Generates PDF CV from user achievements using QuestPDF</td>
+</tr>
+<tr>
+<td><code>JobApplicationService</code></td>
+<td>—</td>
+<td>Manages job offer applications</td>
+</tr>
+<tr>
+<td><code>UserService</code></td>
+<td><code>IUserService</code></td>
+<td>User profile management and authentication helpers</td>
+</tr>
+<tr>
+<td><code>CleanupBackgroundService</code></td>
+<td><code>IHostedService</code></td>
+<td>Daily cleanup of temp files and soft-deleted records (90+ days)</td>
+</tr>
+<tr>
+<td><code>NotificationHub</code></td>
+<td>SignalR Hub</td>
+<td>Real-time push notifications for progress and achievements</td>
+</tr>
+</tbody></table>
+<hr>
+<h3 id="113-repository-layer">11.3 Repository Layer</h3>
+<table>
+<thead>
+<tr>
+<th>Repository</th>
+<th>Interface</th>
+<th>Entity</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>CourseRepository</code></td>
+<td><code>ICourseRepository</code></td>
+<td>Course</td>
+</tr>
+<tr>
+<td><code>LessonRepository</code></td>
+<td><code>ILessonRepository</code></td>
+<td>Lesson</td>
+</tr>
+<tr>
+<td><code>ExerciseRepository</code></td>
+<td><code>IExerciseRepository</code></td>
+<td>CodingExercise</td>
+</tr>
+<tr>
+<td><code>ExerciseSubmissionRepository</code></td>
+<td><code>IExerciseSubmissionRepository</code></td>
+<td>ExerciseSubmission</td>
+</tr>
+<tr>
+<td><code>LessonCompletionRepository</code></td>
+<td><code>ILessonCompletionRepository</code></td>
+<td>LessonCompletion</td>
+</tr>
+<tr>
+<td><code>QuizRepository</code></td>
+<td><code>IQuizRepository</code></td>
+<td>Quiz</td>
+</tr>
+<tr>
+<td><code>ProjectRepository</code></td>
+<td><code>IProjectRepository</code></td>
+<td>Project</td>
+</tr>
+<tr>
+<td><code>UserCourseRepository</code></td>
+<td><code>IUserCourseRepository</code></td>
+<td>UserCourse</td>
+</tr>
+<tr>
+<td><code>UnitOfWork</code></td>
+<td><code>IUnitOfWork</code></td>
+<td>Transaction management</td>
+</tr>
+</tbody></table>
+<hr>
+<h1 id="appendices-1">APPENDICES</h1>
+<hr>
+<h2 id="12-activity-diagrams">12. Activity Diagrams</h2>
+<p>Activity diagrams illustrate the flow of control and user workflows throughout the system.</p>
+<h3 id="ad1-user-registration-and-login-flow">AD1: User Registration and Login Flow</h3>
+<pre><code class="language-mermaid">flowchart TD
+    Start([Start]) --&gt; CheckAuth{User Authenticated?}
+    CheckAuth --&gt;|No| ShowLogin[Show Login Page]
+    CheckAuth --&gt;|Yes| CheckRole{Check User Role}
+    
+    ShowLogin --&gt; LoginMethod{Login Method?}
+    LoginMethod --&gt;|Email/Password| EnterCredentials[Enter Email &amp; Password]
+    LoginMethod --&gt;|Google| GoogleAuth[Redirect to Google OAuth]
+    LoginMethod --&gt;|GitHub| GitHubAuth[Redirect to GitHub OAuth]
+    
+    EnterCredentials --&gt; ValidateCreds{Validate Credentials?}
+    ValidateCreds --&gt;|Invalid| ShowError[Display Error Message]
+    ShowError --&gt; ShowLogin
+    ValidateCreds --&gt;|Valid| CreateSession[Create User Session]
+    
+    GoogleAuth --&gt; ValidateOAuth{User Exists?}
+    GitHubAuth --&gt; ValidateOAuth
+    ValidateOAuth --&gt;|No| CreateOAuthAccount[Create Account from OAuth]
+    ValidateOAuth --&gt;|Yes| CreateSession
+    CreateOAuthAccount --&gt; CreateSession
+    
+    CreateSession --&gt; CheckRole
+    CheckRole --&gt;|Admin| RedirectAdmin[Redirect to /Admin Dashboard]
+    CheckRole --&gt;|Regular User| RedirectHome[Redirect to /Home Dashboard]
+    
+    RedirectAdmin --&gt; End([End])
+    RedirectHome --&gt; End
+</code></pre>
+<hr>
+<h3 id="ad2-assessment-and-learning-path-assignment-flow">AD2: Assessment and Learning Path Assignment Flow</h3>
+<pre><code class="language-mermaid">flowchart TD
+    Start([Start]) --&gt; CheckAssessment{Assessment Completed?}
+    CheckAssessment --&gt;|Yes| RedirectDashboard[Redirect to Dashboard]
+    CheckAssessment --&gt;|No| ShowAssessment[Display Assessment Questions]
+    
+    ShowAssessment --&gt; DisplayQuestion[Display Current Question]
+    DisplayQuestion --&gt; UserAnswer[User Selects Answer]
+    UserAnswer --&gt; CheckMore{More Questions?}
+    CheckMore --&gt;|Yes| DisplayQuestion
+    CheckMore --&gt;|No| SubmitAssessment[User Submits Assessment]
+    
+    SubmitAssessment --&gt; CalculateScore[Calculate Score]
+    CalculateScore --&gt; AssignPath{Assign Learning Path}
+    AssignPath --&gt;|Python| SetPython[Set LearningPath = Python]
+    AssignPath --&gt;|Java| SetJava[Set LearningPath = Java]
+    
+    SetPython --&gt; UpdateProfile[Update User Profile]
+    SetJava --&gt; UpdateProfile
+    UpdateProfile --&gt; ShowResults[Display Results]
+    ShowResults --&gt; RedirectDashboard
+    RedirectDashboard --&gt; End([End])
+</code></pre>
+<hr>
+<h3 id="ad3-course-learning-flow">AD3: Course Learning Flow</h3>
+<pre><code class="language-mermaid">flowchart TD
+    Start([Start]) --&gt; BrowseCourses[Browse Available Courses]
+    BrowseCourses --&gt; SelectCourse[Select Course]
+    SelectCourse --&gt; CheckEnrollment{Enrolled?}
+    CheckEnrollment --&gt;|No| AutoEnroll[Auto-Enroll User]
+    CheckEnrollment --&gt;|Yes| LoadCourse[Load Course Content]
+    AutoEnroll --&gt; LoadCourse
+    
+    LoadCourse --&gt; SelectLesson[User Selects Lesson]
+    SelectLesson --&gt; CheckPrereq{Previous Lesson Completed?}
+    CheckPrereq --&gt;|No| ShowLocked[Show Lesson Locked]
+    CheckPrereq --&gt;|Yes| LoadLesson[Load Lesson Content]
+    
+    LoadLesson --&gt; WriteCode[Write Code in Editor]
+    WriteCode --&gt; RunCode[Run Code in Docker]
+    RunCode --&gt; SubmitExercise{Submit Exercise?}
+    SubmitExercise --&gt;|No| WriteCode
+    SubmitExercise --&gt;|Yes| ValidateCode[Validate Against Test Cases]
+    
+    ValidateCode --&gt; AllPass{All Tests Pass?}
+    AllPass --&gt;|No| ShowFailures[Show Failed Tests]
+    ShowFailures --&gt; WriteCode
+    AllPass --&gt;|Yes| SaveSubmission[Save Submission &amp; Unlock Next]
+    
+    SaveSubmission --&gt; MarkComplete[Mark Lesson Complete]
+    MarkComplete --&gt; CheckMore{More Lessons?}
+    CheckMore --&gt;|Yes| SelectLesson
+    CheckMore --&gt;|No| End([Course Complete])
+</code></pre>
+<hr>
+<h3 id="ad4-code-execution-flow">AD4: Code Execution Flow</h3>
+<pre><code class="language-mermaid">flowchart TD
+    Start([Start]) --&gt; ReceiveCode[Receive User Code]
+    ReceiveCode --&gt; CheckExercise{Exercise Selected?}
+    CheckExercise --&gt;|Yes| GetTestCases[Get Exercise Test Cases]
+    CheckExercise --&gt;|No| ExperimentMode[Experiment Mode]
+    
+    GetTestCases --&gt; DetectLanguage[Detect Programming Language]
+    ExperimentMode --&gt; DetectLanguage
+    
+    DetectLanguage --&gt; PrepareCode[Prepare Code]
+    PrepareCode --&gt; SelectRunner{Runner Type?}
+    SelectRunner --&gt;|Python| RunPython[Execute Python in Docker]
+    SelectRunner --&gt;|Java| RunJava[Execute Java in Docker]
+    
+    RunPython --&gt; CaptureOutput[Capture Output &amp; Errors]
+    RunJava --&gt; CaptureOutput
+    
+    CaptureOutput --&gt; ExerciseCheck{Exercise?}
+    ExerciseCheck --&gt;|No| DisplayOutput[Display Output]
+    ExerciseCheck --&gt;|Yes| ValidateOutput[Compare vs Expected]
+    
+    ValidateOutput --&gt; AllPassed{All Tests Passed?}
+    AllPassed --&gt;|No| ShowResults[Show Test Results]
+    AllPassed --&gt;|Yes| SaveSubmission[Save &amp; Mark Complete]
+    SaveSubmission --&gt; ShowResults
+    ShowResults --&gt; End([End])
+    DisplayOutput --&gt; End
+</code></pre>
+<hr>
+<h3 id="ad5-quiz-taking-flow">AD5: Quiz Taking Flow</h3>
+<pre><code class="language-mermaid">flowchart TD
+    Start([Start]) --&gt; FilterQuizzes[Filter Available Quizzes]
+    FilterQuizzes --&gt; SelectQuiz[User Selects Quiz]
+    SelectQuiz --&gt; LoadQuiz[Load Quiz Questions]
+    LoadQuiz --&gt; CheckTimer{Has Time Limit?}
+    CheckTimer --&gt;|Yes| StartTimer[Start Timer]
+    CheckTimer --&gt;|No| ShowQuestions[Display Questions]
+    StartTimer --&gt; ShowQuestions
+    
+    ShowQuestions --&gt; AnswerQuestion[User Answers Questions]
+    AnswerQuestion --&gt; SubmitQuiz{Submit Quiz?}
+    SubmitQuiz --&gt;|No| AnswerQuestion
+    SubmitQuiz --&gt;|Yes| CalculateScore[Calculate Score]
+    
+    CalculateScore --&gt; CheckPassing{Score &gt;= Passing?}
+    CheckPassing --&gt;|Yes| MarkPassed[Mark as Passed]
+    CheckPassing --&gt;|No| MarkFailed[Mark as Failed]
+    
+    MarkPassed --&gt; SaveAttempt[Save Attempt &amp; Answers]
+    MarkFailed --&gt; SaveAttempt
+    SaveAttempt --&gt; DisplayResults[Display Results &amp; Feedback]
+    DisplayResults --&gt; End([End])
+</code></pre>
+<hr>
+<h3 id="ad6-focus-mode-lesson-flow">AD6: Focus Mode Lesson Flow</h3>
+<pre><code class="language-mermaid">flowchart TD
+    Start([Start]) --&gt; LoadLesson[Load Current Lesson]
+    LoadLesson --&gt; DisplayContent[Display Lesson Content]
+    DisplayContent --&gt; InitEditor[Initialize Monaco Editor]
+    InitEditor --&gt; UserAction{User Action?}
+    
+    UserAction --&gt;|Select Exercise| LoadExercise[Load Exercise]
+    UserAction --&gt;|Write Code| WriteCode[Write Code]
+    UserAction --&gt;|Run Code| ExecuteCode[Execute Code]
+    UserAction --&gt;|AI Help| OpenChat[Open Gemini Chat]
+    UserAction --&gt;|Navigate| NavAction{Direction?}
+    UserAction --&gt;|Exit| End([End Focus Mode])
+    
+    LoadExercise --&gt; WriteCode
+    WriteCode --&gt; AutoSave[Auto-Save to LocalStorage]
+    AutoSave --&gt; UserAction
+    
+    ExecuteCode --&gt; DisplayOutput[Show Output]
+    DisplayOutput --&gt; UserAction
+    
+    OpenChat --&gt; SendMessage[Send to Gemini API]
+    SendMessage --&gt; DisplayResponse[Show AI Response]
+    DisplayResponse --&gt; UserAction
+    
+    NavAction --&gt;|Previous| LoadPrev[Load Previous Lesson]
+    NavAction --&gt;|Next| CheckUnlocked{Unlocked?}
+    LoadPrev --&gt; LoadLesson
+    CheckUnlocked --&gt;|Yes| LoadNext[Load Next Lesson]
+    CheckUnlocked --&gt;|No| ShowLocked[Show Locked Message]
+    LoadNext --&gt; LoadLesson
+    ShowLocked --&gt; UserAction
+</code></pre>
+<hr>
+<h2 id="13-data-flow-diagrams-dfd">13. Data Flow Diagrams (DFD)</h2>
+<h3 id="context-diagram-level-0">Context Diagram (Level 0)</h3>
+<pre><code class="language-mermaid">graph LR
+    Learner[Learner]
+    Admin[Administrator]
+    Guest[Guest User]
+    Google[Google OAuth]
+    GitHub[GitHub OAuth]
+    CodeRunner[Code Execution System]
+    
+    System[CodeWave Learning Platform]
+    
+    Learner --&gt;|Registration, Login, Code, Quiz Answers| System
+    System --&gt;|Course Content, Progress, Quiz Results, Job Offers| Learner
+    
+    Admin --&gt;|Admin Credentials, Management Requests| System
+    System --&gt;|User Data, Analytics Reports| Admin
+    
+    Guest --&gt;|Registration / Login Data| System
+    System --&gt;|Login &amp; Registration Forms| Guest
+    
+    Google --&gt;|OAuth Token + User Profile| System
+    System --&gt;|OAuth Request| Google
+    
+    GitHub --&gt;|OAuth Token + User Profile| System
+    System --&gt;|OAuth Request| GitHub
+    
+    CodeRunner --&gt;|Execution Results| System
+    System --&gt;|Code + Language Type| CodeRunner
+</code></pre>
+<hr>
+<h3 id="level-1-dfd">Level 1 DFD</h3>
+<pre><code class="language-mermaid">graph TB
+    subgraph External[&quot;External Entities&quot;]
+        Learner[Learner]
+        Admin[Administrator]
+        Guest[Guest User]
+        Google[Google OAuth]
+        GitHub[GitHub OAuth]
+        CodeRunner[Code Execution System]
+    end
+    
+    subgraph System[&quot;CodeWave System Processes&quot;]
+        P1[1.0 Authenticate User]
+        P2[2.0 Manage Assessment]
+        P3[3.0 Manage Learning Content]
+        P4[4.0 Execute Code]
+        P5[5.0 Track Progress]
+        P6[6.0 Manage Quizzes]
+        P7[7.0 Manage Admin Functions]
+        P8[8.0 Generate Reports]
+    end
+    
+    subgraph DataStores[&quot;Data Stores&quot;]
+        D1[(&quot;D1: User Database&quot;)]
+        D2[(&quot;D2: Course Database&quot;)]
+        D3[(&quot;D3: Progress Database&quot;)]
+        D4[(&quot;D4: Quiz Database&quot;)]
+        D5[(&quot;D5: Assessment Database&quot;)]
+        D6[(&quot;D6: Session Store&quot;)]
+        D7[(&quot;D7: Code Cache&quot;)]
+    end
+    
+    Learner --&gt;|Login Credentials| P1
+    Guest --&gt;|Registration Data| P1
+    Google --&gt;|OAuth Token| P1
+    GitHub --&gt;|OAuth Token| P1
+    P1 &lt;--&gt;|User Data| D1
+    P1 --&gt;|Session Data| D6
+    P1 --&gt;|Authenticated User| Learner
+    P1 --&gt;|Authenticated Admin| Admin
+    
+    Learner --&gt;|Assessment Answers| P2
+    P2 &lt;--&gt;|Assessment Data| D5
+    P2 --&gt;|Learning Path Assignment| Learner
+    
+    Learner --&gt;|Course Request| P3
+    Admin --&gt;|Course Management| P3
+    P3 &lt;--&gt;|Course Data| D2
+    P3 --&gt;|Lessons &amp; Exercises| Learner
+    
+    Learner --&gt;|Code| P4
+    P4 --&gt;|Code Request| CodeRunner
+    CodeRunner --&gt;|Execution Results| P4
+    P4 &lt;--&gt;|Submission Data| D3
+    P4 --&gt;|Output| Learner
+    
+    Learner --&gt;|Progress Query| P5
+    P5 &lt;--&gt;|Progress Data| D3
+    P5 --&gt;|Progress Statistics| Learner
+    
+    Learner --&gt;|Quiz Answers| P6
+    Admin --&gt;|Quiz Management| P6
+    P6 &lt;--&gt;|Quiz Data| D4
+    P6 --&gt;|Quiz Results| Learner
+    
+    Admin --&gt;|Management Requests| P7
+    P7 &lt;--&gt;|User Data| D1
+    P7 &lt;--&gt;|Course Data| D2
+    P7 --&gt;|Results| Admin
+    
+    Admin --&gt;|Report Request| P8
+    P8 &lt;--&gt;|Analytics| D1
+    P8 &lt;--&gt;|Analytics| D2
+    P8 &lt;--&gt;|Analytics| D3
+    P8 &lt;--&gt;|Analytics| D4
+    P8 --&gt;|Reports| Admin
+</code></pre>
+<hr>
+<h2 id="14-system-architecture">14. System Architecture</h2>
+<p>CodeWave is built on a four-layer Clean Architecture:</p>
+<pre><code>CodeWave/
+├── CodeWave.Domain/           # Layer 1: Domain entities (22 entities, no dependencies)
+├── CodeWave.Application/      # Layer 2: Interfaces, DTOs, ViewModels, AutoMapper
+├── CodeWave.Infrastructure/   # Layer 3: EF Core repositories, services, migrations
+├── CodeWave.Web/              # Layer 4: Controllers (19), Views (52), API, SignalR, Hubs
+├── CodeWave.Tests/            # Unit tests: xUnit + Moq
+└── CodeWave.Docker/           # Docker configurations for code execution
+</code></pre>
+<p><strong>Dependency Flow:</strong> Web → Infrastructure → Application → Domain (no circular dependencies)</p>
+<p><strong>Technology Stack:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>Technology</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Backend Framework</td>
+<td>ASP.NET Core 9.0 MVC</td>
+</tr>
+<tr>
+<td>Database</td>
+<td>MySQL 8.0</td>
+</tr>
+<tr>
+<td>ORM</td>
+<td>Entity Framework Core 9.0</td>
+</tr>
+<tr>
+<td>Authentication</td>
+<td>ASP.NET Core Identity + Google/GitHub OAuth</td>
+</tr>
+<tr>
+<td>Frontend</td>
+<td>Razor Views + Tailwind CSS + Monaco Editor</td>
+</tr>
+<tr>
+<td>Code Execution</td>
+<td>Docker containers (Python 3 + OpenJDK)</td>
+</tr>
+<tr>
+<td>Real-time</td>
+<td>SignalR</td>
+</tr>
+<tr>
+<td>Logging</td>
+<td>Serilog (console + daily rolling file)</td>
+</tr>
+<tr>
+<td>Mapping</td>
+<td>AutoMapper</td>
+</tr>
+<tr>
+<td>AI Integration</td>
+<td>Google Gemini API</td>
+</tr>
+<tr>
+<td>PDF Generation</td>
+<td>QuestPDF</td>
+</tr>
+<tr>
+<td>Testing</td>
+<td>xUnit + Moq + EF Core InMemory</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="15-non-functional-requirements">15. Non-Functional Requirements</h2>
+<table>
+<thead>
+<tr>
+<th>Category</th>
+<th>Requirement</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Performance</td>
+<td>Page load &lt; 2s; Code execution &lt; 5s; API response &lt; 1s</td>
+</tr>
+<tr>
+<td>Scalability</td>
+<td>Supports 100+ concurrent users; Docker containers scale independently</td>
+</tr>
+<tr>
+<td>Security</td>
+<td>HTTPS in production; CSRF tokens; XSS protection; Docker code isolation; EF Core parameterized queries</td>
+</tr>
+<tr>
+<td>Reliability</td>
+<td>99.5% uptime target; graceful error handling; daily database backups</td>
+</tr>
+<tr>
+<td>Usability</td>
+<td>Responsive design (mobile + desktop); dark/light theme; WCAG 2.1 Level AA target</td>
+</tr>
+<tr>
+<td>Maintainability</td>
+<td>Clean Architecture; Git version control; Serilog logging; xUnit tests</td>
+</tr>
+<tr>
+<td>Portability</td>
+<td>Cross-platform (Windows/macOS/Linux); MySQL and SQL Server support</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="16-plantuml-source-code">16. PlantUML Source Code</h2>
+<p>The following PlantUML source files are available in the project root for rendering high-quality diagrams using any PlantUML-compatible tool or the <a href="https://www.plantuml.com/plantuml/uml/">online renderer</a>.</p>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Contents</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>ER_DIAGRAM_PLANTUML.puml</code></td>
+<td>Complete ER diagram with entity attributes</td>
+</tr>
+<tr>
+<td><code>USE_CASE_DIAGRAM.puml</code></td>
+<td>Full use case diagram (40 use cases, 6 actors)</td>
+</tr>
+<tr>
+<td><code>ACTIVITY_DIAGRAM_PLANTUML.puml</code></td>
+<td>5 activity diagrams (Registration, Assessment, Learning, Code Execution, Quiz, Admin)</td>
+</tr>
+<tr>
+<td><code>DFD_DIAGRAM_PLANTUML.puml</code></td>
+<td>Context DFD + Level 1 DFD</td>
+</tr>
+<tr>
+<td><code>ER_DIAGRAM_DBML.txt</code></td>
+<td>DBML schema for <a href="https://dbdiagram.io">dbdiagram.io</a></td>
+</tr>
+<tr>
+<td><code>GANTT_CHART.puml</code></td>
+<td>Project scheduling Gantt chart</td>
+</tr>
+<tr>
+<td><code>PERT_CHART.puml</code></td>
+<td>PERT network diagram</td>
+</tr>
+</tbody></table>
+<p><strong>How to render PlantUML diagrams:</strong></p>
+<ol>
+<li>Open VS Code and install the &quot;PlantUML&quot; extension</li>
+<li>Open any <code>.puml</code> file</li>
+<li>Press <code>Alt+D</code> to preview, or right-click → &quot;Export Current Diagram&quot;</li>
+</ol>
+<p>Or paste the contents at: <code>https://www.plantuml.com/plantuml/uml/</code></p>
+<hr>
+<p><em>Document prepared for CSCI420 Final Year Project – April 2026</em><br><em>CodeWave Development Team</em></p>
+
+
+<!-- Mermaid.js: renders mermaid code blocks automatically -->
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+  mermaid.initialize({ startOnLoad: false, theme: 'default', securityLevel: 'loose' });
+
+  // Find all <pre><code class="language-mermaid"> and replace with <div class="mermaid">
+  document.querySelectorAll('pre code.language-mermaid').forEach(el => {
+    const div = document.createElement('div');
+    div.className = 'mermaid';
+    div.textContent = el.textContent;
+    el.parentElement.replaceWith(div);
+  });
+
+  await mermaid.run();
+  document.title = '__MERMAID_DONE__';
+</script>
+</body>
+</html>

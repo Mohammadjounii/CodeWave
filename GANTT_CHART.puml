@@ -1,0 +1,156 @@
+@startgantt
+Project starts 2024-01-01
+
+' -------------------------------
+' Phase 1: Foundation & Infrastructure
+' -------------------------------
+[Project Setup & Infrastructure] lasts 5 days
+[Database Schema Design] lasts 4 days
+[Domain Entities Implementation] lasts 6 days
+[Database Context & Migrations] lasts 3 days
+
+[Database Schema Design] starts at [Project Setup & Infrastructure]'s end
+[Domain Entities Implementation] starts at [Database Schema Design]'s end
+[Database Context & Migrations] starts at [Domain Entities Implementation]'s end
+
+' -------------------------------
+' Phase 2: Authentication & Authorization
+' -------------------------------
+[User Registration] lasts 3 days
+[OAuth Integration] lasts 5 days
+[User Login] lasts 4 days
+[Role-Based Access Control] lasts 3 days
+
+[User Registration] starts at [Database Context & Migrations]'s end
+[OAuth Integration] starts at [User Registration]'s end
+[User Login] starts at [User Registration]'s end
+[Role-Based Access Control] starts at [OAuth Integration]'s end
+
+' -------------------------------
+' Phase 3: Assessment System
+' -------------------------------
+[Assessment DB Models] lasts 2 days
+[Assessment Questions] lasts 3 days
+[Assessment Logic] lasts 4 days
+[Learning Path Assignment] lasts 2 days
+
+[Assessment DB Models] starts at [Database Context & Migrations]'s end
+[Assessment Questions] starts at [Assessment DB Models]'s end
+[Assessment Logic] starts at [Assessment Questions]'s end
+[Learning Path Assignment] starts at [Assessment Logic]'s end
+
+' -------------------------------
+' Phase 4: Course Management
+' -------------------------------
+[Course Repository] lasts 3 days
+[Course Browsing] lasts 3 days
+[Course Enrollment] lasts 2 days
+
+[Course Repository] starts at [Database Context & Migrations]'s end
+[Course Browsing] starts at [Course Repository]'s end
+[Course Enrollment] starts at [Course Browsing]'s end
+
+' -------------------------------
+' Phase 5: Lesson Management
+' -------------------------------
+[Lesson Repository] lasts 3 days
+[Lesson Display] lasts 3 days
+[Lesson Completion] lasts 2 days
+
+[Lesson Repository] starts at [Database Context & Migrations]'s end
+[Lesson Display] starts at [Lesson Repository]'s end
+[Lesson Completion] starts at [Lesson Display]'s end
+
+' -------------------------------
+' Phase 6: Exercise Management
+' -------------------------------
+[Exercise Repository] lasts 3 days
+[Exercise Repository] starts at [Database Context & Migrations]'s end
+
+' -------------------------------
+' Phase 7: Code Editor & Execution
+' -------------------------------
+[Code Editor Interface] lasts 4 days
+[Docker Setup] lasts 5 days
+[Python Execution] lasts 3 days
+[Java Execution] lasts 4 days
+[Exercise Submission] lasts 5 days
+[Test Case Validation] lasts 3 days
+
+[Code Editor Interface] starts at [Role-Based Access Control]'s end
+[Docker Setup] starts at [Code Editor Interface]'s end
+[Python Execution] starts at [Docker Setup]'s end
+[Java Execution] starts at [Docker Setup]'s end
+[Exercise Submission] starts at [Java Execution]'s end
+[Test Case Validation] starts at [Exercise Submission]'s end
+
+' -------------------------------
+' Phase 8: Progress Tracking
+' -------------------------------
+[Progress Tracking Service] lasts 4 days
+[User Dashboard] lasts 4 days
+[Skills Analysis] lasts 3 days
+
+[Progress Tracking Service] starts at [Test Case Validation]'s end
+[User Dashboard] starts at [Progress Tracking Service]'s end
+[Skills Analysis] starts at [Progress Tracking Service]'s end
+
+' -------------------------------
+' Phase 9: Quiz System
+' -------------------------------
+[Quiz DB Models] lasts 2 days
+[Quiz Repository] lasts 3 days
+[Quiz Display] lasts 3 days
+[Quiz Taking] lasts 4 days
+[Quiz Results] lasts 3 days
+
+[Quiz DB Models] starts at [Database Context & Migrations]'s end
+[Quiz Repository] starts at [Quiz DB Models]'s end
+[Quiz Display] starts at [Quiz Repository]'s end
+[Quiz Taking] starts at [Quiz Display]'s end
+[Quiz Results] starts at [Quiz Taking]'s end
+
+' -------------------------------
+' Phase 10: Focus Mode
+' -------------------------------
+[Focus Mode UI] lasts 3 days
+[Focus Mode Lesson] lasts 3 days
+[AI Helper Chat] lasts 4 days
+
+[Focus Mode UI] starts at [Code Editor Interface]'s end
+[Focus Mode Lesson] starts at [Focus Mode UI]'s end
+[AI Helper Chat] starts at [Focus Mode Lesson]'s end
+
+' -------------------------------
+' Phase 11: Admin Dashboard
+' -------------------------------
+[Admin Dashboard Overview] lasts 3 days
+[User Management] lasts 5 days
+[Course Management Admin] lasts 4 days
+[Job Offer Management] lasts 3 days
+[Reports & Analytics] lasts 4 days
+[Job Offers Display] lasts 2 days
+
+[Admin Dashboard Overview] starts at [Role-Based Access Control]'s end
+[User Management] starts at [Admin Dashboard Overview]'s end
+[Course Management Admin] starts at [Admin Dashboard Overview]'s end
+[Job Offer Management] starts at [Admin Dashboard Overview]'s end
+[Reports & Analytics] starts at [User Management]'s end
+[Job Offers Display] starts at [Job Offer Management]'s end
+
+' -------------------------------
+' Phase 12: Advanced Features
+' -------------------------------
+[CV Generation] lasts 4 days
+[CV Generation] starts at [User Dashboard]'s end
+
+' -------------------------------
+' Phase 13: Testing & Deployment
+' -------------------------------
+[Testing & QA] lasts 8 days
+[Deployment] lasts 3 days
+
+[Testing & QA] starts at [CV Generation]'s end
+[Deployment] starts at [Testing & QA]'s end
+
+@endgantt

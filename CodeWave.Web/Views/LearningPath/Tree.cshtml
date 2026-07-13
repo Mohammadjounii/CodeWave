@@ -1,0 +1,701 @@
+@{
+    Layout = null;
+    var treeCourses   = ViewBag.TreeCourses   as List<CodeWave.Domain.Entities.Course> ?? new();
+    var treeCompleted = ViewBag.TreeCompleted  as HashSet<Guid>                        ?? new();
+    var lpName        = ViewBag.LearningPathName as string ?? "Learning";
+    var pathPrimary   = ViewBag.PathPrimary    as string ?? "#b887e3";
+    var pathRgb       = ViewBag.PathPrimaryRgb as string ?? "184,135,227";
+    var pathGradA     = ViewBag.PathGradA      as string ?? "#5b21b6";
+    var pathGradB     = ViewBag.PathGradB      as string ?? "#2e1065";
+    var pathIcon      = ViewBag.PathIcon       as string ?? "account_tree";
+    var userName      = ViewBag.UserName       as string ?? "";
+    var userPic       = ViewBag.DisplayPictureUrl as string ?? "";
+    var cwPalette     = new (string Hex, string Ga, string Gb, string Rgb)[]
+    {
+        ("#a78bfa","#5b21b6","#2e1065","167,139,250"),
+        ("#60a5fa","#1d4ed8","#1e3a8a","96,165,250"),
+        ("#34d399","#047857","#064e3b","52,211,153"),
+        ("#fb923c","#c2410c","#7c2d12","251,146,60"),
+        ("#f472b6","#be185d","#831843","244,114,182"),
+        ("#22d3ee","#0e7490","#164e63","34,211,238"),
+    };
+    string[] cIcons  = { "menu_book","code","data_object","psychology","storage","functions" };
+    var totalLessons = treeCourses.Sum(c => c.Lessons.Count);
+    var doneLessons  = treeCourses.Sum(c => c.Lessons.Count(l => treeCompleted.Contains(l.Id)));
+    var overallPct   = totalLessons > 0 ? (int)Math.Round((double)doneLessons / totalLessons * 100) : 0;
+
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@lpName Learning Tree — CodeWave</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" rel="stylesheet" />
+
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html, body { width: 100%; height: 100%; overflow: hidden; font-family: 'Space Grotesk', sans-serif; }
+        .mso { font-family: 'Material Symbols Outlined'; font-variation-settings: 'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24; font-display: swap; font-style: normal; line-height: 1; }
+        .msof { font-variation-settings: 'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24; }
+
+        /* ── CSS custom properties for path theme ── */
+        :root {
+            --lp-primary: @pathPrimary;
+            --lp-rgb:     @pathRgb;
+            --lp-ga:      @pathGradA;
+            --lp-gb:      @pathGradB;
+        }
+
+        /* ── Deep-space body ── */
+        body {
+            background:
+                radial-gradient(ellipse at 12% 20%, rgba(88,28,135,0.38) 0%, transparent 50%),
+                radial-gradient(ellipse at 88% 80%, rgba(30,27,75,0.42) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 55%, rgba(var(--lp-rgb),0.07) 0%, transparent 55%),
+                #03030a;
+            color: #e2e8f0;
+        }
+
+        /* ── Keyframes ── */
+        @@keyframes lpNebula  { 0%{transform:translate(0,0) scale(1)} 100%{transform:translate(32px,24px) scale(1.1)} }
+        @@keyframes lpTrunk   { 0%,100%{opacity:.28} 50%{opacity:.9} }
+        @@keyframes lpShine   { 0%{transform:translateX(-200%)} 100%{transform:translateX(500%)} }
+        @@keyframes lpFloat   { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-7px)} }
+        @@keyframes lpRootOrb {
+            0%,100% { box-shadow: 0 0 32px rgba(var(--lp-rgb),.55), 0 0 60px rgba(var(--lp-rgb),.18); }
+            50%     { box-shadow: 0 0 80px rgba(var(--lp-rgb),1),   0 0 140px rgba(var(--lp-rgb),.35); }
+        }
+        @@keyframes lpIn       { from{opacity:0;transform:translateY(30px)} to{opacity:1;transform:translateY(0)} }
+        @@keyframes lpDashFlow { from{stroke-dashoffset:24} to{stroke-dashoffset:0} }
+        @@keyframes lpNodePop  { from{transform:translate(-50%,-50%) scale(.65);opacity:0} to{transform:translate(-50%,-50%) scale(1);opacity:1} }
+        @@keyframes lpPopIn    { from{opacity:0;transform:translate(-50%,-108%) scale(.88)} to{opacity:1;transform:translate(-50%,-108%) scale(1)} }
+        @@keyframes lpRingPulse { 0%{transform:scale(1);opacity:.45} 100%{transform:scale(2);opacity:0} }
+
+        /* Flowing dashes on incomplete paths */
+        .lp-dash { animation: lpDashFlow 1.4s linear infinite; }
+
+        /* Node */
+        .lp-node {
+            position: absolute;
+            visibility: hidden;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            outline: none;
+            transition: transform .18s, box-shadow .18s;
+            transform: translate(-50%,-50%);
+        }
+        .lp-node::after {
+            content: '';
+            position: absolute;
+            inset: -5px;
+            border-radius: 50%;
+            border: 1.5px solid currentColor;
+            animation: lpRingPulse 2.8s ease-out infinite;
+            pointer-events: none;
+        }
+
+        /* Popup */
+        #lpPopup {
+            position: fixed;
+            z-index: 60;
+            display: none;
+            min-width: 232px;
+            max-width: 284px;
+            background: rgba(7,7,18,0.94);
+            backdrop-filter: blur(22px);
+            border: 1px solid rgba(255,255,255,0.11);
+            border-radius: 18px;
+            padding: 18px 20px;
+            box-shadow: 0 24px 70px rgba(0,0,0,.55), 0 0 0 1px rgba(var(--lp-rgb),.12);
+        }
+
+        /* Scrollbar */
+        #lpMain::-webkit-scrollbar { width: 5px; }
+        #lpMain::-webkit-scrollbar-track { background: transparent; }
+        #lpMain::-webkit-scrollbar-thumb { background: rgba(255,255,255,.1); border-radius: 3px; }
+        #lpDrawerBody::-webkit-scrollbar { width: 5px; }
+        #lpDrawerBody::-webkit-scrollbar-track { background: transparent; }
+        #lpDrawerBody::-webkit-scrollbar-thumb { background: rgba(255,255,255,.1); border-radius: 3px; }
+    </style>
+</head>
+<body>
+
+<!-- ══ Star canvas (full screen) ════════════════════════════════════════ -->
+<canvas id="lpStars" style="position:fixed;inset:0;z-index:1;pointer-events:none;"></canvas>
+
+<!-- ══ Nebula atmosphere (full screen) ══════════════════════════════════ -->
+<div style="position:fixed;inset:0;z-index:2;pointer-events:none;overflow:hidden;" aria-hidden="true">
+    <div style="position:absolute;top:-12%;left:-6%;width:720px;height:720px;border-radius:50%;background:radial-gradient(circle,rgba(88,28,135,.24) 0%,transparent 70%);filter:blur(90px);animation:lpNebula 26s ease-in-out infinite alternate;"></div>
+    <div style="position:absolute;bottom:-18%;right:-6%;width:680px;height:680px;border-radius:50%;background:radial-gradient(circle,rgba(30,27,75,.32) 0%,transparent 70%);filter:blur(80px);animation:lpNebula 32s ease-in-out infinite alternate-reverse;"></div>
+    <div style="position:absolute;top:28%;left:32%;width:560px;height:560px;border-radius:50%;background:radial-gradient(circle,rgba(@pathRgb,.1) 0%,transparent 70%);filter:blur(70px);animation:lpNebula 22s ease-in-out infinite alternate;"></div>
+    <div style="position:absolute;top:62%;left:4%;width:440px;height:440px;border-radius:50%;background:radial-gradient(circle,rgba(59,130,246,.09) 0%,transparent 70%);filter:blur(60px);animation:lpNebula 29s ease-in-out infinite alternate-reverse;"></div>
+    <div style="position:absolute;top:4%;right:8%;width:380px;height:380px;border-radius:50%;background:radial-gradient(circle,rgba(244,114,182,.07) 0%,transparent 70%);filter:blur(55px);animation:lpNebula 19s ease-in-out infinite alternate;"></div>
+</div>
+
+<!-- ══ Top navigation (fixed) ═══════════════════════════════════════════ -->
+<nav style="position:fixed;inset:0 0 auto 0;height:64px;z-index:50;display:flex;align-items:center;gap:14px;padding:0 24px;background:rgba(3,3,10,0.78);backdrop-filter:blur(18px);border-bottom:1px solid rgba(255,255,255,0.06);">
+
+    <!-- Back -->
+    <a href="/Home" style="display:flex;align-items:center;gap:6px;padding:6px 14px;border-radius:9px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.09);color:rgba(255,255,255,.7);text-decoration:none;font-size:13px;font-weight:500;transition:all .15s;flex-shrink:0;"
+       onmouseover="this.style.background='rgba(255,255,255,0.11)'" onmouseout="this.style.background='rgba(255,255,255,0.06)'">
+        <span class="mso" style="font-size:16px;color:rgba(255,255,255,.6);">arrow_back</span>
+        Dashboard
+    </a>
+
+    <div style="width:1px;height:28px;background:rgba(255,255,255,.08);flex-shrink:0;"></div>
+
+    <!-- Path identity -->
+    <div style="display:flex;align-items:center;gap:11px;flex-shrink:0;">
+        <div style="width:38px;height:38px;border-radius:12px;background:linear-gradient(135deg,@pathGradA,@pathGradB);display:flex;align-items:center;justify-content:center;box-shadow:0 0 22px rgba(@pathRgb,.45);">
+            <span class="mso msof" style="font-size:20px;color:white;">@pathIcon</span>
+        </div>
+        <div>
+            <p style="font-size:15px;font-weight:700;color:white;line-height:1.2;">@lpName Learning Tree</p>
+            <p style="font-size:11px;color:rgba(255,255,255,.38);line-height:1.2;">@doneLessons / @totalLessons lessons complete</p>
+        </div>
+    </div>
+
+    <!-- Progress bar -->
+    @if (totalLessons > 0)
+    {
+        <div style="flex:1;max-width:220px;display:flex;flex-direction:column;gap:5px;">
+            <div style="height:3px;background:rgba(255,255,255,.08);border-radius:999px;overflow:hidden;">
+                <div style="width:@(overallPct)%;height:100%;background:linear-gradient(90deg,@pathPrimary,@pathGradA);border-radius:999px;"></div>
+            </div>
+            <p style="font-size:10px;color:rgba(255,255,255,.28);text-align:right;">@(overallPct)% complete</p>
+        </div>
+    }
+
+    <div style="flex:1;min-width:0;"></div>
+
+    <!-- User -->
+    <div style="display:flex;align-items:center;gap:10px;flex-shrink:0;">
+        <p style="font-size:13px;color:rgba(255,255,255,.5);">@userName</p>
+        <img src="@userPic" alt="" style="width:36px;height:36px;border-radius:50%;object-fit:cover;border:2px solid rgba(@pathRgb,.5);" onerror="this.style.display='none'" />
+    </div>
+</nav>
+
+<!-- ══ Scrollable tree ═══════════════════════════════════════════════════ -->
+<main id="lpMain" style="position:fixed;inset:64px 0 0 0;z-index:10;overflow-y:auto;overflow-x:hidden;">
+<div style="max-width:960px;margin:0 auto;padding:52px 28px 120px;display:flex;flex-direction:column;align-items:center;">
+
+    <!-- Root orb -->
+    <div style="display:flex;flex-direction:column;align-items:center;animation:lpIn .5s ease both;">
+        <div style="width:72px;height:72px;border-radius:22px;background:linear-gradient(135deg,@pathGradA,@pathGradB);display:flex;align-items:center;justify-content:center;animation:lpRootOrb 3.2s ease-in-out infinite,lpFloat 5.5s ease-in-out infinite;position:relative;">
+            <span class="mso msof" style="font-size:34px;color:white;">@pathIcon</span>
+        </div>
+        <div style="position:relative;overflow:hidden;width:2px;height:56px;margin:0 auto;">
+            <div style="position:absolute;inset:0;background:linear-gradient(180deg,@pathPrimary,rgba(@pathRgb,0.05));"></div>
+            <div style="position:absolute;inset:0;animation:lpTrunk 2.6s ease-in-out infinite;background:rgba(@pathRgb,.65);"></div>
+        </div>
+    </div>
+
+    @if (!treeCourses.Any())
+    {
+        <div style="text-align:center;padding:80px 20px;">
+            <span class="mso" style="font-size:72px;color:rgba(255,255,255,.08);display:block;margin-bottom:18px;">forest</span>
+            <p style="color:rgba(255,255,255,.3);font-size:15px;">No courses found for <strong style="color:@pathPrimary">@lpName</strong> yet.</p>
+            <p style="color:rgba(255,255,255,.15);font-size:12px;margin-top:8px;">Courses will appear here once they are added by your instructor.</p>
+        </div>
+    }
+    else
+    {
+        @for (int ci = 0; ci < treeCourses.Count; ci++)
+        {
+            var course         = treeCourses[ci];
+            var pal            = cwPalette[ci % cwPalette.Length];
+            var cIcon          = cIcons[ci % cIcons.Length];
+            var cEven          = ci % 2 == 0;
+            var cIsLast        = ci == treeCourses.Count - 1;
+            var sortedLessons  = course.Lessons.OrderBy(l => l.OrderNumber).ToList();
+            var cDone          = sortedLessons.Count(l => treeCompleted.Contains(l.Id));
+            var cTotal         = sortedLessons.Count;
+            var cPct           = cTotal > 0 ? (int)Math.Round((double)cDone / cTotal * 100) : 0;
+            var armFrom        = pal.Hex + "18";
+            var armTo          = pal.Hex + "DD";
+
+            <div style="display:flex;flex-direction:column;align-items:center;width:100%;animation:lpIn .6s ease both;animation-delay:@(ci * 160)ms;">
+
+                <!-- Branch row -->
+                <div style="display:grid;grid-template-columns:1fr auto 1fr;width:100%;align-items:center;">
+
+                    @if (cEven)
+                    {
+                        <!-- LEFT: label + arm -->
+                        <div style="display:flex;align-items:center;justify-content:flex-end;gap:16px;padding-right:12px;">
+                            <div style="text-align:right;">
+                                <p style="color:white;font-weight:700;font-size:15px;line-height:1.3;">@course.Title</p>
+                                @if (!string.IsNullOrEmpty(course.DifficultyLevel))
+                                {
+                                    <p style="font-size:10px;color:rgba(255,255,255,.35);margin:2px 0;">@course.DifficultyLevel</p>
+                                }
+                                <p style="color:@pal.Hex;font-size:11px;margin:3px 0 0;font-weight:500;">@cDone / @cTotal lessons</p>
+                                <div style="width:96px;height:3px;background:rgba(255,255,255,.07);border-radius:999px;margin:6px 0 0 auto;">
+                                    <div style="width:@(cPct)%;height:100%;background:@pal.Hex;border-radius:999px;"></div>
+                                </div>
+                            </div>
+                            <!-- Branch arm -->
+                            <div style="position:relative;overflow:hidden;width:88px;height:2px;border-radius:999px;flex-shrink:0;background:rgba(255,255,255,.04);">
+                                <div style="position:absolute;inset:0;background:linear-gradient(90deg,@armFrom,@armTo);border-radius:999px;"></div>
+                                <div style="position:absolute;top:0;bottom:0;width:40px;border-radius:999px;background:@pal.Hex;filter:blur(1.5px);opacity:.95;animation:lpShine @(1.7 + ci * 0.28)s linear infinite;"></div>
+                            </div>
+                        </div>
+                        <!-- Course badge (centre) -->
+                        <button onclick="lpToggle(@ci)"
+                                style="width:76px;height:76px;border-radius:22px;background:linear-gradient(135deg,@pal.Ga,@pal.Gb);box-shadow:0 0 0 2px rgba(255,255,255,.08),0 0 48px rgba(@pal.Rgb,.55);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;position:relative;flex-shrink:0;animation:lpFloat @(4.8+ci*.5)s ease-in-out infinite;animation-delay:@(ci*240)ms;transition:box-shadow .2s;"
+                                onmouseover="this.style.boxShadow='0 0 0 3px rgba(255,255,255,.18),0 0 60px rgba(@pal.Rgb,.75)'"
+                                onmouseout="this.style.boxShadow='0 0 0 2px rgba(255,255,255,.08),0 0 48px rgba(@pal.Rgb,.55)'">
+                            <span class="mso msof" style="font-size:32px;color:white;">@cIcon</span>
+                            <span id="lpArr@(ci)" class="mso" style="position:absolute;bottom:3px;right:3px;font-size:13px;color:rgba(255,255,255,.45);transition:transform .3s;background:rgba(0,0,0,.45);border-radius:50%;padding:1px;line-height:1.1;">expand_more</span>
+                        </button>
+                        <div></div>
+                    }
+                    else
+                    {
+                        <div></div>
+                        <!-- Course badge (centre) -->
+                        <button onclick="lpToggle(@ci)"
+                                style="width:76px;height:76px;border-radius:22px;background:linear-gradient(135deg,@pal.Ga,@pal.Gb);box-shadow:0 0 0 2px rgba(255,255,255,.08),0 0 48px rgba(@pal.Rgb,.55);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;position:relative;flex-shrink:0;animation:lpFloat @(4.8+ci*.5)s ease-in-out infinite;animation-delay:@(ci*240)ms;transition:box-shadow .2s;"
+                                onmouseover="this.style.boxShadow='0 0 0 3px rgba(255,255,255,.18),0 0 60px rgba(@pal.Rgb,.75)'"
+                                onmouseout="this.style.boxShadow='0 0 0 2px rgba(255,255,255,.08),0 0 48px rgba(@pal.Rgb,.55)'">
+                            <span class="mso msof" style="font-size:32px;color:white;">@cIcon</span>
+                            <span id="lpArr@(ci)" class="mso" style="position:absolute;bottom:3px;right:3px;font-size:13px;color:rgba(255,255,255,.45);transition:transform .3s;background:rgba(0,0,0,.45);border-radius:50%;padding:1px;line-height:1.1;">expand_more</span>
+                        </button>
+                        <!-- RIGHT: arm + label -->
+                        <div style="display:flex;align-items:center;justify-content:flex-start;gap:16px;padding-left:12px;">
+                            <!-- Branch arm -->
+                            <div style="position:relative;overflow:hidden;width:88px;height:2px;border-radius:999px;flex-shrink:0;background:rgba(255,255,255,.04);">
+                                <div style="position:absolute;inset:0;background:linear-gradient(270deg,@armFrom,@armTo);border-radius:999px;"></div>
+                                <div style="position:absolute;top:0;bottom:0;width:40px;border-radius:999px;background:@pal.Hex;filter:blur(1.5px);opacity:.95;animation:lpShine @(1.7 + ci * 0.28)s linear infinite reverse;"></div>
+                            </div>
+                            <div style="text-align:left;">
+                                <p style="color:white;font-weight:700;font-size:15px;line-height:1.3;">@course.Title</p>
+                                @if (!string.IsNullOrEmpty(course.DifficultyLevel))
+                                {
+                                    <p style="font-size:10px;color:rgba(255,255,255,.35);margin:2px 0;">@course.DifficultyLevel</p>
+                                }
+                                <p style="color:@pal.Hex;font-size:11px;margin:3px 0 0;font-weight:500;">@cDone / @cTotal lessons</p>
+                                <div style="width:96px;height:3px;background:rgba(255,255,255,.07);border-radius:999px;margin:6px 0 0;">
+                                    <div style="width:@(cPct)%;height:100%;background:@pal.Hex;border-radius:999px;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+
+                </div>
+
+                <!-- Lesson node map -->
+                <div id="lpPanel@(ci)" style="overflow:hidden;max-height:0;opacity:0;transition:max-height .65s ease,opacity .45s ease;width:100%;">
+                    <div id="lpMap@(ci)" class="lp-lesson-map" style="position:relative;width:100%;min-height:200px;padding-bottom:40px;">
+                        @for (int li = 0; li < sortedLessons.Count; li++)
+                        {
+                            var lesson   = sortedLessons[li];
+                            var ldone    = treeCompleted.Contains(lesson.Id);
+                            var lhasEx   = lesson.CodingExercises?.Any() == true;
+                            var lraw     = lesson.Content ?? "";
+                            var lstrip   = System.Text.RegularExpressions.Regex.Replace(lraw, "<[^>]+>", " ");
+                            lstrip       = System.Text.RegularExpressions.Regex.Replace(lstrip, @"\s+", " ").Trim();
+                            var lprev    = lstrip.Length > 320 ? lstrip.Substring(0, 320) + "…" : lstrip;
+                            var ldot     = ldone ? "#22c55e" : pal.Hex;
+                            var lrgb     = ldone ? "34,197,94" : pal.Rgb;
+                            var lbg      = ldone ? "rgba(34,197,94,0.14)" : "rgba(255,255,255,0.07)";
+
+                            <button class="lp-node"
+                                    onclick="lpNodeClick(this)"
+                                    data-lesson-id="@lesson.Id"
+                                    data-course-id="@course.Id"
+                                    data-title="@lesson.Title"
+                                    data-content="@lprev"
+                                    data-video="@(lesson.VideoUrl ?? "")"
+                                    data-has-exercise="@(lhasEx ? "true" : "false")"
+                                    data-done="@(ldone ? "true" : "false")"
+                                    data-num="@(li + 1)"
+                                    data-dot="@ldot"
+                                    data-rgb="@lrgb"
+                                    style="width:54px;height:54px;background:@lbg;border:2.5px solid @ldot;box-shadow:0 0 16px rgba(@lrgb,.48);color:@ldot;font-size:14px;font-family:'Space Grotesk',sans-serif;">
+                                @(ldone ? "✓" : (li + 1).ToString())
+                                @if (lhasEx)
+                                {
+                                    <span style="position:absolute;top:-4px;right:-4px;width:15px;height:15px;border-radius:50%;background:#f97316;display:flex;align-items:center;justify-content:center;font-size:8px;color:white;border:2px solid #03030a;pointer-events:none;">⚡</span>
+                                }
+                            </button>
+                        }
+                    </div>
+                </div>
+
+                <!-- Trunk connector to next course -->
+                @if (!cIsLast)
+                {
+                    <div style="position:relative;overflow:hidden;width:2px;height:54px;margin:0 auto;">
+                        <div style="position:absolute;inset:0;background:linear-gradient(180deg,@pal.Hex,rgba(255,255,255,.02));opacity:.42;animation:lpTrunk 3.8s ease-in-out infinite;animation-delay:@(ci*160)ms;"></div>
+                    </div>
+                }
+
+            </div>
+        }
+    }
+
+    <!-- End cap -->
+    <div style="width:14px;height:14px;border-radius:50%;background:rgba(@pathRgb,.12);border:1px solid rgba(@pathRgb,.35);box-shadow:0 0 18px rgba(@pathRgb,.3);margin-top:6px;"></div>
+
+</div>
+</main>
+
+<!-- ══ Node action popup ═════════════════════════════════════════════════ -->
+<div id="lpPopup" onclick="event.stopPropagation()">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:12px;">
+        <div style="min-width:0;">
+            <p id="lpPopNum" style="font-size:10px;font-weight:700;color:@pathPrimary;text-transform:uppercase;letter-spacing:.07em;margin:0 0 3px;"></p>
+            <p id="lpPopTitle" style="font-size:14px;font-weight:700;color:white;margin:0;line-height:1.3;word-break:break-word;"></p>
+        </div>
+        <button onclick="lpClosePopup()" style="width:26px;height:26px;border-radius:7px;background:rgba(255,255,255,.07);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .15s;"
+                onmouseover="this.style.background='rgba(255,255,255,.14)'" onmouseout="this.style.background='rgba(255,255,255,.07)'">
+            <span class="mso" style="font-size:14px;color:rgba(255,255,255,.5);">close</span>
+        </button>
+    </div>
+    <p id="lpPopStatus" style="font-size:11px;margin:0 0 16px;font-weight:500;"></p>
+    <div style="display:flex;flex-direction:column;gap:9px;">
+        <!-- Solve button -->
+        <a id="lpPopSolve" href="#"
+           style="display:flex;align-items:center;justify-content:center;gap:9px;padding:11px 16px;border-radius:12px;background:linear-gradient(135deg,@pathGradA,@pathGradB);color:white;font-weight:700;font-size:13px;text-decoration:none;transition:opacity .15s,transform .1s;box-shadow:0 4px 20px rgba(@pathRgb,.42);"
+           onmouseover="this.style.opacity='.88';this.style.transform='translateY(-1px)'" onmouseout="this.style.opacity='1';this.style.transform=''">
+            <span class="mso msof" style="font-size:17px;color:white;">psychology</span>
+            Solve in Focus Mode
+        </a>
+        <!-- View lesson button -->
+        <button id="lpPopView" onclick="lpOpenDrawerFromPopup()"
+                style="display:flex;align-items:center;justify-content:center;gap:9px;padding:11px 16px;border-radius:12px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.8);font-weight:600;font-size:13px;cursor:pointer;transition:all .15s;"
+                onmouseover="this.style.background='rgba(255,255,255,.14)';this.style.color='white'" onmouseout="this.style.background='rgba(255,255,255,.07)';this.style.color='rgba(255,255,255,.8)'">
+            <span class="mso" style="font-size:17px;color:inherit;">menu_book</span>
+            View Lesson Details
+        </button>
+    </div>
+</div>
+
+<!-- ══ Lesson detail drawer ══════════════════════════════════════════════ -->
+<div id="lpBd" onclick="lpCloseDrawer()" style="display:none;position:fixed;inset:0;z-index:69;background:rgba(0,0,0,.58);backdrop-filter:blur(4px);"></div>
+
+<div id="lpDrawer" style="position:fixed;top:0;right:0;bottom:0;z-index:70;width:500px;max-width:100vw;background:linear-gradient(180deg,#090916,#05050f);border-left:1px solid rgba(255,255,255,.09);transform:translateX(100%);transition:transform .35s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;">
+
+    <!-- Drawer header -->
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:22px 26px 18px;border-bottom:1px solid rgba(255,255,255,.07);flex-shrink:0;">
+        <div style="min-width:0;">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;">
+                <span id="lpDrNum" style="font-size:11px;font-weight:600;color:@pathPrimary;text-transform:uppercase;letter-spacing:.06em;"></span>
+                <span id="lpDrBadge" style="display:none;font-size:10px;font-weight:700;padding:2px 9px;border-radius:999px;background:rgba(34,197,94,.15);color:#86efac;border:1px solid rgba(34,197,94,.28);">Completed ✓</span>
+            </div>
+            <h3 id="lpDrTitle" style="font-size:18px;font-weight:700;color:white;margin:0;line-height:1.3;"></h3>
+        </div>
+        <button onclick="lpCloseDrawer()" style="width:34px;height:34px;border-radius:9px;background:rgba(255,255,255,.06);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .15s;"
+                onmouseover="this.style.background='rgba(255,255,255,.13)'" onmouseout="this.style.background='rgba(255,255,255,.06)'">
+            <span class="mso" style="font-size:18px;color:rgba(255,255,255,.55);">close</span>
+        </button>
+    </div>
+
+    <!-- Drawer body -->
+    <div id="lpDrawerBody" style="flex:1;overflow-y:auto;padding:22px 26px 32px;">
+        <!-- YouTube -->
+        <div id="lpDrVideo" style="display:none;margin-bottom:22px;border-radius:14px;overflow:hidden;aspect-ratio:16/9;background:#000;">
+            <iframe id="lpDrFrame" width="100%" height="100%" frameborder="0" allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture" allowfullscreen style="display:block;"></iframe>
+        </div>
+        <!-- Description -->
+        <div style="margin-bottom:24px;">
+            <p style="font-size:11px;font-weight:600;color:rgba(255,255,255,.25);text-transform:uppercase;letter-spacing:.08em;margin:0 0 9px;">Lesson Description</p>
+            <p id="lpDrContent" style="font-size:14px;color:rgba(255,255,255,.6);line-height:1.75;margin:0;"></p>
+        </div>
+        <!-- Info note -->
+        <div style="padding:15px 16px;border-radius:12px;background:rgba(@pathRgb,.07);border:1px solid rgba(@pathRgb,.18);">
+            <div style="display:flex;align-items:flex-start;gap:10px;">
+                <span class="mso msof" style="font-size:18px;color:@pathPrimary;flex-shrink:0;margin-top:1px;">info</span>
+                <p style="font-size:12px;color:rgba(255,255,255,.45);margin:0;line-height:1.6;">To practice and solve exercises, use <strong style="color:@pathPrimary">Solve in Focus Mode</strong> from the tree node — it's the dedicated environment for coding.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ══ JavaScript ════════════════════════════════════════════════════════ -->
+<script>
+// ── Stars ────────────────────────────────────────────────────────────────
+(function() {
+    var c = document.getElementById('lpStars');
+    if (!c) return;
+    function rsz() { c.width = window.innerWidth; c.height = window.innerHeight; }
+    rsz();
+    var ctx = c.getContext('2d');
+    var stars = Array.from({length: 380}, function() {
+        return { x:Math.random(), y:Math.random(), r:Math.random()*1.5+0.2,
+                 ph:Math.random()*Math.PI*2, sp:Math.random()*0.004+0.001 };
+    });
+    (function loop(t) {
+        ctx.clearRect(0,0,c.width,c.height);
+        stars.forEach(function(s) {
+            var a = 0.07 + 0.52*(0.5+0.5*Math.sin(t*s.sp+s.ph));
+            ctx.beginPath();
+            ctx.arc(s.x*c.width, s.y*c.height, s.r, 0, Math.PI*2);
+            ctx.fillStyle = 'rgba(225,210,255,'+a+')';
+            ctx.fill();
+        });
+        requestAnimationFrame(loop);
+    })(0);
+    window.addEventListener('resize', rsz);
+})();
+
+// ── Course panel toggle + map builder ────────────────────────────────────
+function lpShowLocked(level) {
+    var prev = level === 'Advanced' ? 'Intermediate' : 'Beginner';
+    var toast = document.getElementById('lpLockedToast');
+    if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'lpLockedToast';
+        toast.style.cssText = 'position:fixed;bottom:32px;left:50%;transform:translateX(-50%);background:#1e1a2e;border:1px solid #f87171;color:#fca5a5;padding:14px 24px;border-radius:14px;font-size:14px;font-weight:600;z-index:9999;display:flex;align-items:center;gap:10px;box-shadow:0 8px 32px rgba(0,0,0,.5);transition:opacity .3s;';
+        document.body.appendChild(toast);
+    }
+    toast.innerHTML = '<span style="font-size:20px">🔒</span> Complete the <strong style="color:white;">' + prev + '</strong> level first to unlock this course.';
+    toast.style.opacity = '1';
+    clearTimeout(toast._t);
+    toast._t = setTimeout(function(){ toast.style.opacity = '0'; }, 3000);
+}
+
+function lpToggle(idx) {
+    var p = document.getElementById('lpPanel'+idx);
+    var a = document.getElementById('lpArr'+idx);
+    if (!p) return;
+    var open = p.style.maxHeight && p.style.maxHeight !== '0px';
+    if (open) {
+        p.style.maxHeight = '0px'; p.style.opacity = '0';
+        if (a) a.style.transform = '';
+    } else {
+        p.style.maxHeight = '3000px'; p.style.opacity = '1';
+        if (a) a.style.transform = 'rotate(180deg)';
+        setTimeout(function() { lpBuildMap('lpMap'+idx); }, 90);
+    }
+}
+
+function lpBuildMap(mapId) {
+    var map = document.getElementById(mapId);
+    if (!map || map.dataset.built === '1') return;
+    map.dataset.built = '1';
+
+    var nodes = Array.from(map.querySelectorAll('.lp-node'));
+    var n = nodes.length;
+    if (n === 0) return;
+
+    var W    = map.offsetWidth || 700;
+    var COLS = n <= 2 ? n : n <= 6 ? 3 : n <= 12 ? 4 : 5;
+    var ROWS = Math.ceil(n / COLS);
+    var R    = 27;
+    var CW   = W / COLS;
+    var CH   = 155;
+    var H    = ROWS * CH + 72;
+    map.style.height = H + 'px';
+
+    // Positions: snake layout + golden-ratio jitter
+    var pos = [];
+    for (var i = 0; i < n; i++) {
+        var row    = Math.floor(i / COLS);
+        var cInRow = i % COLS;
+        var vCol   = (row % 2 === 0) ? cInRow : (COLS - 1 - cInRow);
+        var bx     = CW * vCol + CW / 2;
+        var by     = CH * row + CH / 2 + 26;
+        var jx     = Math.sin(i * 2.399) * CW * 0.2;
+        var jy     = Math.cos(i * 1.618) * 20;
+        pos.push({
+            x: Math.max(R + 12, Math.min(W - R - 12, bx + jx)),
+            y: Math.max(R + 12, Math.min(H - R - 40, by + jy))
+        });
+    }
+
+    // SVG: draw connections behind nodes
+    var NS  = 'http://www.w3.org/2000/svg';
+    var svg = document.createElementNS(NS, 'svg');
+    svg.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible;';
+    map.insertBefore(svg, map.firstChild);
+
+    for (var i = 0; i < n - 1; i++) {
+        var a = pos[i], b = pos[i + 1];
+        var bothDone = nodes[i].dataset.done === 'true' && nodes[i+1].dataset.done === 'true';
+        var dx = b.x - a.x, dy = b.y - a.y, s = 0.38;
+        var cx1 = a.x + dx*0.36 - dy*s*0.5, cy1 = a.y + dy*0.36 + dx*s*0.5;
+        var cx2 = b.x - dx*0.36 - dy*s*0.5, cy2 = b.y - dy*0.36 + dx*s*0.5;
+        var d   = 'M'+a.x+','+a.y+' C'+cx1+','+cy1+' '+cx2+','+cy2+' '+b.x+','+b.y;
+
+        // Glow layer
+        var g = document.createElementNS(NS, 'path');
+        g.setAttribute('d', d); g.setAttribute('fill', 'none');
+        g.setAttribute('stroke', bothDone ? 'rgba(34,197,94,.22)' : 'rgba(255,255,255,.07)');
+        g.setAttribute('stroke-width', '12'); g.setAttribute('stroke-linecap', 'round');
+        svg.appendChild(g);
+
+        // Main line
+        var pathId = mapId + '-p' + i;
+        var ln = document.createElementNS(NS, 'path');
+        ln.setAttribute('id', pathId); ln.setAttribute('d', d); ln.setAttribute('fill', 'none');
+        ln.setAttribute('stroke', bothDone ? 'rgba(34,197,94,.65)' : 'rgba(255,255,255,.2)');
+        ln.setAttribute('stroke-width', '2'); ln.setAttribute('stroke-linecap', 'round');
+        if (!bothDone) { ln.setAttribute('stroke-dasharray', '7 5'); ln.classList.add('lp-dash'); }
+        svg.appendChild(ln);
+
+        // Animated dot travelling along complete segments
+        if (bothDone) {
+            var dot = document.createElementNS(NS, 'circle');
+            dot.setAttribute('r', '4'); dot.setAttribute('fill', 'rgba(34,197,94,.85)');
+            var am  = document.createElementNS(NS, 'animateMotion');
+            am.setAttribute('dur', (2.8 + i * 0.25) + 's');
+            am.setAttribute('repeatCount', 'indefinite');
+            var mp = document.createElementNS(NS, 'mpath');
+            mp.setAttribute('href', '#' + pathId);
+            mp.setAttributeNS('http://www.w3.org/1999/xlink', 'xlink:href', '#' + pathId);
+            am.appendChild(mp); dot.appendChild(am); svg.appendChild(dot);
+        }
+    }
+
+    // Position nodes + labels + hover effects
+    nodes.forEach(function(node, i) {
+        var p = pos[i];
+        node.style.left = p.x + 'px';
+        node.style.top  = p.y + 'px';
+
+        // Staggered pop-in
+        setTimeout(function(n2) {
+            return function() {
+                n2.style.visibility = 'visible';
+                n2.style.animation  = 'lpNodePop .42s ease both';
+            };
+        }(node), i * 60);
+
+        // Label
+        var lbl = document.createElement('div');
+        var t = node.dataset.title || '';
+        lbl.textContent = t.length > 15 ? t.slice(0, 15) + '…' : t;
+        lbl.style.cssText = 'position:absolute;left:'+p.x+'px;top:'+(p.y+32)+'px;transform:translateX(-50%);' +
+            'max-width:96px;text-align:center;font-size:9.5px;line-height:1.3;color:rgba(255,255,255,.42);' +
+            'pointer-events:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:opacity .18s;opacity:.42;font-family:Space Grotesk,sans-serif;';
+        map.appendChild(lbl);
+
+        node.addEventListener('mouseenter', function() {
+            this.style.transform = 'translate(-50%,-50%) scale(1.32)';
+            this.style.zIndex = '10';
+            this.style.boxShadow = '0 0 28px rgba('+this.dataset.rgb+',.85),0 0 56px rgba('+this.dataset.rgb+',.3)';
+            lbl.style.opacity = '1'; lbl.style.color = 'rgba(255,255,255,.8)';
+        });
+        node.addEventListener('mouseleave', function() {
+            this.style.transform = 'translate(-50%,-50%)';
+            this.style.zIndex = '';
+            this.style.boxShadow = '0 0 16px rgba('+this.dataset.rgb+',.48)';
+            lbl.style.opacity = '.42'; lbl.style.color = 'rgba(255,255,255,.42)';
+        });
+    });
+}
+
+// ── Node click → popup ────────────────────────────────────────────────────
+var lpCurrent = null;
+function lpNodeClick(node) {
+    lpCurrent = node;
+    var d = node.dataset;
+    document.getElementById('lpPopNum').textContent   = 'Lesson ' + (d.num || '');
+    document.getElementById('lpPopTitle').textContent = d.title || '';
+    var st = document.getElementById('lpPopStatus');
+    if (d.done === 'true') {
+        st.textContent = '✓ Completed'; st.style.color = '#4ade80';
+    } else {
+        st.textContent = d.hasExercise === 'true' ? '○ Not yet started  ·  has exercise ⚡' : '○ Not yet started';
+        st.style.color = 'rgba(255,255,255,.38)';
+    }
+    document.getElementById('lpPopSolve').href = '/LearningPath/FocusMode?lessonId=' + d.lessonId;
+
+    // Position popup near node
+    var popup = document.getElementById('lpPopup');
+    popup.style.display = 'block';
+    var rect = node.getBoundingClientRect();
+    var cx   = rect.left + rect.width  / 2;
+    var cy   = rect.top  + rect.height / 2;
+    popup.style.left = cx + 'px';
+    popup.style.top  = (cy - 10) + 'px';
+    popup.style.transform = 'translate(-50%,-108%)';
+    popup.style.animation = 'none';
+    void popup.offsetWidth;
+    popup.style.animation = 'lpPopIn .22s ease both';
+
+    // Flip below if too close to top
+    var ph = popup.offsetHeight || 170;
+    if (cy - ph - 10 < 70) {
+        popup.style.top = (cy + rect.height/2 + 10) + 'px';
+        popup.style.transform = 'translate(-50%,0)';
+    }
+    // Clamp sides
+    var pw = popup.offsetWidth || 248;
+    var rl = cx - pw/2;
+    if (rl < 12) popup.style.left = (pw/2 + 12) + 'px';
+    if (rl + pw > window.innerWidth - 12) popup.style.left = (window.innerWidth - pw/2 - 12) + 'px';
+}
+
+function lpClosePopup() {
+    document.getElementById('lpPopup').style.display = 'none';
+    lpCurrent = null;
+}
+
+document.addEventListener('click', function(e) {
+    var popup = document.getElementById('lpPopup');
+    if (popup && popup.style.display !== 'none' &&
+        !popup.contains(e.target) &&
+        !e.target.classList.contains('lp-node') &&
+        !e.target.closest('.lp-node')) {
+        lpClosePopup();
+    }
+});
+
+// ── Drawer ────────────────────────────────────────────────────────────────
+function lpOpenDrawerFromPopup() {
+    if (!lpCurrent) return;
+    var d = lpCurrent.dataset;   // capture data BEFORE lpClosePopup nulls lpCurrent
+    lpClosePopup();
+    lpOpenDrawer(d);
+}
+
+function lpOpenDrawer(d) {
+    document.getElementById('lpDrNum').textContent     = 'Lesson ' + (d.num || '');
+    document.getElementById('lpDrTitle').textContent   = d.title   || '';
+    document.getElementById('lpDrContent').textContent = d.content || '(No description available for this lesson.)';
+    document.getElementById('lpDrBadge').style.display = d.done === 'true' ? '' : 'none';
+
+    var embed = lpYtEmbed(d.video);
+    var vw = document.getElementById('lpDrVideo');
+    var vf = document.getElementById('lpDrFrame');
+    if (embed) { vf.src = embed; vw.style.display = ''; }
+    else       { vf.src = '';   vw.style.display = 'none'; }
+
+    document.getElementById('lpDrawer').style.transform = 'translateX(0)';
+    document.getElementById('lpBd').style.display       = '';
+    document.getElementById('lpMain').style.overflowY   = 'hidden';
+}
+
+function lpCloseDrawer() {
+    document.getElementById('lpDrawer').style.transform = 'translateX(100%)';
+    document.getElementById('lpBd').style.display       = 'none';
+    document.getElementById('lpMain').style.overflowY   = 'auto';
+    setTimeout(function() { var f = document.getElementById('lpDrFrame'); if (f) f.src = ''; }, 380);
+}
+
+function lpYtEmbed(url) {
+    if (!url) return null;
+    var m = url.match(/[?&]v=([^&]+)/);
+    if (m) return 'https://www.youtube.com/embed/' + m[1];
+    m = url.match(/youtu\.be\/([^?]+)/);
+    if (m) return 'https://www.youtube.com/embed/' + m[1];
+    if (url.indexOf('youtube.com/embed/') >= 0) return url;
+    return null;
+}
+
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') { lpClosePopup(); lpCloseDrawer(); }
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,1056 @@
+@inject Microsoft.AspNetCore.Identity.UserManager<CodeWave.Domain.Entities.ApplicationUser> _SidebarUserMgr
+@{
+    var currentController = ViewContext.RouteData.Values["controller"]?.ToString() ?? "";
+    var _sidebarCurrentUser = await _SidebarUserMgr.GetUserAsync(User);
+    var _isAdminUser = _sidebarCurrentUser?.IsAdmin == true;
+    var currentAction = ViewContext.RouteData.Values["action"]?.ToString() ?? "";
+    var profilePictureUrl = ViewBag.ProfilePictureUrl as string;
+    var defaultPictureUrl = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40'%3E%3Ccircle cx='20' cy='20' r='20' fill='%234a5568'/%3E%3Cpath d='M20 12c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm0 10c-3.31 0-6 1.69-6 4v2h12v-2c0-2.31-2.69-4-6-4z' fill='white'/%3E%3C/svg%3E";
+    var displayPictureUrl = !string.IsNullOrEmpty(profilePictureUrl) ? profilePictureUrl : defaultPictureUrl;
+    var userName = ViewBag.UserName as string ?? "User";
+    var userLevel = ViewBag.UserLevel as string ?? "Developer";
+    var userLevelRaw = ViewBag.UserLevelRaw as string;
+    var isBeginner = !string.IsNullOrEmpty(userLevelRaw) && string.Equals(userLevelRaw, "Beginner", StringComparison.OrdinalIgnoreCase);
+    
+    // Learning Paths button always goes to the full Tree view
+    var userLearningPath = ViewBag.LearningPathName as string ?? ViewBag.LearningPath as string ?? "";
+    var recommendedCourse = ViewBag.RecommendedCourse as CodeWave.Domain.Entities.Course;
+    var nextLesson = ViewBag.NextLesson as CodeWave.Domain.Entities.Lesson;
+    string learningPathUrl = !string.IsNullOrEmpty(userLearningPath)
+        ? Url.Action("Tree", "LearningPath", new { learningPath = userLearningPath })
+        : Url.Action("Index", "PythonLearningPath");
+    
+    // Helper function to check if a link is active
+    bool IsActive(string controller, string action = null)
+    {
+        if (string.IsNullOrEmpty(controller)) return false;
+        if (controller.Equals(currentController, StringComparison.OrdinalIgnoreCase))
+        {
+            if (action == null || action.Equals(currentAction, StringComparison.OrdinalIgnoreCase))
+                return true;
+        }
+        return false;
+    }
+    
+    // Helper function to get active class
+    string GetActiveClass(string controller, string action = null)
+    {
+        return IsActive(controller, action) 
+            ? "bg-primary/20 text-primary dark:text-white" 
+            : "text-gray-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-white/10 dark:text-slate-400 dark:hover:bg-slate-800";
+    }
+    
+    // Helper function to get active icon class
+    string GetActiveIconClass(string controller, string action = null)
+    {
+        return IsActive(controller, action) 
+            ? "text-primary" 
+            : "text-gray-600 dark:text-slate-500 dark:text-slate-400";
+    }
+}
+
+<div class="flex h-full min-h-screen flex-col p-4">
+    <div class="flex flex-col gap-4">
+        <!-- Logo -->
+        <div class="flex items-center gap-2 p-2">
+            <img src="/codewaveblacklogo.png" alt="CodeWave Logo" class="logo-black h-10 w-10 object-contain" style="display: block;" />
+            <img src="/CodeWavelogo.PNG" alt="CodeWave Logo" class="logo-white h-10 w-10 object-contain" style="display: none;" />
+            <h1 class="text-gray-900 dark:text-white text-xl font-bold">CodeWave</h1>
+        </div>
+        <style>
+            /* Force correct logo display based on theme */
+            html:not(.dark) .logo-black {
+                display: block !important;
+            }
+            html:not(.dark) .logo-white {
+                display: none !important;
+            }
+            html.dark .logo-black {
+                display: none !important;
+            }
+            html.dark .logo-white {
+                display: block !important;
+            }
+        </style>
+
+        <!-- Profile & Navigation -->
+        <div class="flex flex-col gap-4">
+            <div class="flex items-center gap-3">
+                <button type="button" onclick="openProfilePictureModal()" class="cursor-pointer relative group">
+                    <div class="size-10 rounded-full bg-cover bg-center bg-no-repeat border-2 border-transparent group-hover:border-primary transition-all"
+                         style='background-image:url("@displayPictureUrl"); background-color: #4a5568;'>
+                    </div>
+                    <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/50 rounded-full">
+                        <span class="material-symbols-outlined text-white text-sm">camera_alt</span>
+                    </div>
+                </button>
+                <div class="flex flex-col">
+                    <h1 class="text-gray-900 dark:text-white text-base font-medium">@userName</h1>
+                    <p class="text-gray-600 dark:text-[#9da6b9] text-sm">@userLevel</p>
+                </div>
+            </div>
+
+            <!-- User path data for path-restriction checks (read by JS on any page) -->
+            <span id="cwUserPath" data-path="@userLearningPath" aria-hidden="true" style="display:none"></span>
+
+            <!-- Search button -->
+            <button onclick="window.cwOpenSearch && window.cwOpenSearch('')"
+                    class="flex items-center gap-3 px-3 py-2 rounded-lg w-full text-left transition-colors mt-1 text-gray-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-white/10 dark:hover:bg-slate-800 group">
+                <span class="material-symbols-outlined text-gray-600 dark:text-slate-500 group-hover:text-primary transition-colors text-[20px]">search</span>
+                <p class="text-sm font-medium flex-1">Search</p>
+                <kbd class="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-gray-100 dark:bg-white/10 text-gray-400 dark:text-slate-500 border border-gray-200 dark:border-white/10 font-mono leading-tight">⌃K</kbd>
+            </button>
+
+            <!-- Sidebar links -->
+            <nav class="flex flex-col gap-2 pt-4">
+                <a class="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors @GetActiveClass("Home", "Index")" href="/Home">
+                    <span class="material-symbols-outlined @GetActiveIconClass("Home", "Index")">dashboard</span>
+                    <p class="text-sm font-medium">Dashboard</p>
+                </a>
+
+                <a class="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors @GetActiveClass("LearningPath")" href="@learningPathUrl">
+                    <span class="material-symbols-outlined @GetActiveIconClass("LearningPath")">timeline</span>
+                    <p class="text-sm font-medium">Learning Paths</p>
+                </a>
+
+                @if (isBeginner)
+                {
+                    <div class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-500 dark:text-slate-500 cursor-not-allowed opacity-50" title="Available for Intermediate and Advanced users">
+                        <span class="material-symbols-outlined">lock</span>
+                        <p class="text-sm font-medium">CV</p>
+                    </div>
+                    <div class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-500 dark:text-slate-500 cursor-not-allowed opacity-50" title="Available for Intermediate and Advanced users">
+                        <span class="material-symbols-outlined">lock</span>
+                        <p class="text-sm font-medium">Jobs</p>
+                    </div>
+                }
+                else
+                {
+                    <a class="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors @(IsActive("Cv") ? GetActiveClass("Cv") : GetActiveClass("Cv", "ViewCV"))" asp-controller="Cv" asp-action="Index">
+                        <span class="material-symbols-outlined @(IsActive("Cv") ? GetActiveIconClass("Cv") : GetActiveIconClass("Cv", "ViewCV"))">description</span>
+                        <p class="text-sm font-medium">CV</p>
+                    </a>
+
+                    <a class="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors @GetActiveClass("JobOffer")" asp-controller="JobOffer" asp-action="RealJobs">
+                        <span class="material-symbols-outlined @GetActiveIconClass("JobOffer")">public</span>
+                        <p class="text-sm font-medium">Jobs</p>
+                    </a>
+
+                    @if (IsActive("JobOffer"))
+                    {
+                        <div class="flex items-stretch pl-4">
+                            <div class="w-px bg-gray-300 dark:bg-slate-600 mx-2 flex-shrink-0"></div>
+                            <a class="flex items-center gap-2 px-3 py-2 rounded-lg transition-colors flex-1 @GetActiveClass("JobOffer", "AppliedJobs")" asp-controller="JobOffer" asp-action="AppliedJobs">
+                                <span class="material-symbols-outlined text-[18px] @GetActiveIconClass("JobOffer", "AppliedJobs")">assignment</span>
+                                <p class="text-sm font-medium">My Applications</p>
+                            </a>
+                        </div>
+                    }
+                }
+                
+                <a class="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors @GetActiveClass("Projects")" asp-controller="Projects" asp-action="Index">
+                    <span class="material-symbols-outlined @GetActiveIconClass("Projects")">folder_code</span>
+                    <p class="text-sm font-medium">Projects</p>
+                </a>
+
+                <a class="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors @GetActiveClass("Quiz")" asp-controller="Quiz" asp-action="Index">
+                    <span class="material-symbols-outlined @GetActiveIconClass("Quiz")">quiz</span>
+                    <p class="text-sm font-medium">Quizzes</p>
+                </a>
+
+                <a class="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors @GetActiveClass("Achievements")" asp-controller="Achievements" asp-action="Index">
+                    <span class="material-symbols-outlined @GetActiveIconClass("Achievements")">military_tech</span>
+                    <p class="text-sm font-medium">Achievements</p>
+                </a>
+
+                <a class="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors @GetActiveClass("Interview")" asp-controller="Interview" asp-action="Index">
+                    <span class="material-symbols-outlined @GetActiveIconClass("Interview")">record_voice_over</span>
+                    <p class="text-sm font-medium">Interview Prep</p>
+                </a>
+
+                <a class="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors @GetActiveClass("Playground")" asp-controller="Playground" asp-action="Index">
+                    <span class="material-symbols-outlined @GetActiveIconClass("Playground")">code</span>
+                    <p class="text-sm font-medium">Playground</p>
+                </a>
+
+                <a class="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors @GetActiveClass("Settings")" asp-controller="Settings" asp-action="Index">
+                    <span class="material-symbols-outlined @GetActiveIconClass("Settings")">settings</span>
+                    <p class="text-sm font-medium">Settings</p>
+                </a>
+            </nav>
+        </div>
+    </div>
+
+    <!-- Bottom Section -->
+    <div class="mt-6 flex flex-col gap-2 pt-4 border-t border-gray-200 dark:border-slate-700 dark:border-slate-800">
+        @if (_isAdminUser)
+        {
+            <a asp-controller="Admin" asp-action="Index"
+               class="flex items-center gap-3 px-3 py-2 rounded-lg text-primary bg-primary/10 hover:bg-primary/20 transition-colors font-semibold">
+                <span class="material-symbols-outlined text-primary" style="font-variation-settings:'FILL' 1">admin_panel_settings</span>
+                <p class="text-sm font-semibold">Admin Panel</p>
+            </a>
+        }
+        <!-- Theme Toggle -->
+        <button id="theme-toggle" type="button" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-white/10 dark:text-slate-400 dark:hover:bg-slate-800 w-full text-left transition-colors">
+            <span class="material-symbols-outlined" id="theme-icon">dark_mode</span>
+            <p class="text-sm font-medium">
+                <span id="theme-text">Dark Mode</span>
+            </p>
+        </button>
+        
+        <form asp-controller="User" asp-action="Logout" method="post" class="w-full">
+            @Html.AntiForgeryToken()
+            <button type="submit" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-white/10 dark:text-slate-400 dark:hover:bg-slate-800 w-full text-left transition-colors">
+                <span class="material-symbols-outlined">logout</span>
+                <p class="text-sm font-medium">Log Out</p>
+            </button>
+        </form>
+    </div>
+
+</div>
+
+<script>
+    // Theme toggle button functionality
+    (function() {
+        function initThemeToggle() {
+            const themeToggle = document.getElementById('theme-toggle');
+            const themeIcon = document.getElementById('theme-icon');
+            const themeText = document.getElementById('theme-text');
+            const html = document.documentElement;
+            
+            if (!themeToggle || !themeIcon || !themeText) {
+                // Retry if elements aren't ready yet
+                setTimeout(initThemeToggle, 100);
+                return;
+            }
+            
+            // Update button state based on current theme
+            const updateButton = () => {
+                const isDark = html.classList.contains('dark');
+                if (isDark) {
+                    themeIcon.textContent = 'light_mode';
+                    themeText.textContent = 'Light Mode';
+                } else {
+                    themeIcon.textContent = 'dark_mode';
+                    themeText.textContent = 'Dark Mode';
+                }
+            };
+            
+            // Initialize button state
+            updateButton();
+            
+            // Toggle theme on button click
+            themeToggle.addEventListener('click', () => {
+                const isDark = html.classList.contains('dark');
+                const newTheme = isDark ? 'light' : 'dark';
+                
+                // Remove both classes first
+                html.classList.remove('dark', 'light');
+                
+                // Apply new theme
+                if (newTheme === 'dark') {
+                    html.classList.add('dark');
+                } else {
+                    // For light mode, ensure dark class is removed
+                    html.classList.remove('dark');
+                }
+                
+                // Save preference
+                localStorage.setItem('theme', newTheme);
+                
+                // Debug: Log theme change
+                console.log('Theme toggled to:', newTheme, 'HTML classes:', html.className, 'Has dark:', html.classList.contains('dark'));
+                
+                // Force a repaint to ensure changes are visible
+                void html.offsetHeight;
+                
+                // Trigger a reflow to ensure CSS is reapplied
+                document.body.style.display = 'none';
+                void document.body.offsetHeight;
+                document.body.style.display = '';
+                
+                // Update button
+                updateButton();
+            });
+        }
+        
+        // Initialize when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initThemeToggle);
+        } else {
+            initThemeToggle();
+        }
+    })();
+</script>
+
+<!-- Profile Picture Modal (shared across all pages via sidebar) -->
+<div id="profilePictureModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/70 backdrop-blur-sm">
+    <div class="bg-white dark:bg-[#111318] rounded-xl p-8 max-w-md w-full mx-4 border border-gray-200 dark:border-[#3b4354] shadow-2xl">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-gray-900 dark:text-white text-2xl font-bold">Profile Picture</h2>
+            <button onclick="closeProfilePictureModal()" class="text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white transition-colors">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+        <div class="flex flex-col items-center gap-6">
+            <div class="size-48 rounded-full bg-cover bg-center bg-no-repeat border-4 border-primary shadow-lg"
+                 id="modalProfilePicture"
+                 style='background-image:url("@displayPictureUrl"); background-color: #4a5568;'>
+            </div>
+            <form id="profilePictureForm" asp-controller="Home" asp-action="UploadProfilePicture" method="post" enctype="multipart/form-data" class="w-full">
+                @Html.AntiForgeryToken()
+                <label for="profilePictureInput" class="flex items-center justify-center gap-2 w-full bg-primary text-white h-12 px-6 rounded-lg hover:bg-primary/90 transition-colors cursor-pointer">
+                    <span class="material-symbols-outlined text-white">upload</span>
+                    <span>Change Picture</span>
+                </label>
+                <input type="file" id="profilePictureInput" name="profilePicture" accept="image/jpeg,image/jpg,image/png,image/gif" class="hidden" onchange="handleProfilePictureSelect(this)" />
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    function openProfilePictureModal() {
+        document.getElementById('profilePictureModal').classList.remove('hidden');
+        document.getElementById('profilePictureModal').classList.add('flex');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeProfilePictureModal() {
+        document.getElementById('profilePictureModal').classList.add('hidden');
+        document.getElementById('profilePictureModal').classList.remove('flex');
+        document.body.style.overflow = 'auto';
+    }
+
+    function handleProfilePictureSelect(input) {
+        if (input.files && input.files[0]) {
+            var file = input.files[0];
+            if (file.size > 5 * 1024 * 1024) {
+                alert('File size too large. Please upload an image smaller than 5MB.');
+                input.value = '';
+                return;
+            }
+            var allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+            if (!allowedTypes.includes(file.type)) {
+                alert('Invalid file type. Please upload a JPG, PNG, or GIF image.');
+                input.value = '';
+                return;
+            }
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('modalProfilePicture').style.backgroundImage = 'url(' + e.target.result + ')';
+            };
+            reader.readAsDataURL(file);
+            document.getElementById('profilePictureForm').submit();
+        }
+    }
+
+    document.getElementById('profilePictureModal').addEventListener('click', function(e) {
+        if (e.target === this) closeProfilePictureModal();
+    });
+
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') closeProfilePictureModal();
+    });
+</script>
+
+<script>
+// ── (dropdown IIFE removed — search now uses full overlay) ──────────────────
+
+// placeholder so any old cwGo refs don't error
+window.cwGo = function(url) { if (url) window.location.href = url; };
+
+/* DELETED_IIFE_START
+    purple: { icon:'#b887e3', bg:'rgba(184,135,227,0.12)' },
+        blue:   { icon:'#3b82f6', bg:'rgba(59,130,246,0.12)'  },
+        yellow: { icon:'#f59e0b', bg:'rgba(245,158,11,0.12)'  },
+        orange: { icon:'#f97316', bg:'rgba(249,115,22,0.12)'  },
+        green:  { icon:'#10b981', bg:'rgba(16,185,129,0.12)'  },
+        rose:   { icon:'#f43f5e', bg:'rgba(244,63,94,0.12)'   },
+        indigo: { icon:'#6366f1', bg:'rgba(99,102,241,0.12)'  },
+        cyan:   { icon:'#06b6d4', bg:'rgba(6,182,212,0.12)'   },
+    };
+
+    let debounce  = null;
+    let query     = '';
+    let activeIdx = -1;
+    let items     = [];
+
+    const input   = document.getElementById('sidebarSearchInput');
+    const box     = document.getElementById('sidebarSearchBox');
+    const icon    = document.getElementById('sidebarSearchIcon');
+    const clearBtn= document.getElementById('sidebarClearBtn');
+    const dd      = document.getElementById('sidebarSearchDropdown');
+    const resDiv  = document.getElementById('sidebarSearchResults');
+    const loading = document.getElementById('sidebarSearchLoading');
+    const footer  = document.getElementById('sidebarSearchFooter');
+    const allBtn  = document.getElementById('sidebarSearchAll');
+    const allText = document.getElementById('sidebarSearchAllText');
+
+    if (!input) return;
+
+    // expose globally for form onsubmit
+    window.cwSubmitSearch = function(e) {
+        e.preventDefault();
+        const q = input.value.trim();
+        if (q) { hideDropdown(); window.cwOpenSearch ? window.cwOpenSearch(q) : navigate('/Search?q=' + enc(q)); }
+    };
+    window.cwClearSearch = function() {
+        input.value = '';
+        clearBtn.classList.add('hidden');
+        hideDropdown();
+        input.focus();
+    };
+
+    // ── input events ──────────────────────────────────────────────────
+    input.addEventListener('focus', () => {
+        icon.style.color = '#b887e3';
+        if (query.length >= 2 && items.length) showDropdown();
+    });
+
+    input.addEventListener('input', () => {
+        const q = input.value.trim();
+        clearBtn.classList.toggle('hidden', q.length === 0);
+        activeIdx = -1;
+        clearTimeout(debounce);
+
+        if (q.length < 2) { hideDropdown(); return; }
+
+        showLoading();
+        debounce = setTimeout(() => fetch2(q), 260);
+    });
+
+    input.addEventListener('keydown', e => {
+        const rows = resDiv.querySelectorAll('.cw-item');
+        if (e.key === 'ArrowDown')  { e.preventDefault(); moveFocus(rows, 1); }
+        else if (e.key === 'ArrowUp')   { e.preventDefault(); moveFocus(rows, -1); }
+        else if (e.key === 'Enter')     { e.preventDefault(); pickActive(); }
+        else if (e.key === 'Escape')    { hideDropdown(); input.blur(); }
+    });
+
+    input.addEventListener('blur', () => {
+        if (!input.value) icon.style.color = '';
+    });
+
+    document.addEventListener('mousedown', e => {
+        if (!document.getElementById('sidebarSearchWrapper')?.contains(e.target)) {
+            hideDropdown();
+        }
+    });
+
+    allBtn?.addEventListener('click', () => {
+        hideDropdown();
+        window.cwOpenSearch ? window.cwOpenSearch(query) : navigate('/Search?q=' + enc(query));
+    });
+
+    // ── fetch ─────────────────────────────────────────────────────────
+    async function fetch2(q) {
+        try {
+            query = q;
+            const res  = await fetch('/Search/Suggestions?q=' + enc(q));
+            items = await res.json();
+            render(items, q);
+        } catch (_) { hideDropdown(); }
+    }
+
+    // ── render suggestions ────────────────────────────────────────────
+    function render(data, q) {
+        loading.classList.add('hidden');
+        const dark = document.documentElement.classList.contains('dark');
+
+        if (!data.length) {
+            resDiv.innerHTML = `
+                <div style="padding:20px 16px;text-align:center">
+                    <span class="material-symbols-outlined" style="font-size:30px;color:${dark?'#334155':'#d1d5db'};display:block;margin-bottom:4px">search_off</span>
+                    <p style="font-size:12px;color:${dark?'#64748b':'#9ca3af'}">No results for <b>${esc(q)}</b></p>
+                </div>`;
+            footer.classList.add('hidden');
+            showDropdown();
+            return;
+        }
+
+        resDiv.innerHTML = data.map((r, i) => {
+            const c = TC[r.typeColor] || TC.purple;
+            const hoverBg = dark ? 'rgba(255,255,255,0.05)' : 'rgba(249,250,251,1)';
+            return `
+            <button data-i="${i}" class="cw-item"
+                onclick="cwGo('${esc(r.url)}','${esc(r.type)}','${esc(r.learningPath||'')}')"
+                style="width:100%;display:flex;align-items:center;gap:10px;padding:8px 12px;border:none;background:transparent;cursor:pointer;text-align:left;transition:background .12s"
+                onmouseenter="this.style.background='${hoverBg}'"
+                onmouseleave="this.style.background='transparent'"
+            >
+                <div style="padding:6px;border-radius:8px;background:${c.bg};flex-shrink:0">
+                    <span class="material-symbols-outlined" style="font-size:16px;color:${c.icon};display:block">${esc(r.typeIcon)}</span>
+                </div>
+                <div style="flex:1;min-width:0;overflow:hidden">
+                    <p style="font-size:13px;font-weight:500;color:${dark?'#f1f5f9':'#111827'};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${highlight(esc(r.title), esc(q))}</p>
+                    ${r.learningPath ? `<p style="font-size:11px;color:${dark?'#64748b':'#9ca3af'};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(r.learningPath)}</p>` : ''}
+                </div>
+                <span style="font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:${c.icon};opacity:.75;flex-shrink:0">${esc(r.type)}</span>
+            </button>`;
+        }).join('');
+
+        footer.classList.remove('hidden');
+        allText.textContent = data.length >= 7 ? `See all results for "${q}"` : `View results for "${q}"`;
+        showDropdown();
+        activeIdx = -1;
+    }
+
+    // ── keyboard navigation ───────────────────────────────────────────
+    function moveFocus(rows, dir) {
+        if (!rows.length) return;
+        setRowHighlight(rows, activeIdx, false);
+        activeIdx = Math.max(-1, Math.min(rows.length - 1, activeIdx + dir));
+        if (activeIdx >= 0) {
+            setRowHighlight(rows, activeIdx, true);
+            rows[activeIdx].scrollIntoView({ block:'nearest' });
+        }
+    }
+
+    function setRowHighlight(rows, idx, on) {
+        if (idx < 0 || idx >= rows.length) return;
+        const dark = document.documentElement.classList.contains('dark');
+        rows[idx].style.background = on ? (dark ? 'rgba(184,135,227,0.12)' : 'rgba(184,135,227,0.08)') : 'transparent';
+    }
+
+    function pickActive() {
+        if (activeIdx >= 0 && items[activeIdx]) {
+            navigate(items[activeIdx].url);
+        } else {
+            const q = input.value.trim();
+            if (q) navigate('/Search?q=' + enc(q));
+        }
+    }
+
+    // ── show / hide ───────────────────────────────────────────────────
+    function showLoading() {
+        resDiv.innerHTML = '';
+        loading.style.display = 'flex';
+        footer.classList.add('hidden');
+        positionAndShow();
+    }
+
+    function positionAndShow() {
+        // Position dropdown to the RIGHT of the sidebar so it never overlaps nav links
+        const box = document.getElementById('sidebarSearchBox');
+        if (box) {
+            const r = box.getBoundingClientRect();
+            dd.style.top  = r.top + 'px';
+            dd.style.left = (r.right + 8) + 'px';
+        }
+        dd.style.opacity      = '1';
+        dd.style.transform    = 'translateY(0) scale(1)';
+        dd.style.pointerEvents = 'auto';
+    }
+
+    // alias used by render/no-results paths
+    var showDropdown = positionAndShow;
+
+    function hideDropdown() {
+        dd.style.opacity      = '0';
+        dd.style.transform    = 'translateY(-4px) scale(0.97)';
+        dd.style.pointerEvents = 'none';
+        loading.style.display = 'none';
+        activeIdx = -1;
+    }
+
+    // ── helpers ───────────────────────────────────────────────────────
+    function navigate(url) { window.location.href = url; }
+    function enc(s) { return encodeURIComponent(s ?? ''); }
+    function esc(s) {
+        return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+    function highlight(text, q) {
+        if (!q) return text;
+        const re = new RegExp('(' + q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&') + ')', 'gi');
+        return text.replace(re, '<mark style="background:rgba(184,135,227,0.2);color:#b887e3;font-weight:600;border-radius:2px;padding:0 1px">$1</mark>');
+    }
+
+    // expose click handler to inline onclick — checks learning path before navigating
+    window.cwGo = function(url, type, resultPath) {
+        if (window.cwShouldBlock && window.cwShouldBlock(type, resultPath)) {
+            window.cwShowPathToast && window.cwShowPathToast(resultPath);
+            return;
+        }
+DELETED_IIFE_END */
+
+// ── Path restriction utilities (available on every page via sidebar) ──────────
+
+window.cwShouldBlock = function(type, resultPath) {
+    try {
+        if (!resultPath || !resultPath.trim()) return false;
+        const restricted = ['course', 'lesson', 'quiz', 'exercise'];
+        if (!restricted.includes((type || '').toLowerCase())) return false;
+        const userPath = (document.getElementById('cwUserPath')?.dataset.path || '').toLowerCase().trim();
+        if (!userPath) return false;
+        const rp = resultPath.toLowerCase().trim();
+        if (!rp) return false;
+        // Use language-level matching (handles "Java", "Java Programming", etc.)
+        const lang = s => s.includes('python') ? 'python' : s.includes('java') ? 'java' : s.includes('web') ? 'web' : null;
+        const uLang = lang(userPath);
+        const rLang = lang(rp);
+        if (!uLang || !rLang) return false; // Unknown path → never block
+        return uLang !== rLang;
+    } catch(_) { return false; }
+};
+
+window.cwShowPathToast = function(resultPath) {
+    const t = document.getElementById('cwPathToast');
+    const m = document.getElementById('cwToastMsg');
+    if (!t || !m) return;
+
+    const dark = document.documentElement.classList.contains('dark');
+    t.style.background  = dark ? '#1c1c28' : '#ffffff';
+    t.style.border      = dark ? '1px solid rgba(255,255,255,0.1)' : '1px solid #e5e7eb';
+    t.style.color       = dark ? '#f1f5f9' : '#111827';
+
+    // Build message safely (no innerHTML XSS)
+    m.innerHTML = '';
+    const strong = Object.assign(document.createElement('strong'), { textContent: resultPath });
+    const link   = Object.assign(document.createElement('a'),      { href: '/Settings', textContent: 'Switch in Settings' });
+    link.style.cssText = 'color:#b887e3;text-decoration:underline;font-weight:600';
+    m.append('This is ', strong, ' content. ', link, '.');
+
+    // Animate in
+    t.style.transform    = 'translateY(30px)';
+    t.style.opacity      = '0';
+    t.style.pointerEvents = 'auto';
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+        t.style.transform = 'translateY(0)';
+        t.style.opacity   = '1';
+    }));
+
+    clearTimeout(window._cwToastTimer);
+    window._cwToastTimer = setTimeout(() => window.cwDismissPathToast(), 5000);
+};
+
+window.cwDismissPathToast = function() {
+    const t = document.getElementById('cwPathToast');
+    if (!t) return;
+    t.style.transform = 'translateY(30px)';
+    t.style.opacity   = '0';
+    setTimeout(() => { t.style.pointerEvents = 'none'; }, 350);
+};
+</script>
+
+<!-- Path-restriction toast — fixed, visible on all pages -->
+<div id="cwPathToast"
+     role="alert" aria-live="assertive"
+     style="position:fixed;bottom:28px;right:24px;z-index:9999;max-width:320px;min-width:260px;border-radius:16px;padding:14px 16px;display:flex;align-items:flex-start;gap:12px;transform:translateY(30px);opacity:0;pointer-events:none;transition:transform .4s cubic-bezier(0.34,1.56,0.64,1),opacity .25s ease;box-shadow:0 20px 48px -8px rgba(0,0,0,0.22),0 8px 16px -4px rgba(0,0,0,0.1);">
+    <div style="padding:8px;border-radius:10px;background:rgba(245,158,11,0.15);flex-shrink:0;margin-top:1px">
+        <span class="material-symbols-outlined" style="font-size:20px;color:#f59e0b;display:block">alt_route</span>
+    </div>
+    <div style="flex:1;min-width:0">
+        <p style="font-size:13px;font-weight:700;margin:0 0 4px 0;line-height:1.3">Path mismatch</p>
+        <p id="cwToastMsg" style="font-size:12px;line-height:1.55;margin:0"></p>
+    </div>
+    <button onclick="window.cwDismissPathToast()"
+            style="background:none;border:none;cursor:pointer;padding:2px;flex-shrink:0;border-radius:6px;transition:background .15s;margin-top:-2px;color:inherit;opacity:.5"
+            onmouseenter="this.style.opacity='1';this.style.background='rgba(0,0,0,0.07)'"
+            onmouseleave="this.style.opacity='.5';this.style.background='none'"
+            aria-label="Dismiss">
+        <span class="material-symbols-outlined" style="font-size:18px;display:block">close</span>
+    </button>
+</div>
+
+<!-- ── Search Overlay — created and managed entirely by JS ─────────────── -->
+<script>
+(function () {
+    'use strict';
+
+    // ── Color / icon map ──────────────────────────────────────────────
+    var G = {
+        Course:      { label:'Courses',        icon:'school',            c:'#b887e3', bg:'rgba(184,135,227,.12)', grid:true  },
+        Lesson:      { label:'Lessons',         icon:'menu_book',         c:'#3b82f6', bg:'rgba(59,130,246,.12)',  grid:false },
+        Quiz:        { label:'Quizzes',         icon:'quiz',              c:'#f59e0b', bg:'rgba(245,158,11,.12)',  grid:true  },
+        Achievement: { label:'Achievements',    icon:'military_tech',     c:'#f97316', bg:'rgba(249,115,22,.12)',  grid:true  },
+        Interview:   { label:'Interview Prep',  icon:'record_voice_over', c:'#10b981', bg:'rgba(16,185,129,.12)', grid:false },
+        Job:         { label:'Jobs',            icon:'work',              c:'#f43f5e', bg:'rgba(244,63,94,.12)',   grid:true  },
+        Exercise:    { label:'Exercises',       icon:'code',              c:'#6366f1', bg:'rgba(99,102,241,.12)',  grid:false },
+        Project:     { label:'My Projects',     icon:'folder_code',       c:'#06b6d4', bg:'rgba(6,182,212,.12)',   grid:true  },
+        Feature:     { label:'Pages',           icon:'apps',              c:'#b887e3', bg:'rgba(184,135,227,.12)', grid:true  },
+    };
+
+    var debounce = null;
+
+    // ── Inject keyframe CSS once ──────────────────────────────────────
+    (function injectCSS() {
+        if (document.getElementById('cwOverlayStyles')) return;
+        var s = document.createElement('style');
+        s.id = 'cwOverlayStyles';
+        s.textContent =
+            '@@keyframes cwFu{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}' +
+            '@@keyframes cwSpin{to{transform:rotate(360deg)}}' +
+            '.cw-card{transition:transform .2s,border-color .2s,box-shadow .2s}' +
+            '.cw-card:hover{transform:translateY(-2px)}';
+        document.head.appendChild(s);
+    })();
+
+    // ── Build overlay DOM ─────────────────────────────────────────────
+    function buildOverlay() {
+        var ov = document.createElement('div');
+        ov.id = 'cwSearchOverlay';
+        ov.setAttribute('role', 'dialog');
+        ov.setAttribute('aria-modal', 'true');
+        ov.setAttribute('aria-label', 'Search');
+        ov.style.cssText =
+            'position:fixed;inset:0;z-index:10000;display:none;' +
+            'align-items:flex-start;justify-content:center;padding:60px 20px 24px;';
+
+        ov.innerHTML =
+            '<div id="cwOvBackdrop" style="position:absolute;inset:0;background:rgba(4,4,12,.7);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)"></div>' +
+            '<div id="cwOvPanel" style="position:relative;z-index:1;width:100%;max-width:700px;border-radius:22px;overflow:hidden;' +
+                'display:flex;flex-direction:column;max-height:calc(100vh - 100px);' +
+                'box-shadow:0 40px 80px rgba(0,0,0,.45);' +
+                'transform:translateY(-16px);opacity:0;transition:transform .22s ease,opacity .18s ease">' +
+
+                // search bar
+                '<div id="cwOvBar" style="display:flex;align-items:center;gap:12px;padding:16px 20px;border-bottom-width:1px;border-bottom-style:solid;flex-shrink:0">' +
+                    '<span class="material-symbols-outlined" style="color:#b887e3;font-size:22px;flex-shrink:0">search</span>' +
+                    '<input id="cwOvInput" type="text" placeholder="Search courses, lessons, quizzes, jobs…" autocomplete="off" ' +
+                        'style="flex:1;border:none;outline:none;font-size:15px;font-family:inherit;background:transparent;min-width:0"/>' +
+                    '<button id="cwOvClearBtn" onclick="window.cwSearchOverlayClear()" title="Clear" ' +
+                        'style="display:none;background:none;border:none;cursor:pointer;padding:4px;border-radius:6px;opacity:.5;flex-shrink:0">' +
+                        '<span class="material-symbols-outlined" style="font-size:18px;display:block">close</span>' +
+                    '</button>' +
+                    '<button onclick="window.cwCloseSearch()" title="Close (Esc)" ' +
+                        'style="background:rgba(0,0,0,.06);border:none;cursor:pointer;padding:4px 8px;border-radius:7px;font-size:11px;' +
+                        'font-family:inherit;opacity:.6;flex-shrink:0;transition:opacity .15s" onmouseenter="this.style.opacity=1" onmouseleave="this.style.opacity=.6">ESC</button>' +
+                '</div>' +
+
+                // filter pills
+                '<div id="cwOvFilters" style="display:none;padding:10px 20px;gap:8px;flex-wrap:wrap;border-bottom-width:1px;border-bottom-style:solid;flex-shrink:0"></div>' +
+
+                // results
+                '<div id="cwOvResults" style="overflow-y:auto;flex:1;padding:18px 20px;min-height:220px;' +
+                    'scrollbar-width:thin;scrollbar-color:#9b59f5 transparent"></div>' +
+
+                // footer
+                '<div id="cwOvFooter" style="display:none;padding:10px 20px;border-top-width:1px;border-top-style:solid;' +
+                    'align-items:center;justify-content:space-between;flex-shrink:0">' +
+                    '<span style="font-size:11px;opacity:.45">↑↓ navigate · Enter select · Esc close · Ctrl+K open</span>' +
+                    '<span id="cwOvCount" style="font-size:11px;opacity:.45"></span>' +
+                '</div>' +
+            '</div>';
+
+        document.body.appendChild(ov);
+
+        // Theme + event wiring
+        applyTheme();
+        document.getElementById('cwOvBackdrop').addEventListener('click', window.cwCloseSearch);
+        document.getElementById('cwOvInput').addEventListener('input', onInput);
+        document.getElementById('cwOvInput').addEventListener('keydown', onKey);
+
+        // Watch theme changes
+        new MutationObserver(applyTheme)
+            .observe(document.documentElement, {attributes:true, attributeFilter:['class']});
+
+        showInit();
+    }
+
+    // ── Theme ─────────────────────────────────────────────────────────
+    function applyTheme() {
+        var panel   = document.getElementById('cwOvPanel');
+        var bar     = document.getElementById('cwOvBar');
+        var filters = document.getElementById('cwOvFilters');
+        var footer  = document.getElementById('cwOvFooter');
+        var input   = document.getElementById('cwOvInput');
+        if (!panel) return;
+        var dark   = document.documentElement.classList.contains('dark');
+        var bg     = dark ? '#15151f' : '#ffffff';
+        var border = dark ? 'rgba(255,255,255,.09)' : '#e5e7eb';
+        var text   = dark ? '#f1f5f9' : '#111827';
+        panel.style.background   = bg;
+        panel.style.color        = text;
+        [bar, filters, footer].forEach(function(el) { if (el) el.style.borderColor = border; });
+        if (input) { input.style.color = text; input.style.background = 'transparent'; }
+    }
+
+    // ── Public API ────────────────────────────────────────────────────
+    window.cwOpenSearch = function(q) {
+        if (!document.getElementById('cwSearchOverlay')) buildOverlay();
+        applyTheme();
+        var ov    = document.getElementById('cwSearchOverlay');
+        var panel = document.getElementById('cwOvPanel');
+        var inp   = document.getElementById('cwOvInput');
+        ov.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+        requestAnimationFrame(function() { requestAnimationFrame(function() {
+            if (panel) { panel.style.transform = 'translateY(0)'; panel.style.opacity = '1'; }
+        }); });
+        if (inp) {
+            inp.value = q || '';
+            document.getElementById('cwOvClearBtn').style.display = q ? 'block' : 'none';
+            setTimeout(function() { inp.focus(); inp.select && inp.select(); }, 80);
+        }
+        if (q && q.length >= 2) runSearch(q);
+        else showInit();
+    };
+
+    window.cwCloseSearch = function() {
+        var ov    = document.getElementById('cwSearchOverlay');
+        var panel = document.getElementById('cwOvPanel');
+        if (!ov) return;
+        if (panel) { panel.style.transform = 'translateY(-12px)'; panel.style.opacity = '0'; }
+        setTimeout(function() {
+            ov.style.display = 'none';
+            document.body.style.overflow = '';
+        }, 200);
+    };
+
+    window.cwSearchOverlayClear = function() {
+        var inp = document.getElementById('cwOvInput');
+        if (inp) { inp.value = ''; inp.focus(); }
+        document.getElementById('cwOvClearBtn').style.display = 'none';
+        showInit();
+    };
+
+    window.cwSearchQuick = function(kw) {
+        var inp = document.getElementById('cwOvInput');
+        if (inp) { inp.value = kw; document.getElementById('cwOvClearBtn').style.display = 'block'; }
+        runSearch(kw);
+    };
+
+    // ── Input handlers ────────────────────────────────────────────────
+    function onInput() {
+        var q = this.value.trim();
+        document.getElementById('cwOvClearBtn').style.display = q ? 'block' : 'none';
+        clearTimeout(debounce);
+        if (q.length < 2) { showInit(); return; }
+        debounce = setTimeout(function() { runSearch(q); }, 280);
+    }
+
+    function onKey(e) {
+        if (e.key === 'Escape') { e.preventDefault(); window.cwCloseSearch(); }
+    }
+
+    // ── Fetch & render ────────────────────────────────────────────────
+    async function runSearch(q) {
+        showSpinner();
+        try {
+            var res  = await fetch('/Search/Results?q=' + encodeURIComponent(q));
+            var data = await res.json();
+            renderResults(data.results || [], q, data.total || 0);
+        } catch(e) { showError(); }
+    }
+
+    function renderResults(items, q, total) {
+        var container = document.getElementById('cwOvResults');
+        var footer    = document.getElementById('cwOvFooter');
+        var filters   = document.getElementById('cwOvFilters');
+        if (!container) return;
+
+        var dark  = document.documentElement.classList.contains('dark');
+        var text  = dark ? '#f1f5f9' : '#111827';
+        var muted = dark ? '#64748b' : '#9ca3af';
+        var cardBg    = dark ? 'rgba(255,255,255,.04)' : 'rgba(248,242,255,.85)';
+        var cardBord  = dark ? 'rgba(255,255,255,.07)' : 'rgba(184,135,227,.2)';
+        var hoverBg   = dark ? 'rgba(255,255,255,.06)' : 'rgba(248,242,255,.9)';
+
+        if (!items.length) {
+            container.innerHTML =
+                '<div style="text-align:center;padding:48px 20px">' +
+                '<span class="material-symbols-outlined" style="font-size:48px;color:' + muted + ';display:block;margin-bottom:10px">search_off</span>' +
+                '<p style="font-weight:700;font-size:15px;color:' + text + ';margin:0 0 6px">No results for "' + x(q) + '"</p>' +
+                '<p style="font-size:13px;color:' + muted + ';margin:0 0 18px">Try different keywords</p>' +
+                '<div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center">' +
+                ['Python','Java','OOP','Quiz'].map(function(kw) {
+                    return '<button onclick="cwSearchQuick(\'' + kw + '\')" style="font-size:12px;padding:5px 14px;border-radius:999px;border:1px solid rgba(184,135,227,.3);background:rgba(184,135,227,.08);color:#b887e3;cursor:pointer;font-family:inherit">' + kw + '</button>';
+                }).join('') + '</div></div>';
+            if (filters) filters.style.display = 'none';
+            if (footer)  footer.style.display  = 'none';
+            return;
+        }
+
+        // Group
+        var grouped = {};
+        var ORDER   = ['Course','Lesson','Quiz','Achievement','Interview','Job','Exercise','Project','Feature'];
+        items.forEach(function(r) {
+            if (!grouped[r.type]) grouped[r.type] = [];
+            grouped[r.type].push(r);
+        });
+
+        // Filter pills
+        if (filters) {
+            var types = ORDER.filter(function(t) { return grouped[t] && grouped[t].length; });
+            if (types.length > 1) {
+                filters.style.display = 'flex';
+                var inBg = dark ? 'rgba(255,255,255,.07)' : 'rgba(229,231,235,.9)';
+                var inTxt= dark ? '#94a3b8' : '#374151';
+                filters.innerHTML =
+                    '<button onclick="cwOvFilter(\'all\')" id="cwOvF-all" data-filter="all" style="font-size:11px;font-weight:600;padding:4px 12px;border-radius:999px;border:none;cursor:pointer;background:rgba(184,135,227,.15);color:#b887e3;font-family:inherit">All (' + total + ')</button>' +
+                    types.map(function(t) {
+                        var g = G[t] || {label:t, c:'#b887e3'};
+                        return '<button onclick="cwOvFilter(\'' + t + '\')" id="cwOvF-' + t + '" data-filter="' + t + '" style="font-size:11px;font-weight:500;padding:4px 12px;border-radius:999px;border:none;cursor:pointer;background:' + inBg + ';color:' + inTxt + ';font-family:inherit">' + g.label + ' (' + grouped[t].length + ')</button>';
+                    }).join('');
+            } else {
+                filters.style.display = 'none';
+            }
+        }
+
+        // Cards
+        var html = '';
+        var idx  = 0;
+        ORDER.forEach(function(type) {
+            var list = grouped[type];
+            if (!list || !list.length) return;
+            var g = G[type] || {label:type, icon:'circle', c:'#b887e3', bg:'rgba(184,135,227,.1)', grid:false};
+
+            html += '<div class="cw-ov-group" data-gtype="' + type + '" style="margin-bottom:22px">';
+            // Section header
+            html +=
+                '<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">' +
+                '<div style="padding:6px;border-radius:10px;background:' + g.bg + ';flex-shrink:0">' +
+                '<span class="material-symbols-outlined" style="font-size:17px;color:' + g.c + ';display:block">' + g.icon + '</span></div>' +
+                '<span style="font-weight:700;font-size:14px;color:' + text + '">' + g.label + '</span>' +
+                '<span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:999px;background:' + g.bg + ';color:' + g.c + '">' + list.length + '</span></div>';
+
+            if (g.grid) {
+                html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px">';
+                list.forEach(function(r) {
+                    var d = idx++ * 30;
+                    html +=
+                        '<div role="button" tabindex="0" data-url="' + x(r.url) + '" data-type="' + x(r.type) + '" data-path="' + x(r.learningPath||'') + '" ' +
+                        'class="cw-card cw-result" style="background:' + cardBg + ';border:1px solid ' + cardBord + ';border-radius:14px;padding:14px;cursor:pointer;animation:cwFu .32s ' + d + 'ms ease both">' +
+                            '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:6px">' +
+                                '<div style="display:flex;align-items:center;gap:8px;min-width:0;flex:1">' +
+                                    '<div style="padding:6px;border-radius:8px;background:' + g.bg + ';flex-shrink:0"><span class="material-symbols-outlined" style="font-size:15px;color:' + g.c + ';display:block">' + x(r.typeIcon||g.icon) + '</span></div>' +
+                                    '<span style="font-weight:600;font-size:13px;color:' + text + ';overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + x(r.title) + '</span>' +
+                                '</div>' +
+                                '<span class="material-symbols-outlined" style="font-size:15px;color:' + muted + ';flex-shrink:0;margin-top:2px">arrow_outward</span>' +
+                            '</div>' +
+                            (r.excerpt ? '<p style="font-size:12px;color:' + muted + ';line-height:1.5;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;margin:0 0 8px">' + x(r.excerpt) + '</p>' : '') +
+                            '<div style="display:flex;gap:6px;flex-wrap:wrap">' +
+                                (r.learningPath ? '<span style="font-size:10px;font-weight:600;padding:3px 8px;border-radius:999px;background:rgba(184,135,227,.12);color:#b887e3">' + x(r.learningPath) + '</span>' : '') +
+                                (r.difficultyLevel ? '<span style="font-size:10px;font-weight:600;padding:3px 8px;border-radius:999px;background:' + dBg(r.difficultyLevel) + ';color:' + dC(r.difficultyLevel) + '">' + x(r.difficultyLevel) + '</span>' : '') +
+                            '</div>' +
+                        '</div>';
+                });
+                html += '</div>';
+            } else {
+                list.forEach(function(r) {
+                    var d = idx++ * 25;
+                    html +=
+                        '<div role="button" tabindex="0" data-url="' + x(r.url) + '" data-type="' + x(r.type) + '" data-path="' + x(r.learningPath||'') + '" ' +
+                        'class="cw-result" style="display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:11px;cursor:pointer;animation:cwFu .3s ' + d + 'ms ease both;transition:background .14s" ' +
+                        'onmouseenter="this.style.background=\'' + hoverBg + '\'" onmouseleave="this.style.background=\'transparent\'">' +
+                            '<div style="padding:7px;border-radius:9px;background:' + g.bg + ';flex-shrink:0"><span class="material-symbols-outlined" style="font-size:16px;color:' + g.c + ';display:block">' + x(r.typeIcon||g.icon) + '</span></div>' +
+                            '<div style="flex:1;min-width:0;overflow:hidden">' +
+                                '<p style="font-weight:600;font-size:13px;color:' + text + ';white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:0 0 2px">' + x(r.title) + '</p>' +
+                                (r.excerpt ? '<p style="font-size:11px;color:' + muted + ';white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:0">' + x(r.excerpt) + '</p>' : '') +
+                            '</div>' +
+                            '<div style="display:flex;align-items:center;gap:8px;flex-shrink:0">' +
+                                (r.learningPath ? '<span style="font-size:10px;font-weight:500;padding:3px 8px;border-radius:999px;background:rgba(184,135,227,.1);color:#b887e3">' + x(r.learningPath) + '</span>' : '') +
+                                '<span class="material-symbols-outlined" style="font-size:16px;color:' + muted + '">arrow_forward</span>' +
+                            '</div>' +
+                        '</div>';
+                });
+            }
+            html += '</div>';
+        });
+
+        container.innerHTML = html;
+
+        // Click handlers on all result cards
+        container.querySelectorAll('.cw-result').forEach(function(card) {
+            card.addEventListener('click', function() {
+                try {
+                    var url  = card.dataset.url;
+                    var type = card.dataset.type;
+                    var path = card.dataset.path || '';
+                    if (window.cwShouldBlock && window.cwShouldBlock(type, path)) {
+                        window.cwShowPathToast && window.cwShowPathToast(path);
+                        shakeEl(card); return;
+                    }
+                    window.cwCloseSearch();
+                    setTimeout(function() { window.location.href = url; }, 90);
+                } catch(_) {}
+            });
+            card.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); card.click(); }
+            });
+        });
+
+        if (footer) {
+            footer.style.display = 'flex';
+            var cnt = document.getElementById('cwOvCount');
+            if (cnt) cnt.textContent = total + ' result' + (total === 1 ? '' : 's');
+        }
+    }
+
+    window.cwOvFilter = function(type) {
+        document.querySelectorAll('[id^="cwOvF-"]').forEach(function(btn) {
+            var active = btn.dataset.filter === type;
+            btn.style.background  = active ? 'rgba(184,135,227,.15)' : (document.documentElement.classList.contains('dark') ? 'rgba(255,255,255,.07)' : 'rgba(229,231,235,.9)');
+            btn.style.color       = active ? '#b887e3' : (document.documentElement.classList.contains('dark') ? '#94a3b8' : '#374151');
+            btn.style.fontWeight  = active ? '600' : '500';
+        });
+        document.querySelectorAll('.cw-ov-group').forEach(function(g) {
+            g.style.display = (type === 'all' || g.dataset.gtype === type) ? '' : 'none';
+        });
+    };
+
+    // ── Loading / error / init states ─────────────────────────────────
+    function showSpinner() {
+        var c = document.getElementById('cwOvResults');
+        if (!c) return;
+        var muted = document.documentElement.classList.contains('dark') ? '#64748b' : '#9ca3af';
+        c.innerHTML =
+            '<div style="display:flex;align-items:center;justify-content:center;gap:12px;padding:56px 20px">' +
+            '<div style="width:20px;height:20px;border-radius:50%;border:2.5px solid #b887e3;border-top-color:transparent;animation:cwSpin .7s linear infinite"></div>' +
+            '<span style="font-size:13px;color:' + muted + '">Searching…</span></div>';
+        var f = document.getElementById('cwOvFooter'); if(f) f.style.display='none';
+        var fil = document.getElementById('cwOvFilters'); if(fil) fil.style.display='none';
+    }
+
+    function showError() {
+        var c = document.getElementById('cwOvResults');
+        if (c) c.innerHTML = '<div style="text-align:center;padding:40px;color:#f43f5e;font-size:13px">Something went wrong. Please try again.</div>';
+    }
+
+    function showInit() {
+        var c = document.getElementById('cwOvResults');
+        if (!c) return;
+        var dark  = document.documentElement.classList.contains('dark');
+        var text  = dark ? '#f1f5f9' : '#111827';
+        var muted = dark ? '#64748b' : '#9ca3af';
+        c.innerHTML =
+            '<div style="text-align:center;padding:52px 20px 40px">' +
+            '<span class="material-symbols-outlined" style="font-size:56px;color:#b887e3;display:block;margin-bottom:14px;font-variation-settings:\'FILL\' 0,\'wght\' 200">search</span>' +
+            '<p style="font-weight:700;font-size:17px;color:' + text + ';margin:0 0 8px">Find anything in CodeWave</p>' +
+            '<p style="font-size:13px;color:' + muted + ';margin:0 0 22px">Courses · Lessons · Quizzes · Achievements · Jobs · More</p>' +
+            '<div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center">' +
+            ['Python','Java','OOP','Functions','Quiz','Interview','Job','Achievements'].map(function(kw) {
+                return '<button onclick="cwSearchQuick(\'' + kw + '\')" style="font-size:12px;font-weight:500;padding:6px 14px;border-radius:999px;border:1px solid rgba(184,135,227,.3);background:rgba(184,135,227,.08);color:#b887e3;cursor:pointer;font-family:inherit;transition:background .15s" onmouseenter="this.style.background=\'rgba(184,135,227,.2)\'" onmouseleave="this.style.background=\'rgba(184,135,227,.08)\'">' + kw + '</button>';
+            }).join('') + '</div></div>';
+        var f = document.getElementById('cwOvFilters'); if(f) f.style.display='none';
+        var ft = document.getElementById('cwOvFooter'); if(ft) ft.style.display='none';
+    }
+
+    // ── Helpers ───────────────────────────────────────────────────────
+    function shakeEl(el) {
+        if (!el) return;
+        el.style.transition = 'transform .08s ease';
+        ['-7px','7px','-3px','0'].forEach(function(v, i) {
+            setTimeout(function() { el.style.transform = 'translateX(' + v + ')'; }, i * 75);
+        });
+    }
+    function dBg(d) { return d==='Beginner'?'rgba(16,185,129,.1)':d==='Intermediate'?'rgba(245,158,11,.1)':'rgba(244,63,94,.1)'; }
+    function dC(d)  { return d==='Beginner'?'#10b981':d==='Intermediate'?'#f59e0b':'#f43f5e'; }
+    function x(s)   { return String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+    // ── Global keyboard shortcuts (Ctrl+K and Escape) ─────────────────
+    document.addEventListener('keydown', function(e) {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+            e.preventDefault();
+            window.cwOpenSearch('');
+        }
+        if (e.key === 'Escape') {
+            var ov = document.getElementById('cwSearchOverlay');
+            if (ov && ov.style.display !== 'none') window.cwCloseSearch();
+        }
+    });
+
+})();
+</script>

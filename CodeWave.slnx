@@ -1,0 +1,8 @@
+<Solution>
+  <Project Path="CodeWave.Application/CodeWave.Application.csproj" />
+  <Project Path="CodeWave.Docker/CodeWave.Sandbox.csproj" Id="c40f4859-24eb-4d6f-9c25-2f64d82d05c6" />
+  <Project Path="CodeWave.Domain/CodeWave.Domain.csproj" />
+  <Project Path="CodeWave.Infrastructure/CodeWave.Infrastructure.csproj" />
+  <Project Path="CodeWave.Web/CodeWave.Web.csproj" />
+</Solution>
+
